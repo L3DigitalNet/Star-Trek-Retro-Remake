@@ -1,0 +1,32 @@
+{
+    "keyboard": {
+        "move_up": "w",
+        "move_down": "s",
+        "move_left": "a",
+        "move_right": "d",
+        "move_up_z": "q",
+        "move_down_z": "e",
+        "fire_phasers": "space",
+        "fire_torpedoes": "t",
+        "shields_toggle": "shift",
+        "sensors_toggle": "r",
+        "pause": "p",
+        "menu": "escape",
+        "save_game": "f5",
+        "load_game": "f9",
+        "next_turn": "enter",
+        "zoom_in": "plus",
+        "zoom_out": "minus"
+    },
+    "mouse": {
+        "primary_action": "left_click",
+        "secondary_action": "right_click",
+        "context_menu": "right_click",
+        "pan_view": "middle_drag",
+        "zoom": "wheel"
+    },
+    "gamepad": {
+        "enabled": false,
+        "deadzone": 0.15
+    }
+}

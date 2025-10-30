@@ -18,12 +18,12 @@ Features:
     - Game Object Pattern with Component composition
     - MVC separation for testable game logic
     - Object pooling for memory efficiency
-    - PyGame/PyQt6 integration patterns
+    - PyGame/PySide6 integration patterns
 
 Requirements:
     - Python 3.14+ for latest language features
     - PyGame for game engine functionality
-    - PyQt6 for UI, menus, and settings
+    - PySide6 for UI, menus, and settings
     - Linux environment (primary target)
 
 Architecture Overview:
@@ -67,13 +67,13 @@ Our game characteristics:
 - Turn-based gameplay (performance less critical)
 - Smaller entity counts (dozens, not thousands)
 - Clear object hierarchies (starships contain systems)
-- Heavy UI interaction (PyQt6 widgets)
+- Heavy UI interaction (PySide6 widgets)
 
 ### Architecture Layers
 
 ```text
 ┌─────────────────────────────────────────┐
-│              PyQt6 UI Layer             │
+│            PySide6 UI Layer             │
 │        (Menus, Dialogs, Windows)        │
 ├─────────────────────────────────────────┤
 │             Controller Layer            │
@@ -421,7 +421,7 @@ Clean separation of concerns:
 ```python
 from typing import List, Optional, Dict
 import pygame
-from PyQt6.QtWidgets import QMainWindow, QWidget
+from PySide6.QtWidgets import QMainWindow, QWidget
 
 class GameModel:
     """Pure game logic and state (no UI dependencies)."""
@@ -502,7 +502,7 @@ class GameView:
     def __init__(self, controller: 'GameController'):
         self.controller = controller
 
-        # PyQt6 main window
+        # PySide6 main window
         self.main_window = QMainWindow()
         self.setup_ui()
 
@@ -511,7 +511,7 @@ class GameView:
         pygame.init()
 
     def setup_ui(self) -> None:
-        """Initialize PyQt6 interface."""
+        """Initialize PySide6 interface."""
         # Menu bar, status panels, dialogs, etc.
         pass
 
@@ -533,12 +533,12 @@ class GameView:
 
     def show_combat_dialog(self, result: 'CombatResult') -> None:
         """Display combat results dialog."""
-        # PyQt6 dialog with combat information
+        # PySide6 dialog with combat information
         pass
 
     def show_ship_status(self, ship: Starship) -> None:
         """Display ship status panel."""
-        # PyQt6 widget with ship systems information
+        # PySide6 widget with ship systems information
         pass
 
     def _render_grid(self, sector: 'SectorMap') -> None:
@@ -682,7 +682,7 @@ This architecture provides a solid foundation for the Star Trek Retro Remake whi
    - UI elements (combat dialogs, status windows)
    - Temporary calculation objects
 
-2. **Resource Cleanup**: Ensure proper cleanup of PyGame and PyQt6 resources
+2. **Resource Cleanup**: Ensure proper cleanup of PyGame and PySide6 resources
    - Surface management
    - Font caching
    - Image loading/unloading
@@ -705,7 +705,7 @@ This architecture provides a solid foundation for the Star Trek Retro Remake whi
 3. **Event Queuing**: Queue events to prevent frame rate spikes
 4. **Background Processing**: Use threading for non-critical calculations
 
-### PyQt6 Integration
+### PySide6 Integration
 
 1. **Widget Reuse**: Cache and reuse dialog windows
 2. **Model Updates**: Batch model updates to prevent excessive redraws
@@ -714,16 +714,16 @@ This architecture provides a solid foundation for the Star Trek Retro Remake whi
 
 ## Integration Guide
 
-### PyGame + PyQt6 Setup
+### PyGame + PySide6 Setup
 
-1. **Window Management**: PyQt6 main window contains PyGame widget
-2. **Event Handling**: Route PyGame events through PyQt6 event system
+1. **Window Management**: PySide6 main window contains PyGame widget
+2. **Event Handling**: Route PyGame events through PySide6 event system
 3. **Resource Sharing**: Share fonts, colors, and styling between frameworks
 4. **Testing**: Test each framework independently before integration
 
 ### State Machine Integration
 
-1. **UI States**: Map game states to PyQt6 window configurations
+1. **UI States**: Map game states to PySide6 window configurations
 2. **Rendering States**: Each state defines its PyGame rendering requirements
 3. **Input Routing**: Route input events to appropriate state handlers
 4. **Persistence**: Save/load state information across sessions

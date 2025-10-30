@@ -142,7 +142,7 @@
 
 - [ ] **Testing Strategy Alignment** - Expand testing approach to match project guidelines
   - Define pytest framework usage for core logic testing
-  - Specify integration testing for PyQt6/PyGame interaction
+  - Specify integration testing for PySide6/PyGame interaction
   - Document AI testing and performance benchmarking
 
 ### Low Priority Improvements
@@ -184,7 +184,7 @@ Star Trek fans, strategy game enthusiasts, and players who enjoy turn-based tact
 ### 1.3 Platform and Technical Requirements
 
 - PC (Linux initially, with potential for Windows in the future)
-- Developed using Python with PyGame for game engine and PyQt6 for UI
+- Developed using Python with PyGame for game engine and PySide6 for UI
 
 ### 1.4 Competitive Analysis
 
@@ -470,9 +470,9 @@ Inspired by UI's windowed desktop games largely around the mid-1990s era. An exa
 
 ### 6.2 Interface Layout
 
-- The main game will be contained within a PyQt6 application window
+- The main game will be contained within a PySide6 application window
 - Much of the interaction will be through widgets such as menus, dialogs, and buttons
-- The main game view (map) will be rendered using PyGame embedded within the PyQt6 application
+- The main game view (map) will be rendered using PyGame embedded within the PySide6 application
 - The map will be centered in the application window with UI elements surrounding it
 - Pop-up dialogs will be used for mission briefings, ship status, and other information
 
@@ -534,7 +534,7 @@ The game will use a hybrid architecture optimized for turn-based strategy games:
 ##### Game State Machine
 
 - Manages transitions between game modes: Galaxy Map ↔ Sector Map ↔ Combat Mode
-- Handles UI state synchronization with PyQt6
+- Handles UI state synchronization with PySide6
 - Provides clean separation of game phases
 - Supports save/load at any state
 
@@ -548,7 +548,7 @@ The game will use a hybrid architecture optimized for turn-based strategy games:
 ##### Model-View-Controller (MVC) Separation
 
 - **Model**: Game logic, state, and data (pure Python)
-- **View**: PyQt6 UI widgets and PyGame rendering
+- **View**: PySide6 UI widgets and PyGame rendering
 - **Controller**: Input handling and state transitions
 - Enables independent testing of game logic
 
@@ -631,7 +631,7 @@ class GameModel:
     def resolve_combat(self, attacker: Starship, target: Starship) -> CombatResult: ...
 
 class GameView:
-    """PyQt6 UI and PyGame rendering (no game logic)."""
+    """PySide6 UI and PyGame rendering (no game logic)."""
     def __init__(self, controller):
         self.controller = controller
         self.main_window = MainWindow()
@@ -699,11 +699,11 @@ class ResourceManager:
 #### Data Flow and Dependencies
 
 ```text
-PyQt6 Main Window
-    ├── Menu System (PyQt6 widgets)
+PySide6 Main Window
+    ├── Menu System (PySide6 widgets)
     ├── Game View (PyGame embedded surface)
-    ├── Dialog System (PyQt6 dialogs)
-    └── Status Panels (PyQt6 widgets)
+    ├── Dialog System (PySide6 dialogs)
+    └── Status Panels (PySide6 widgets)
 
 Game Controller
     ├── Input Handler
@@ -734,7 +734,7 @@ Game Model (Pure Logic)
 
 **UI Tests:**
 
-- PyQt6 widget behavior
+- PySide6 widget behavior
 - PyGame rendering validation
 - User interaction flows
 
