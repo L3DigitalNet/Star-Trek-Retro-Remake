@@ -116,7 +116,7 @@ class StarTrekRetroRemake:
         pygame.init()
 
         # Create PyGame window
-        screen = pygame.display.set_mode((1280, 720))
+        screen = pygame.display.set_mode((1920, 1080))
 
         # Set up clock for fixed timestep
         clock = pygame.time.Clock()
