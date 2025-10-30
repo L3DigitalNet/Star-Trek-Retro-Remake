@@ -63,7 +63,7 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from src.game.application import StarTrekRetroRemake
 
-__version__: Final[str] = "0.0.10"
+__version__: Final[str] = "0.0.11"
 
 
 def main() -> None:

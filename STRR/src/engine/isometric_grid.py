@@ -12,7 +12,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-30-2025
-Date Changed: 10-30-2025 (v0.0.9 - Bug fixes)
+Date Changed: 10-30-2025 (v0.0.11 - Import fixes)
 License: MIT
 
 Features:
@@ -53,13 +53,9 @@ from typing import Final, TypeAlias
 import pygame
 
 # Import GridPosition from the game entities module
-from game.entities.base import GridPosition
+from src.game.entities.base import GridPosition
 
-from typing import Final
-
-import pygame
-
-__version__: Final[str] = "0.0.10"
+__version__: Final[str] = "0.0.11"
 
 logger = logging.getLogger(__name__)
 

@@ -23,7 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Import Path Fixes**: Corrected module import paths for proper package structure
+  - Fixed `isometric_grid.py` to use `from src.game.entities.base` instead of `from game.entities.base`
+  - Fixed `config_manager.py` to use `from src.game.exceptions` instead of `from game.exceptions`
+  - All demo files now import correctly without ModuleNotFoundError
+- **Type Hint Improvements**: Added proper type annotations to exception classes
+  - Added `-> None` return type hints to `__init__` methods in exceptions.py
+  - Added type hints for `**kwargs` parameters: `**kwargs: str | int | float`
+  - Improved type safety in InvalidMoveError, CombatError, ConfigurationError, and SaveLoadError
 - Configuration system now cleaner and more maintainable without dual format support
+- All 75 unit tests pass successfully with 33.28% code coverage
+- Verified all TOML configuration files load correctly
 
 ## [Unreleased - Previous]
 

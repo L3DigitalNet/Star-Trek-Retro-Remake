@@ -12,8 +12,8 @@ Author: Star Trek Retro Remake Development Team
 Email: team@startrekretroremake.dev
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
-License: Open Source
+Date Changed: 10-30-2025 (v0.0.11 - Import fixes)
+License: MIT
 
 Features:
     - TOML configuration loading with Python 3.14+ stdlib
@@ -36,7 +36,7 @@ Functions:
     - set_config_value(): Set configuration value using dot notation
 """
 
-__version__ = "0.0.11"
+__version__: Final[str] = "0.0.11"
 
 import tomllib
 from pathlib import Path
@@ -49,7 +49,7 @@ except ImportError:
     # Fallback for development - will need tomli_w for production
     tomli_w = None
 
-from game.exceptions import ConfigurationError
+from src.game.exceptions import ConfigurationError
 
 
 class ConfigManager:
