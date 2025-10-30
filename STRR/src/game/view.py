@@ -36,7 +36,7 @@ Functions:
 import logging
 from typing import Final, TYPE_CHECKING
 
-import pygame_ce as pygame
+import pygame
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import QTimer
 

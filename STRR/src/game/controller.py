@@ -34,7 +34,7 @@ Functions:
 
 from typing import Final, Optional, TYPE_CHECKING
 
-import pygame_ce as pygame
+import pygame
 
 from .states.state_machine import GameStateManager, GameMode
 from .entities.base import GridPosition
@@ -168,8 +168,8 @@ class GameController:
         # Initialize game model
         self.model.initialize_new_game()
 
-        # Transition to sector map state
-        self.state_manager.transition_to(GameMode.SECTOR_MAP)
+        # TODO: Transition to sector map state once states are implemented
+        # self.state_manager.transition_to(GameMode.SECTOR_MAP)
 
         # Update view if available
         if self.view:

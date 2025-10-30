@@ -41,7 +41,7 @@ Functions:
 import sys
 from typing import Final
 
-import pygame_ce as pygame
+import pygame
 from PySide6.QtWidgets import QApplication
 
 from game.controller import GameController

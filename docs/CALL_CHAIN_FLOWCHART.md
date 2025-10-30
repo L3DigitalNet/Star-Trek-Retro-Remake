@@ -18,7 +18,7 @@ This document provides visual flow charts showing how the game's components inte
 
 ## Application Startup Flow
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                         GAME STARTUP                         │
 └─────────────────────────────────────────────────────────────┘
@@ -76,7 +76,7 @@ main.py (Entry Point)
 
 ## Main Game Loop
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │              MAIN GAME LOOP (60 FPS Fixed)                   │
 │              Location: controller.py::_game_loop()          │
@@ -134,7 +134,7 @@ main.py (Entry Point)
 
 ## State Machine Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    STATE MACHINE FLOW                        │
 │            Location: states/ directory + controller.py      │
@@ -205,7 +205,7 @@ self.state_manager.transition_to(GameMode.COMBAT)
 
 ## MVC Component Interaction
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                  MVC ARCHITECTURE PATTERN                    │
 └─────────────────────────────────────────────────────────────┘
@@ -263,7 +263,7 @@ IMPLEMENTATION RULES:
 
 ## Event Processing Flow
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    EVENT PROCESSING FLOW                     │
 └─────────────────────────────────────────────────────────────┘
@@ -324,7 +324,7 @@ User Action (Keyboard/Mouse)
 
 ## Rendering Pipeline
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     RENDERING PIPELINE                       │
 └─────────────────────────────────────────────────────────────┘
@@ -393,7 +393,7 @@ _render() called (60 times per second)
 
 ## Where to Code Specific Features
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │              FEATURE IMPLEMENTATION LOCATIONS                │
 └─────────────────────────────────────────────────────────────┘
@@ -579,7 +579,7 @@ _render() called (60 times per second)
 
 ## Quick Reference: "I want to add..."
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                  QUICK FEATURE LOOKUP                        │
 └─────────────────────────────────────────────────────────────┘
@@ -641,7 +641,7 @@ _render() called (60 times per second)
 
 ## Architecture Principles Summary
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                 DESIGN PATTERN REMINDERS                     │
 └─────────────────────────────────────────────────────────────┘

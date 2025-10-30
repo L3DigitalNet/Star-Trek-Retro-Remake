@@ -444,7 +444,7 @@ subscribe_event("ship_destroyed", my_handler)
 
 ## Architecture Summary
 
-```
+```text
 main.py
   └─> application.py (StarTrekRetroRemake)
        ├─> model.py (GameModel) ← Pure game logic
