@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-### 1. Executive Summary
+### Executive Summary
 
 - [1.1 Game Overview](#11-game-overview)
 - [1.2 Target Audience](#12-target-audience)
@@ -10,14 +10,14 @@
 - [1.4 Competitive Analysis](#14-competitive-analysis)
 - [1.5 Key Features](#15-key-features)
 
-### 2. Game Overview
+### Game Overview
 
 - [2.1 Setting and Theme](#21-setting-and-theme)
 - [2.2 Core Player Fantasy](#22-core-player-fantasy)
 - [2.3 Player Goals and Motivation](#23-player-goals-and-motivation)
 - [2.4 Victory Conditions](#24-victory-conditions)
 
-### 3. Gameplay
+### Gameplay
 
 - [3.1 Core Gameplay Loop](#31-core-gameplay-loop)
   - [3.1.1 Time Scale](#311-time-scale)
@@ -26,15 +26,16 @@
 - [3.3 Player Progression](#33-player-progression)
 - [3.4 Difficulty and Balance](#34-difficulty-and-balance)
 
-### 4. Game World
+### Game World
 
 - [4.1 World Overview](#41-world-overview)
 - [4.2 Galaxy Map](#42-galaxy-map)
 - [4.3 Sector Map](#43-sector-map)
-- [4.4 Locations and Environments](#44-locations-and-environments)
-- [4.5 Factions and NPCs](#45-factions-and-npcs)
+- [4.4 Combat Map](#44-combat-map)
+- [4.5 Locations and Environments](#45-locations-and-environments)
+- [4.6 Factions and NPCs](#46-factions-and-npcs)
 
-### 5. Game Mechanics
+### Game Mechanics
 
 - [5.1 Starships](#51-starships)
 - [5.2 Combat System](#52-combat-system)
@@ -43,27 +44,27 @@
 - [5.5 Economy and Trading](#55-economy-and-trading)
 - [5.6 AI and NPCs](#56-ai-and-npcs)
 
-### 6. User Interface and User Experience
+### User Interface and User Experience
 
 - [6.1 UI Design Philosophy](#61-ui-design-philosophy)
 - [6.2 Interface Layout](#62-interface-layout)
 - [6.3 Input Controls](#63-input-controls)
 - [6.4 Accessibility](#64-accessibility)
 
-### 7. Audio and Visual Design
+### Audio and Visual Design
 
 - [7.1 Art Style](#71-art-style)
 - [7.2 Audio Design](#72-audio-design)
 - [7.3 Visual Effects](#73-visual-effects)
 
-### 8. Narrative and Storytelling
+### Narrative and Storytelling
 
 - [8.1 Story Overview](#81-story-overview)
 - [8.2 Characters](#82-characters)
 - [8.3 Dialogue System](#83-dialogue-system)
 - [8.4 Cutscenes and Presentation](#84-cutscenes-and-presentation)
 
-### 9. Technical Requirements
+### Technical Requirements
 
 - [9.1 Technical Architecture](#91-technical-architecture)
 - [9.2 Platform Requirements](#92-platform-requirements)
@@ -71,7 +72,7 @@
 - [9.4 Data Management](#94-data-management)
 - [9.5 Localization](#95-localization)
 
-### 10. Production
+### Production
 
 - [10.1 Development Milestones](#101-development-milestones)
 - [10.2 Team Structure](#102-team-structure)
@@ -79,31 +80,94 @@
 - [10.4 Risk Assessment](#104-risk-assessment)
 - [10.5 Resource Requirements](#105-resource-requirements)
 
-### 11. Marketing and Business
+### Marketing and Business
 
 - [11.1 Marketing Strategy](#111-marketing-strategy)
 - [11.2 Monetization Model](#112-monetization-model)
 - [11.3 Community and Support](#113-community-and-support)
 - [11.4 Post-Launch Content](#114-post-launch-content)
 
-### 12. Legal and Compliance
+### Legal and Compliance
 
 - [12.1 Intellectual Property](#121-intellectual-property)
 - [12.2 Privacy and Data Protection](#122-privacy-and-data-protection)
 - [12.3 Content Rating Considerations](#123-content-rating-considerations)
 - [12.4 Platform Compliance](#124-platform-compliance)
 
-### 13. Future Development
+### Future Development
 
 - [13.1 Post-Launch Features (v1.1+)](#131-post-launch-features-v11)
 - [13.2 Long-term Vision (v2.0+)](#132-long-term-vision-v20)
 
-### Appendices
+### Additional Resources
 
 - [Appendix A: Reference Materials](#appendix-a-reference-materials)
 - [Appendix B: Glossary](#appendix-b-glossary)
 - [Appendix C: Change Log](#appendix-c-change-log)
 - [Appendix D: Credits and Acknowledgments](#appendix-d-credits-and-acknowledgments)
+
+---
+
+## CRITICAL TODO LIST
+
+### High Priority Architecture Issues
+
+- [x] **Hybrid Architecture Specification** - Define State Machine + Game Object + Component pattern implementation
+  - Game State Machine for mode transitions (Galaxy/Sector/Combat)
+  - Game Object Pattern for entities with natural hierarchies
+  - Component Pattern for ship systems (simplified from full ECS)
+  - MVC Pattern for UI separation and testability
+
+- [ ] **Game State Machine Definition** - Expand game modes section with detailed state management
+  - Define state transitions: Main Menu → Galaxy Map → Sector Map → Combat → Mission Briefing → Settings
+  - Specify transition triggers and validation rules
+  - Add state persistence and error handling strategies
+
+- [ ] **Object Pooling Strategy** - Detail memory management for turn-based gameplay
+  - Define entity pools for starships, projectiles, and effects
+  - Specify component pooling for reusable game elements
+  - Document resource management and garbage collection strategies
+
+### Medium Priority System Design
+
+- [ ] **Combat System Consolidation** - Merge scattered combat mechanics into cohesive system
+  - Define turn structure: Initiative → Action → Resolution → Status phases
+  - Specify tactical grid integration (15x15 with 3-5 z-levels)
+  - Document environmental factors and victory conditions
+
+- [ ] **Resource Management Enhancement** - Define resource interdependencies and relationships
+  - Specify primary resources: Energy, Supplies, Crew Morale, Ship Integrity
+  - Document resource consumption and regeneration mechanics
+  - Define how resources affect ship systems and combat performance
+
+- [ ] **Testing Strategy Alignment** - Expand testing approach to match project guidelines
+  - Define pytest framework usage for core logic testing
+  - Specify integration testing for PyQt6/PyGame interaction
+  - Document AI testing and performance benchmarking
+
+### Low Priority Improvements
+
+- [ ] **Version Management Strategy** - Create clear version progression plan
+  - Define milestone features for v0.1.0 through v1.0.0
+  - Specify feature scope for each release
+  - Document error handling timeline (deferred until v1.0.0)
+
+- [ ] **Data Management Specification** - Detail save/load and configuration systems
+  - Specify JSON structure for game saves and settings
+  - Define asset organization and folder structure
+  - Plan for future mod support architecture
+
+- [ ] **Performance Benchmarks** - Set concrete performance targets
+  - Define frame rate requirements (60 FPS UI, 30 FPS minimum game view)
+  - Specify memory usage limits (512MB maximum for base assets)
+  - Set load time targets (2s sector transitions, 1s combat initialization)
+
+### Content Organization
+
+- [ ] **Remove Duplicate Content** - Consolidate overlapping sections 4.4 and 4.5
+- [ ] **Expand Faction Descriptions** - Add gameplay characteristics for each faction
+- [ ] **Add UI Layout Diagrams** - Include simple ASCII mockups for key interfaces
+- [ ] **Create Controls Reference** - Document planned keyboard shortcuts and mouse interactions
 
 ---
 
@@ -304,10 +368,12 @@ The game world consists of a galaxy divided into sectors, each containing variou
   - The Gorn Hegemony
   - The Tholian Assembly
   - The Orion Syndicate
+
 - NPC starships will belong to various factions and have different behaviors:
   - Friendly (allied ships, neutral traders)
   - Hostile (enemy ships, pirates)
   - Neutral (independent ships, explorers)
+
 - Will be able to interact with NPCs through:
   - Combat
   - Diplomacy
@@ -459,11 +525,227 @@ Inspired by UI's windowed desktop games largely around the mid-1990s era. An exa
 
 ### 9.1 Technical Architecture
 
-- The game will be developed using Python
-- PyGame will be used for the game engine and rendering
-- PyQt6 will be used for the user interface
-- The game will follow an Entity-Component-System (ECS) architecture for managing game objects
-- The game will be modular to allow for future expansion and feature additions
+#### Architecture Pattern: Hybrid State Machine + Game Object + Component + MVC
+
+The game will use a hybrid architecture optimized for turn-based strategy games:
+
+#### Core Architecture Components
+
+##### Game State Machine
+
+- Manages transitions between game modes: Galaxy Map ↔ Sector Map ↔ Combat Mode
+- Handles UI state synchronization with PyQt6
+- Provides clean separation of game phases
+- Supports save/load at any state
+
+##### Game Object Pattern with Component Composition
+
+- Starships, stations, and crew as GameObject base classes
+- Component composition for ship systems (not full ECS)
+- Natural object hierarchies for Star Trek entities
+- Simplified system interactions for turn-based gameplay
+
+##### Model-View-Controller (MVC) Separation
+
+- **Model**: Game logic, state, and data (pure Python)
+- **View**: PyQt6 UI widgets and PyGame rendering
+- **Controller**: Input handling and state transitions
+- Enables independent testing of game logic
+
+#### Detailed Architecture Specification
+
+**Game State Management:**
+
+```python
+class GameState(ABC):
+    """Base class for all game states."""
+    def enter(self) -> None: ...
+    def exit(self) -> None: ...
+    def handle_input(self, event) -> None: ...
+    def update(self, dt: float) -> None: ...
+    def render(self, surface) -> None: ...
+
+class GameStateManager:
+    """Manages state transitions and current state."""
+    def transition_to(self, new_state: GameState) -> None: ...
+    def update(self, dt: float) -> None: ...
+```
+
+**Game Object Pattern:**
+
+```python
+class GameObject:
+    """Base class for all game entities."""
+    def __init__(self, position: GridPosition):
+        self.id = generate_id()
+        self.position = position
+        self.active = True
+
+class Starship(GameObject):
+    """Star Trek starship with component systems."""
+    def __init__(self, position: GridPosition, ship_class: str):
+        super().__init__(position)
+        self.systems = {
+            'weapons': WeaponSystems(),
+            'shields': ShieldSystems(),
+            'engines': EngineSystems(),
+            'sensors': SensorSystems()
+        }
+        self.crew = CrewRoster()
+        self.resources = ResourceManager()
+```
+
+**Component Pattern (Simplified):**
+
+```python
+class ShipSystem:
+    """Base class for ship subsystems."""
+    def __init__(self, efficiency: float = 1.0):
+        self.efficiency = efficiency
+        self.damaged = False
+        self.power_usage = 0.0
+
+class WeaponSystems(ShipSystem):
+    """Manages ship weapons and firing solutions."""
+    def __init__(self):
+        super().__init__()
+        self.phasers = PhaserArray()
+        self.torpedoes = TorpedoLauncher()
+
+    def can_fire_at(self, target: GridPosition) -> bool: ...
+    def calculate_damage(self, target: Starship) -> int: ...
+```
+
+**MVC Implementation:**
+
+```python
+class GameModel:
+    """Pure game logic and state (no UI dependencies)."""
+    def __init__(self):
+        self.galaxy = GalaxyMap()
+        self.current_sector = None
+        self.player_ship = None
+        self.turn_manager = TurnManager()
+
+    def execute_move(self, ship: Starship, destination: GridPosition) -> bool: ...
+    def resolve_combat(self, attacker: Starship, target: Starship) -> CombatResult: ...
+
+class GameView:
+    """PyQt6 UI and PyGame rendering (no game logic)."""
+    def __init__(self, controller):
+        self.controller = controller
+        self.main_window = MainWindow()
+        self.game_surface = pygame.Surface((800, 600))
+
+    def render_sector_map(self, sector: SectorMap) -> None: ...
+    def show_combat_dialog(self, result: CombatResult) -> None: ...
+
+class GameController:
+    """Handles input and coordinates Model/View."""
+    def __init__(self):
+        self.model = GameModel()
+        self.view = GameView(self)
+        self.state_manager = GameStateManager()
+
+    def handle_ship_move(self, destination: GridPosition) -> None: ...
+    def handle_combat_action(self, action: CombatAction) -> None: ...
+```
+
+#### Memory Management and Object Pooling
+
+**Entity Pooling:**
+
+```python
+class EntityPool:
+    """Manages reusable game objects for performance."""
+    def __init__(self, entity_type: type, initial_size: int = 50):
+        self.pool = [entity_type() for _ in range(initial_size)]
+        self.active_entities = set()
+
+    def acquire(self) -> GameObject: ...
+    def release(self, entity: GameObject) -> None: ...
+
+class ResourceManager:
+    """Centralized resource and memory management."""
+    def __init__(self):
+        self.starship_pool = EntityPool(Starship, 20)
+        self.projectile_pool = EntityPool(Projectile, 100)
+        self.effect_pool = EntityPool(VisualEffect, 50)
+```
+
+#### State-Specific Implementations
+
+**Galaxy Map State:**
+
+- Large-scale navigation between sectors
+- Resource management and fleet status
+- Mission briefings and strategic planning
+- Time scale: days/weeks per turn
+
+**Sector Map State:**
+
+- Grid-based movement with z-levels
+- Real-time encounter resolution
+- Environmental interactions
+- Time scale: hours/minutes per turn
+
+**Combat State:**
+
+- Tactical turn-based combat
+- Detailed ship system management
+- Action point allocation
+- Time scale: seconds/minutes per turn
+
+#### Data Flow and Dependencies
+
+```text
+PyQt6 Main Window
+    ├── Menu System (PyQt6 widgets)
+    ├── Game View (PyGame embedded surface)
+    ├── Dialog System (PyQt6 dialogs)
+    └── Status Panels (PyQt6 widgets)
+
+Game Controller
+    ├── Input Handler
+    ├── State Manager
+    └── Event Dispatcher
+
+Game Model (Pure Logic)
+    ├── Galaxy Map
+    ├── Sector Maps
+    ├── Game Objects
+    └── Rule Engine
+```
+
+#### Testing Strategy
+
+**Unit Tests (pytest):**
+
+- Game logic isolated from UI
+- Ship system interactions
+- Combat calculations
+- State transitions
+
+**Integration Tests:**
+
+- Controller → Model interactions
+- State persistence
+- Multi-state workflows
+
+**UI Tests:**
+
+- PyQt6 widget behavior
+- PyGame rendering validation
+- User interaction flows
+
+This hybrid architecture provides:
+
+- ✅ Clean separation for testing
+- ✅ Appropriate complexity for turn-based gameplay
+- ✅ Natural Star Trek entity relationships
+- ✅ Performance suitable for target platforms
+- ✅ Clear state management
+- ✅ Modular design for future expansion
 
 ### 9.2 Platform Requirements
 

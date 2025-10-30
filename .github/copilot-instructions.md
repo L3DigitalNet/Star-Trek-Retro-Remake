@@ -45,7 +45,6 @@ This repository contains **Star Trek Retro Remake**, a single Python game projec
 
 ### File Structure (Required)
 ```python
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - [Module Name]

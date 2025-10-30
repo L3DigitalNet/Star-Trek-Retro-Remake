@@ -8,12 +8,12 @@ applyTo: "**"
 *Note: This file extends the common requirements found in `common-requirements.instructions.md`. All shared requirements (headers, testing, etc.) are defined there.*
 
 ## Game Requirements
-- **MUST** implement ECS or Game Object pattern for Star Trek entities (ships, stations, crew)
+- **MUST** implement Hybrid State Machine + Game Object + Component pattern for Star Trek entities (ships, stations, crew)
 - **MUST** use PyGame for game engine (justify alternatives with comments)
 - **MUST** use PyQt6 for UI/menus/settings/dialogs (justify alternatives with comments)
 - **MUST** implement game loop: input → update → render (fixed timestep)
-- **MUST** implement game state machine (main menu, bridge view, tactical, paused, etc.)
-- **MUST** separate game logic from rendering
+- **MUST** implement game state machine (main menu, galaxy map, sector map, combat, paused, etc.)
+- **MUST** separate game logic from rendering using MVC pattern
 - **MUST** use object pooling and proper memory management
 - **MUST** test game logic separately from graphics/audio
 - **MUST** validate game state transitions and logic independently of rendering
@@ -22,15 +22,15 @@ applyTo: "**"
 ## Game Header Requirements
 - **MUST** include Game-specific Features section with:
   - Game loop with fixed timestep for consistent physics
-  - State machine for main menu, bridge view, tactical, paused, game over states
-  - ECS (Entity-Component-System) architecture for Star Trek game objects
+  - State machine for main menu, galaxy map, sector map, combat, paused states
+  - Hybrid State Machine + Game Object + Component architecture for Star Trek game objects
   - Object pooling for efficient memory management
-  - Separated game logic from rendering for testability
+  - Separated game logic from rendering for testability using MVC pattern
   - PyGame for game engine, PyQt6 for UI/menus
 
 ## Game Code Generation Focus
 - **Framework:** Start with PyGame for engine, PyQt6 for UI, justify alternatives
-- **Architecture:** Separate logic/rendering/input, use ECS/GameObject patterns for Star Trek entities
+- **Architecture:** Separate logic/rendering/input using MVC, use Hybrid State Machine + Game Object + Component patterns for Star Trek entities
 - **Pattern:** Follow template below
 
 ## Game Development Template
