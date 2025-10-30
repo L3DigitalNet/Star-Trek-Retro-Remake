@@ -33,10 +33,12 @@ Functions:
 """
 
 from typing import Final, Optional, TYPE_CHECKING
+import logging
 
 import pygame
 
 from .states.state_machine import GameStateManager, GameMode
+from .states.sector_state import SectorState
 from .entities.base import GridPosition
 
 if TYPE_CHECKING:
@@ -45,6 +47,8 @@ if TYPE_CHECKING:
     from .entities.starship import Starship
 
 __version__: Final[str] = "0.0.1"
+
+logger = logging.getLogger(__name__)
 
 
 class GameController:
@@ -105,17 +109,11 @@ class GameController:
         self.view = view
 
     def start(self) -> None:
-        """Start the controller and game loop."""
+        """Start the controller."""
         self.running = True
 
         # Initialize with main menu state
         # self.state_manager.transition_to(GameMode.MAIN_MENU)
-
-        # For now, start directly with a new game
-        self.start_new_game()
-
-        # Start the game loop
-        self._game_loop()
 
     def stop(self) -> None:
         """Stop the controller."""
@@ -168,8 +166,8 @@ class GameController:
         # Initialize game model
         self.model.initialize_new_game()
 
-        # TODO: Transition to sector map state once states are implemented
-        # self.state_manager.transition_to(GameMode.SECTOR_MAP)
+        # Transition to sector map state
+        self.state_manager.transition_to(GameMode.SECTOR_MAP)
 
         # Update view if available
         if self.view:
@@ -213,9 +211,9 @@ class GameController:
 
     def _setup_states(self) -> None:
         """Initialize game states."""
-        # States will be registered here when implemented
-        # For now, create placeholder registrations
-        pass
+        # Register sector exploration state
+        sector_state = SectorState(self.state_manager)
+        self.state_manager.register_state(GameMode.SECTOR_MAP, sector_state)
 
     def _game_loop(self) -> None:
         """Main game loop."""
@@ -237,9 +235,101 @@ class GameController:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.view:
+                # Handle mouse clicks for grid selection
+                self._handle_mouse_click(event.pos)
+            elif event.type == pygame.KEYDOWN:
+                # Handle keyboard input
+                self._handle_keypress(event.key)
             else:
                 # Pass events to current state
                 self.state_manager.handle_input(event)
+
+    def _handle_mouse_click(self, mouse_pos: tuple[int, int]) -> None:
+        """
+        Handle mouse click events for grid interaction.
+
+        Args:
+            mouse_pos: Mouse position (x, y) in screen coordinates
+        """
+        if not self.view:
+            return
+
+        logger.info(f"Processing mouse click at screen position: {mouse_pos}")
+
+        # Convert screen coordinates to grid position
+        grid_pos = self.view.grid_renderer.screen_to_world(
+            mouse_pos,
+            self.view.current_z_level
+        )
+
+        logger.info(f"Converted to grid position: {grid_pos}")
+
+        # Validate grid position
+        if not self.view.grid_renderer.is_in_bounds(grid_pos):
+            logger.warning(f"Grid position {grid_pos} is out of bounds")
+            return
+
+        # Update view selection
+        self.view.set_selected_cell(grid_pos)
+
+        # Attempt to move player ship to clicked position
+        if self.model.player_ship:
+            logger.info(f"Attempting to move ship to {grid_pos}")
+            self.handle_ship_move_request(grid_pos)
+
+    def _handle_keypress(self, key: int) -> None:
+        """
+        Handle keyboard input.
+
+        Args:
+            key: pygame key constant
+        """
+        if not self.view:
+            return
+
+        logger.info(f"Processing key press: {key}")
+
+        # Z-level controls
+        if key == pygame.K_PAGEUP:
+            new_z = self.view.current_z_level + 1
+            if new_z < self.view.grid_renderer.max_z_levels:
+                logger.info(f"Changing z-level from {self.view.current_z_level} to {new_z}")
+                self.view.set_z_level(new_z)
+        elif key == pygame.K_PAGEDOWN:
+            new_z = self.view.current_z_level - 1
+            if new_z >= 0:
+                logger.info(f"Changing z-level from {self.view.current_z_level} to {new_z}")
+                self.view.set_z_level(new_z)
+
+        # Camera panning
+        elif key == pygame.K_LEFT:
+            logger.info("Panning camera left")
+            self._pan_camera(10, 0)
+        elif key == pygame.K_RIGHT:
+            logger.info("Panning camera right")
+            self._pan_camera(-10, 0)
+        elif key == pygame.K_UP:
+            logger.info("Panning camera up")
+            self._pan_camera(0, 10)
+        elif key == pygame.K_DOWN:
+            logger.info("Panning camera down")
+            self._pan_camera(0, -10)
+
+    def _pan_camera(self, dx: int, dy: int) -> None:
+        """
+        Pan the camera by the specified offset.
+
+        Args:
+            dx: X offset in pixels
+            dy: Y offset in pixels
+        """
+        if not self.view:
+            return
+
+        offset = self.view.grid_renderer.camera_offset
+        new_offset = (offset[0] + dx, offset[1] + dy)
+        self.view.grid_renderer.set_camera_offset(new_offset)
 
     def _update(self, dt: float) -> None:
         """

@@ -95,14 +95,14 @@ class StarTrekRetroRemake:
 
         Runs the main game loop until the application is closed.
         """
-        # Start the game controller
-        self.controller.start()
+        # Initialize the game (don't start the loop in controller)
+        self.controller.start_new_game()
 
-        # Run the PySide6 event loop
+        # Show the view
         self.view.run()
 
-        # Clean shutdown
-        self._cleanup()
+        # Run the PySide6 event loop
+        sys.exit(self.qt_app.exec())
 
     def shutdown(self) -> None:
         """Initiate clean shutdown of the application."""
@@ -112,17 +112,8 @@ class StarTrekRetroRemake:
 
     def _initialize_systems(self) -> None:
         """Initialize PyGame and PySide6 systems."""
-        # Initialize PyGame for game rendering
+        # Initialize PyGame for game rendering (without display)
         pygame.init()
-
-        # Create PyGame window
-        screen = pygame.display.set_mode((1920, 1080))
-
-        # Set up clock for fixed timestep
-        clock = pygame.time.Clock()
-
-        # Application state
-        running = True
 
         # Initialize PySide6 application
         if not QApplication.instance():

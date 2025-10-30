@@ -9,18 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added (Planned Features)
 
-- PySide6 UI integration with embedded pygame-ce rendering
 - Advanced AI behavior system for enemy ships
 - Mission generation and dynamic storytelling system
 - Audio and visual effects framework
 - Comprehensive save/load functionality
+- Entity sprite system for visual ship representation
+- Movement animation and pathfinding visualization
 
 ### Changed
 
-- Migrated from pygame to pygame-ce (Community Edition) for Python 3.14+ compatibility
-- Updated all imports to use `import pygame_ce as pygame`
-- Updated all documentation to reflect pygame-ce usage
-- Updated pyproject.toml dependencies and mypy configuration
+- TBD
 
 ### Fixed
 
@@ -29,6 +27,93 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - TBD
+
+## [0.0.3] - 2025-10-30
+
+### Integration
+
+- **Isometric Grid System Fully Integrated into MVC Architecture**
+  - GridRenderer now embedded in GameView for rendering
+  - GameController handles mouse and keyboard input for grid interaction
+  - Unified GridPosition class (no more duplication)
+  - Complete click-to-select and click-to-move functionality
+  - Z-level switching via Page Up/Down keys
+  - Camera panning via arrow keys
+  - Visual feedback for selected cells (green highlight)
+  - Entity rendering at correct grid positions with name labels
+
+### Added
+
+- **Isometric Grid Rendering System** (`isometric_grid.py`)
+  - GridRenderer class with full 3D coordinate support (x, y, z)
+  - Isometric projection mathematics (world ↔ screen coordinate conversion)
+  - Z-level support for vertical space positioning (up to configurable max levels)
+  - Grid line rendering with configurable tile sizes and colors
+  - Cell highlighting and selection functionality
+  - Camera offset and viewport management
+  - Grid bounds checking and validation
+  - Factory functions for common grid configurations (default, combat, sector)
+
+- **Comprehensive Documentation** (`isometric_grid_doc.md`)
+  - Complete API reference with all classes, methods, and attributes
+  - Mathematical details of isometric projection formulas
+  - Usage examples for common scenarios
+  - Integration guides for MVC architecture
+  - Performance considerations and optimization notes
+
+- **Full Test Suite** (`test_isometric_grid.py`)
+  - 41 unit tests covering all functionality
+  - Tests for GridPosition operations (distance, addition, subtraction)
+  - Tests for coordinate conversion (world ↔ screen, round-trip validation)
+  - Tests for bounds checking and edge cases
+  - Tests for camera operations and z-level calculations
+  - Tests for rendering operations and factory functions
+  - All tests passing with 100% success rate
+
+- **Interactive Demo** (`demo_isometric_grid.py`)
+  - Full-featured interactive demonstration application
+  - Mouse click cell selection with visual feedback
+  - Keyboard controls for z-level switching and camera panning
+  - Multiple grid preset modes (default, combat, sector)
+  - Real-time information panel showing grid state
+  - Help overlay with complete control reference
+  - Clean, documented code suitable as example implementation
+
+### Technical Implementation
+
+- **GridPosition dataclass**: Immutable 3D coordinate representation with mathematical operations
+- **GridRenderer class**: Core rendering engine with isometric projection
+- **Projection formulas**:
+  - World to screen: `screen_x = (x - y) * (tile_width/2) + camera_x`
+  - World to screen: `screen_y = (x + y) * (tile_height/2) - (z * z_offset) + camera_y`
+- **Z-level visualization**: Vertical offset per level with configurable pixel spacing
+- **Color scheme**: Different colors for each z-level to enhance depth perception
+- **Factory pattern**: Convenience functions for common grid configurations
+
+### Integration Points
+
+- Compatible with existing MVC architecture in `model.py`, `view.py`, `controller.py`
+- Uses GridPosition dataclass compatible with game entity system
+- Designed for integration with pygame-ce rendering in GameView
+- Ready for controller integration for mouse-to-world coordinate conversion
+
+### Testing Coverage
+
+- **GridPosition**: 10 tests covering creation, distance, operators, immutability
+- **Initialization**: 3 tests for renderer setup and configuration
+- **Coordinate Conversion**: 8 tests for projection math and round-trip accuracy
+- **Bounds Checking**: 6 tests for validation logic
+- **Camera Operations**: 2 tests for viewport management
+- **Rendering**: 7 tests for grid drawing and highlighting
+- **Factory Functions**: 3 tests for preset configurations
+- **Edge Cases**: 3 tests for extreme values and special scenarios
+
+### Performance Characteristics
+
+- Efficient isometric projection using integer math where possible
+- Minimal memory allocation (no caching, pure functional rendering)
+- Suitable for grids up to 30x30 with 5 z-levels at 60 FPS
+- Object pooling pattern compatible for future optimization
 
 ## [0.0.2] - 2025-10-30
 

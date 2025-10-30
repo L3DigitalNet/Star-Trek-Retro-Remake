@@ -38,14 +38,78 @@ from typing import Final, TYPE_CHECKING
 
 import pygame
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Qt
+from PySide6.QtGui import QImage, QPixmap, QMouseEvent, QKeyEvent
+
+# Import isometric grid renderer
+from engine.isometric_grid import GridRenderer, create_sector_grid
 
 if TYPE_CHECKING:
-    from .controller import GameController
+    from game.controller import GameController
+    from game.entities.base import GridPosition
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.3"
 
 logger = logging.getLogger(__name__)
+
+
+class GameDisplay(QLabel):
+    """
+    Custom QLabel for game display with mouse and keyboard input.
+
+    Captures mouse and keyboard events and forwards them to the controller.
+    """
+
+    def __init__(self, view: 'GameView'):
+        """
+        Initialize the game display widget.
+
+        Args:
+            view: Reference to parent view
+        """
+        super().__init__()
+        self.view = view
+        self.setFocusPolicy(Qt.StrongFocus)  # Allow keyboard focus
+        self.setMouseTracking(True)  # Track mouse movement
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        """
+        Handle mouse press events.
+
+        Args:
+            event: Qt mouse event
+        """
+        if event.button() == Qt.LeftButton:
+            pos = (event.pos().x(), event.pos().y())
+            logger.info(f"Mouse clicked at: {pos}")
+            self.view.controller._handle_mouse_click(pos)
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """
+        Handle keyboard press events.
+
+        Args:
+            event: Qt keyboard event
+        """
+        # Convert Qt keys to pygame keys
+        key_map = {
+            Qt.Key_Up: pygame.K_UP,
+            Qt.Key_Down: pygame.K_DOWN,
+            Qt.Key_Left: pygame.K_LEFT,
+            Qt.Key_Right: pygame.K_RIGHT,
+            Qt.Key_PageUp: pygame.K_PAGEUP,
+            Qt.Key_PageDown: pygame.K_PAGEDOWN,
+            Qt.Key_Space: pygame.K_SPACE,
+            Qt.Key_Escape: pygame.K_ESCAPE,
+        }
+
+        qt_key = event.key()
+        if qt_key in key_map:
+            pygame_key = key_map[qt_key]
+            logger.info(f"Key pressed: {event.key()} -> pygame key: {pygame_key}")
+            self.view.controller._handle_keypress(pygame_key)
+        else:
+            logger.debug(f"Unmapped key pressed: {event.key()}")
 
 
 class GameView:
@@ -92,13 +156,23 @@ class GameView:
         pygame.init()
         self.game_surface = pygame.Surface((800, 600))
 
+        # Initialize isometric grid renderer
+        self.grid_renderer = create_sector_grid()
+        self.current_z_level = 0  # Current visible z-level
+        self.selected_cell: GridPosition | None = None
+
         # Set up UI
         self._setup_ui()
+
+        # Clock for managing updates
+        self.clock = pygame.time.Clock()
 
         # Set up update timer
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self._update_display)
         self.update_timer.start(16)  # ~60 FPS
+
+        logger.info("GameView initialized with isometric grid renderer")
 
     def run(self) -> None:
         """Start the view event loop."""
@@ -120,12 +194,23 @@ class GameView:
             game_objects: List of game objects to display
         """
         # Clear the game surface
-        self.game_surface.fill((0, 0, 0))
+        self.game_surface.fill((20, 20, 30))  # Dark space background
 
-        # Render grid (placeholder implementation)
-        self._render_grid(sector_map)
+        # Render isometric grid
+        self.grid_renderer.render_grid(
+            self.game_surface,
+            visible_z_levels=[self.current_z_level]
+        )
 
-        # Render game objects (placeholder implementation)
+        # Highlight selected cell if any
+        if self.selected_cell:
+            self.grid_renderer.render_cell_highlight(
+                self.game_surface,
+                self.selected_cell,
+                color=(0, 255, 0)  # Green highlight
+            )
+
+        # Render game objects
         for obj in game_objects:
             self._render_game_object(obj)
 
@@ -169,9 +254,13 @@ class GameView:
         layout = QVBoxLayout()
         central_widget.setLayout(layout)
 
-        # Add placeholder widgets
-        game_label = QLabel("Star Trek Retro Remake - Game View")
-        layout.addWidget(game_label)
+        # Create custom game display widget with input handling
+        self.game_label = GameDisplay(self)
+        self.game_label.setMinimumSize(800, 600)
+        layout.addWidget(self.game_label)
+
+        # Set focus to game display for keyboard input
+        self.game_label.setFocus()
 
         # pygame-ce widget will be integrated here
         self._setup_pygame_widget()
@@ -184,9 +273,61 @@ class GameView:
 
     def _update_display(self) -> None:
         """Update the display regularly."""
-        # Update pygame-ce surface and convert to PySide6 display
-        # This will be implemented when pygame-ce integration is complete
-        pass
+        # Clear pygame event queue (events are handled by Qt now)
+        pygame.event.pump()
+
+        # Calculate delta time
+        dt = self.clock.tick(60) / 1000.0
+
+        # Update controller
+        self.controller._update(dt)
+
+        # Render current state first (clears screen)
+        self.controller.state_manager.render(self.game_surface)
+
+        # Render the game content on top
+        if hasattr(self.controller.model, 'current_sector') and self.controller.model.current_sector:
+            self.render_sector_map(
+                self.controller.model.current_sector,
+                self.controller.model.game_objects
+            )
+
+        # Convert pygame surface to QPixmap and display
+        # Get the pygame surface as a string buffer
+        surface_string = pygame.image.tostring(self.game_surface, 'RGB')
+        w, h = self.game_surface.get_size()
+
+        # Create QImage from the buffer
+        qimage = QImage(surface_string, w, h, w * 3, QImage.Format_RGB888)
+
+        # Convert to QPixmap and display
+        pixmap = QPixmap.fromImage(qimage)
+        self.game_label.setPixmap(pixmap)
+
+    def set_z_level(self, z_level: int) -> None:
+        """
+        Set the currently visible z-level.
+
+        Args:
+            z_level: Z-level to display (0 to max_z_levels-1)
+        """
+        if 0 <= z_level < self.grid_renderer.max_z_levels:
+            self.current_z_level = z_level
+            logger.debug("Z-level changed to: %d", z_level)
+
+    def set_selected_cell(self, position: 'GridPosition') -> None:
+        """
+        Set the currently selected grid cell.
+
+        Args:
+            position: Grid position to select
+        """
+        self.selected_cell = position
+        logger.debug("Selected cell: %s", position)
+
+    def clear_selection(self) -> None:
+        """Clear the current cell selection."""
+        self.selected_cell = None
 
     def _render_grid(self, sector_map) -> None:
         """
@@ -195,8 +336,8 @@ class GameView:
         Args:
             sector_map: Sector map to render grid for
         """
-        # Placeholder grid rendering
-        # Draw grid lines for visualization
+        # Grid rendering is now handled by render_sector_map
+        # This method kept for compatibility
         pass
 
     def _render_game_object(self, obj) -> None:
@@ -206,6 +347,23 @@ class GameView:
         Args:
             obj: Game object to render
         """
-        # Placeholder object rendering
-        # Draw object sprite at position
-        pass
+        # Get object position and convert to screen coordinates
+        if hasattr(obj, 'position'):
+            screen_pos = self.grid_renderer.world_to_screen(obj.position)
+
+            # Draw a placeholder circle for the object
+            # Color varies based on object type
+            color = (255, 255, 0)  # Yellow default
+
+            if hasattr(obj, 'name') and 'Enterprise' in obj.name:
+                color = (0, 255, 255)  # Cyan for player ship
+
+            # Draw circle at screen position
+            pygame.draw.circle(self.game_surface, color, screen_pos, 8)
+
+            # Draw name label if available
+            if hasattr(obj, 'name') and obj.name:
+                font = pygame.font.Font(None, 18)
+                text = font.render(obj.name, True, (255, 255, 255))
+                text_rect = text.get_rect(center=(screen_pos[0], screen_pos[1] - 15))
+                self.game_surface.blit(text, text_rect)

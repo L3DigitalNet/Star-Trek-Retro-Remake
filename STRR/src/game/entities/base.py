@@ -39,13 +39,15 @@ from typing import Final, Optional
 __version__: Final[str] = "0.0.1"
 
 
-@dataclass
+@dataclass(frozen=True)
 class GridPosition:
     """
     3D grid position with z-level support.
 
     Represents a position in the game's 3D grid system where x and y are
     the horizontal coordinates and z represents the vertical level.
+
+    Immutable (frozen) for use as dictionary keys and in sets.
 
     Attributes:
         x: Horizontal x-coordinate
@@ -70,6 +72,14 @@ class GridPosition:
         dy = self.y - other.y
         dz = self.z - other.z
         return (dx*dx + dy*dy + dz*dz) ** 0.5
+
+    def __add__(self, other: 'GridPosition') -> 'GridPosition':
+        """Add two grid positions component-wise."""
+        return GridPosition(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other: 'GridPosition') -> 'GridPosition':
+        """Subtract two grid positions component-wise."""
+        return GridPosition(self.x - other.x, self.y - other.y, self.z - other.z)
 
 
 class GameObject:
