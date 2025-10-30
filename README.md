@@ -44,6 +44,7 @@ Engage in tactical turn-based combat on specialized combat grids with environmen
 
 - **PyGame 2.5+**: Core game engine for rendering and game loop
 - **PySide6 6.7+**: UI framework for menus, dialogs, and main window
+- **Qt Designer**: Visual UI design tool (included with PySide6)
 - **Python Standard Library**: Primary dependency approach
 
 ## 📦 Installation
@@ -237,11 +238,13 @@ This is currently a solo indie project for personal enjoyment. While not activel
 - Write **pytest tests** for all new functionality
 - Follow **PEP 8** style guidelines strictly
 - Document all functions and classes with proper docstrings
+- Design UI in **Qt Designer** - see [Qt Designer Workflow](docs/QT_DESIGNER_WORKFLOW.md)
 
 ## 📄 Documentation
 
 - **[Game Design Document](docs/DESIGN.md)**: Complete game design specification
 - **[Architecture Guide](docs/ARCHITECTURE.md)**: Technical implementation details
+- **[Qt Designer Workflow](docs/QT_DESIGNER_WORKFLOW.md)**: UI design with Qt Designer
 - **[Project Documentation](star_trek_retro_remake/docs/PROJECT-DOC.md)**: Detailed project information
 - **[Change Log](star_trek_retro_remake/docs/CHANGELOG.md)**: Version history and updates
 

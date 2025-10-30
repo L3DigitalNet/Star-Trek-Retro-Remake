@@ -42,7 +42,15 @@ Turn-based strategy game set in Kirk-era Star Trek universe. Features grid-based
 - Standard library first, justify external dependencies
 
 **Version Strategy:**
-- Format: MAJOR.MINOR.PATCH (start 0.0.1)
+- Format: MAJOR.MINOR.PATCH (currently at v0.0.10)
+- AI can freely increment PATCH by 0.0.1 for any non-trivial changes
+- Must update: `pyproject.toml`, modified file `__version__`, `CHANGELOG.md`, file "Date Changed"
+- Increment rules:
+  - Bug fixes, refactoring, small features: +0.0.1 (PATCH)
+  - New major features or subsystems: +0.1.0 (MINOR) - requires approval
+  - Breaking changes or complete rewrites: +1.0.0 (MAJOR) - requires approval
+- All modified core modules get current version number
+- Supporting modules can stay at lower versions until modified
 - Defer error handling until v1.0.0
 - Focus: clean architecture, core game logic, state transitions
 
@@ -117,9 +125,12 @@ Functions:
 - Use fixtures, parametrize, descriptive names
 
 **Version Management:**
-- Update `docs/CHANGELOG.md` on version changes
-- Update "Date Changed" in file headers
-- Categorize: Added/Changed/Fixed/Removed
+- AI increments version by 0.0.1 for any non-trivial change
+- Update all modified files: `pyproject.toml`, file `__version__`, "Date Changed" header
+- Update `STRR/docs/CHANGELOG.md` with new version entry
+- Categorize changes: Added/Changed/Fixed/Removed
+- Version consistency: All core modules use current project version
+- Supporting/unchanged modules keep their existing version numbers
 
 **Documentation Standard:**
 - Every `.py` file in `STRR/` has a matching `_doc.md` file in the same directory
@@ -143,7 +154,7 @@ Functions:
 11. **Version Aware:** Defer error handling until v1.0.0
 12. **Documentation:** Every `.py` file has matching `_doc.md` in same directory
 13. **Testing:** pytest for business logic, AAA pattern
-14. **Versioning:** Update CHANGELOG.md on changes
+14. **Versioning:** Increment by 0.0.1 for changes, update pyproject.toml, __version__, Date Changed, CHANGELOG.md
 15. **Comments:** Inline for significant blocks
 16. **Type Safety:** Runtime matches annotations
 17. **Separation:** Clear component boundaries

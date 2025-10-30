@@ -44,11 +44,11 @@ from typing import Final
 import pygame
 from PySide6.QtWidgets import QApplication
 
-from game.controller import GameController
-from game.model import GameModel
-from game.view import GameView
+from .controller import GameController
+from .model import GameModel
+from .view import GameView
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.10"
 
 
 class StarTrekRetroRemake:
@@ -109,6 +109,7 @@ class StarTrekRetroRemake:
         self.running = False
         self.controller.stop()
         self.view.close()
+        self._cleanup()
 
     def _initialize_systems(self) -> None:
         """Initialize PyGame and PySide6 systems."""

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Qt Designer integration for UI design workflow
+- `.ui` file loading with QUiLoader for runtime UI loading
+- UI compilation script (`scripts/compile_ui.py`) for optional Python compilation
+- Comprehensive Qt Designer workflow documentation (`docs/QT_DESIGNER_WORKFLOW.md`)
+- Base `main_window.ui` file matching current functionality
+- UI directory structure (`STRR/src/ui/designer/`, `STRR/src/ui/compiled/`)
+
+### Changed
+
+- Refactored `GameView` to load UI from Qt Designer `.ui` files instead of programmatic creation
+- Updated `view_doc.md` with Qt Designer integration details
+- Added Qt Designer reference to main README.md documentation
+
 ### Added (Planned Features)
 
 - Advanced AI behavior system for enemy ships

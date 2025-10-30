@@ -34,6 +34,7 @@ Functions:
 """
 
 import logging
+from pathlib import Path
 from typing import Final, TYPE_CHECKING
 
 import pygame
@@ -48,6 +49,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QImage, QPixmap, QMouseEvent, QKeyEvent
+from PySide6.QtUiTools import QUiLoader
 
 # Import isometric grid renderer
 from engine.isometric_grid import GridRenderer, create_sector_grid
@@ -132,12 +134,12 @@ class GameDisplay(QLabel):
             return
 
         pos = (pixmap_x, pixmap_y)
-        logger.info(
+        logger.debug(
             f"Mouse click: widget=({widget_x}, {widget_y}) -> "
             f"pygame=({pixmap_x}, {pixmap_y}) offset=({x_offset}, {y_offset})"
         )
 
-        self.view.controller._handle_mouse_click(pos)
+        self.view.controller.handle_mouse_click(pos)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """
@@ -165,8 +167,8 @@ class GameDisplay(QLabel):
         qt_key = event.key()
         if qt_key in key_map:
             pygame_key = key_map[qt_key]
-            logger.info(f"Key pressed: {event.key()} -> pygame key: {pygame_key}")
-            self.view.controller._handle_keypress(pygame_key)
+            logger.debug(f"Key pressed: {event.key()} -> pygame key: {pygame_key}")
+            self.view.controller.handle_keypress(pygame_key)
         else:
             logger.debug(f"Unmapped key pressed: {event.key()}")
 
@@ -206,10 +208,8 @@ class GameView:
         """
         self.controller = controller
 
-        # Initialize PySide6 main window
-        self.main_window = QMainWindow()
-        self.main_window.setWindowTitle("Star Trek Retro Remake")
-        self.main_window.setGeometry(100, 100, 1920, 1080)
+        # Load UI from Qt Designer file
+        self._load_ui()
 
         # Override close event to ensure proper cleanup
         self.main_window.closeEvent = self._handle_close_event
@@ -235,8 +235,11 @@ class GameView:
         w, h = self.game_surface.get_size()
         self._qimage_buffer = bytearray(w * h * 3)
 
-        # Set up UI
-        self._setup_ui()
+        # Connect UI signals to slots
+        self._connect_signals()
+
+        # Replace the gameDisplay QLabel with our custom GameDisplay widget
+        self._setup_game_display()
 
         # Clock for managing updates
         self.clock = pygame.time.Clock()
@@ -369,140 +372,83 @@ class GameView:
         if hasattr(self, "message_display"):
             self.message_display.setText(message)
 
-    def _setup_ui(self) -> None:
-        """Initialize the user interface."""
-        # Create central widget
-        central_widget = QWidget()
-        self.main_window.setCentralWidget(central_widget)
+    def _load_ui(self) -> None:
+        """Load UI from Qt Designer .ui file."""
+        # Get the path to the UI file
+        ui_dir = Path(__file__).parent.parent / "ui" / "designer"
+        ui_file = ui_dir / "main_window.ui"
 
-        # Create main horizontal layout
-        main_layout = QHBoxLayout()
-        central_widget.setLayout(main_layout)
+        if not ui_file.exists():
+            logger.error(f"UI file not found: {ui_file}")
+            raise FileNotFoundError(f"UI file not found: {ui_file}")
 
-        # Create control panel (left side)
-        control_panel = self._create_control_panel()
-        main_layout.addWidget(control_panel)
+        # Load the UI file
+        loader = QUiLoader()
+        ui_file_obj = ui_file.open("r")
+        self.main_window = loader.load(ui_file_obj)
+        ui_file_obj.close()
 
-        # Create game display area (right side)
-        game_container = QWidget()
-        game_layout = QVBoxLayout()
-        game_container.setLayout(game_layout)
+        # Store references to UI elements
+        self.ship_status_label = self.main_window.findChild(QLabel, "shipStatusLabel")
+        self.z_level_label = self.main_window.findChild(QLabel, "zLevelLabel")
+        self.message_display = self.main_window.findChild(QLabel, "messageDisplay")
 
-        # Add title for game area
-        game_title = QLabel("<h3>Sector Map View</h3>")
-        game_title.setAlignment(Qt.AlignCenter)
-        game_layout.addWidget(game_title)
+        # Store references to buttons
+        self.new_game_btn = self.main_window.findChild(QPushButton, "newGameButton")
+        self.save_game_btn = self.main_window.findChild(QPushButton, "saveGameButton")
+        self.load_game_btn = self.main_window.findChild(QPushButton, "loadGameButton")
+        self.settings_btn = self.main_window.findChild(QPushButton, "settingsButton")
+        self.quit_btn = self.main_window.findChild(QPushButton, "quitButton")
 
-        # Create custom game display widget with input handling
+        logger.info(f"UI loaded from: {ui_file}")
+
+    def _connect_signals(self) -> None:
+        """Connect UI signals to slots."""
+        self.new_game_btn.clicked.connect(self._on_new_game)
+        self.save_game_btn.clicked.connect(self._on_save_game)
+        self.load_game_btn.clicked.connect(self._on_load_game)
+        self.settings_btn.clicked.connect(self._on_settings)
+        self.quit_btn.clicked.connect(self._on_quit)
+
+    def _setup_game_display(self) -> None:
+        """Replace the placeholder game display with custom GameDisplay widget."""
+        # Find the game display label in the loaded UI
+        old_label = self.main_window.findChild(QLabel, "gameDisplay")
+        if not old_label:
+            logger.error("gameDisplay label not found in UI file")
+            return
+
+        # Get parent layout
+        parent_layout = old_label.parent().layout()
+        if not parent_layout:
+            logger.error("Could not find parent layout for gameDisplay")
+            return
+
+        # Find the position of the old label in the layout
+        index = -1
+        for i in range(parent_layout.count()):
+            if parent_layout.itemAt(i).widget() == old_label:
+                index = i
+                break
+
+        if index == -1:
+            logger.error("Could not find gameDisplay in parent layout")
+            return
+
+        # Create custom game display widget
         self.game_label = GameDisplay(self)
         self.game_label.setMinimumSize(1280, 900)
         self.game_label.setMaximumSize(1280, 900)
-        game_layout.addWidget(self.game_label)
 
-        # Add instructions
-        instructions = QLabel(
-            "Controls: PageUp/PageDown (Z-levels) | +/- (Zoom) | "
-            "Arrow Keys (Pan) | Left Click (Select/Move)"
-        )
-        instructions.setAlignment(Qt.AlignCenter)
-        instructions.setStyleSheet(
-            "padding: 5px; background-color: #2a2a2a; color: #ccc;"
-        )
-        game_layout.addWidget(instructions)
-
-        main_layout.addWidget(game_container)
+        # Replace the old label with the new widget
+        parent_layout.removeWidget(old_label)
+        old_label.deleteLater()
+        parent_layout.insertWidget(index, self.game_label)
 
         # Set focus to game display for keyboard input
         self.game_label.setFocus()
 
-        # pygame-ce widget will be integrated here
-        self._setup_pygame_widget()
-
-    def _create_control_panel(self) -> QWidget:
-        """
-        Create the control panel with game controls and status.
-
-        Returns:
-            QWidget containing control panel
-        """
-        # Create group box for controls
-        group_box = QGroupBox("Game Controls")
-        group_box.setMaximumWidth(350)
-        group_box.setMinimumWidth(300)
-
-        layout = QVBoxLayout()
-
-        # Title
-        title = QLabel("<h2>Star Trek<br>Retro Remake</h2>")
-        title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #00aaff; padding: 10px;")
-        layout.addWidget(title)
-
-        # Ship status label
-        self.ship_status_label = QLabel(
-            "<b>USS Enterprise</b><br>"
-            "Status: Active<br>"
-            "Hull: 100%<br>"
-            "Shields: 100%<br>"
-            "Energy: 5000"
-        )
-        self.ship_status_label.setStyleSheet(
-            "padding: 10px; background-color: #1a1a1a; "
-            "border: 1px solid #333; border-radius: 5px; color: #ccc;"
-        )
-        self.ship_status_label.setWordWrap(True)
-        layout.addWidget(self.ship_status_label)
-
-        # Z-level label
-        self.z_level_label = QLabel("Z-Level: 0")
-        self.z_level_label.setStyleSheet(
-            "padding: 8px; background-color: #2a2a2a; "
-            "border: 1px solid #444; border-radius: 3px; font-weight: bold;"
-        )
-        layout.addWidget(self.z_level_label)
-
-        # Control buttons
-        new_game_btn = QPushButton("New Game")
-        new_game_btn.clicked.connect(self._on_new_game)
-        layout.addWidget(new_game_btn)
-
-        save_game_btn = QPushButton("Save Game")
-        save_game_btn.clicked.connect(self._on_save_game)
-        layout.addWidget(save_game_btn)
-
-        load_game_btn = QPushButton("Load Game")
-        load_game_btn.clicked.connect(self._on_load_game)
-        layout.addWidget(load_game_btn)
-
-        settings_btn = QPushButton("Settings")
-        settings_btn.clicked.connect(self._on_settings)
-        layout.addWidget(settings_btn)
-
-        # Message display area
-        message_label = QLabel("<b>Messages:</b>")
-        layout.addWidget(message_label)
-
-        self.message_display = QLabel("Ready to explore...")
-        self.message_display.setStyleSheet(
-            "padding: 10px; background-color: #0a0a0a; "
-            "border: 1px solid #333; border-radius: 5px; "
-            "color: #00ff00; font-family: monospace;"
-        )
-        self.message_display.setWordWrap(True)
-        self.message_display.setMinimumHeight(100)
-        layout.addWidget(self.message_display)
-
-        # Add stretch to push quit button to bottom
-        layout.addStretch()
-
-        # Quit button
-        quit_btn = QPushButton("Quit")
-        quit_btn.clicked.connect(self._on_quit)
-        quit_btn.setStyleSheet("background-color: #aa0000;")
-        layout.addWidget(quit_btn)
-
-        group_box.setLayout(layout)
-        return group_box
+        logger.info("Custom game display widget installed")
 
     def _on_new_game(self) -> None:
         """Handle New Game button click."""
@@ -525,12 +471,6 @@ class GameView:
     def _on_quit(self) -> None:
         """Handle Quit button click."""
         self.main_window.close()
-
-    def _setup_pygame_widget(self) -> None:
-        """Set up pygame-ce integration widget."""
-        # Placeholder for pygame-ce widget integration
-        # This will embed the pygame-ce surface in the PySide6 window
-        pass
 
     def _update_display(self) -> None:
         """Update the display regularly."""

@@ -32,7 +32,7 @@ Functions:
     - None
 """
 
-from typing import Final, Optional, TYPE_CHECKING
+from typing import Final, TYPE_CHECKING
 import logging
 
 import pygame
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from .view import GameView
     from .entities.starship import Starship
 
-__version__: Final[str] = "0.0.9"
+__version__: Final[str] = "0.0.10"
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ class GameController:
             model: Game model reference
         """
         self.model = model
-        self.view: Optional["GameView"] = None
+        self.view: "GameView" | None = None
 
         # Initialize game state management
         self.state_manager = GameStateManager()
@@ -212,9 +212,9 @@ class GameController:
 
     # Note: _game_loop() and _handle_events() removed
     # Events are now handled exclusively through Qt widgets (GameDisplay)
-    # Qt events are forwarded to _handle_mouse_click() and _handle_keypress()
+    # Qt events are forwarded to handle_mouse_click() and handle_keypress()
 
-    def _handle_mouse_click(self, mouse_pos: tuple[int, int]) -> None:
+    def handle_mouse_click(self, mouse_pos: tuple[int, int]) -> None:
         """
         Handle mouse click events for grid interaction.
 
@@ -224,14 +224,14 @@ class GameController:
         if not self.view:
             return
 
-        logger.info(f"Processing mouse click at screen position: {mouse_pos}")
+        logger.debug(f"Processing mouse click at screen position: {mouse_pos}")
 
         # Convert screen coordinates to grid position
         grid_pos = self.view.grid_renderer.screen_to_world(
             mouse_pos, self.view.current_z_level
         )
 
-        logger.info(f"Converted to grid position: {grid_pos}")
+        logger.debug(f"Converted to grid position: {grid_pos}")
 
         # Validate grid position is within renderer bounds
         if not self.view.grid_renderer.is_in_bounds(grid_pos):
@@ -250,10 +250,10 @@ class GameController:
 
         # Attempt to move player ship to clicked position
         if self.model.player_ship:
-            logger.info(f"Attempting to move ship to {grid_pos}")
+            logger.debug(f"Attempting to move ship to {grid_pos}")
             self.handle_ship_move_request(grid_pos)
 
-    def _handle_keypress(self, key: int) -> None:
+    def handle_keypress(self, key: int) -> None:
         """
         Handle keyboard input.
 
@@ -263,7 +263,7 @@ class GameController:
         if not self.view:
             return
 
-        logger.info(f"Processing key press: {key}")
+        logger.debug(f"Processing key press: {key}")
 
         # Z-level controls (validation is centralized in set_z_level)
         if key == pygame.K_PAGEUP:
@@ -273,27 +273,27 @@ class GameController:
 
         # Zoom controls
         elif key in (pygame.K_PLUS, pygame.K_EQUALS):
-            logger.info("Zooming in")
+            logger.debug("Zooming in")
             self.view.grid_renderer.zoom_in()
         elif key == pygame.K_MINUS:
-            logger.info("Zooming out")
+            logger.debug("Zooming out")
             self.view.grid_renderer.zoom_out()
         elif key == pygame.K_0:
-            logger.info("Resetting zoom")
+            logger.debug("Resetting zoom")
             self.view.grid_renderer.reset_zoom()
 
         # Camera panning
         elif key == pygame.K_LEFT:
-            logger.info("Panning camera left")
+            logger.debug("Panning camera left")
             self._pan_camera(10, 0)
         elif key == pygame.K_RIGHT:
-            logger.info("Panning camera right")
+            logger.debug("Panning camera right")
             self._pan_camera(-10, 0)
         elif key == pygame.K_UP:
-            logger.info("Panning camera up")
+            logger.debug("Panning camera up")
             self._pan_camera(0, 10)
         elif key == pygame.K_DOWN:
-            logger.info("Panning camera down")
+            logger.debug("Panning camera down")
             self._pan_camera(0, -10)
 
     def _pan_camera(self, dx: int, dy: int) -> None:

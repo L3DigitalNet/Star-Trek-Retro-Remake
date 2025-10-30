@@ -55,7 +55,11 @@ import pygame
 # Import GridPosition from the game entities module
 from game.entities.base import GridPosition
 
-__version__: Final[str] = "0.0.9"
+from typing import Final
+
+import pygame
+
+__version__: Final[str] = "0.0.10"
 
 logger = logging.getLogger(__name__)
 

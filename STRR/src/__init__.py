@@ -14,5 +14,5 @@ License: MIT
 
 from typing import Final
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.10"
 __author__: Final[str] = "Star Trek Retro Remake Development Team"

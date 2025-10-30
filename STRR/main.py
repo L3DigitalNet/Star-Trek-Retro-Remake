@@ -53,12 +53,12 @@ import logging
 from pathlib import Path
 from typing import Final
 
-# Configure logging
+# Configure logging for application-wide debugging and monitoring
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
-# Add src directory to Python path for imports
+# Add src directory to Python path to enable module imports from STRR/src/
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from src.game.application import StarTrekRetroRemake
@@ -71,9 +71,12 @@ def main() -> None:
     Main entry point for the Star Trek Retro Remake game.
 
     Initializes the game application and starts the main game loop.
+    Execution blocks until the game window is closed.
     """
-    # Create and run the game application
+    # Create the main application instance (initializes MVC components)
     game = StarTrekRetroRemake()
+
+    # Start the game loop (runs until user exits)
     game.run()
 
 

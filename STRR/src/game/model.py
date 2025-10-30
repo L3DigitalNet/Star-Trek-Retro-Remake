@@ -35,7 +35,7 @@ Functions:
     - None
 """
 
-from typing import Final, Optional
+from typing import Final
 from dataclasses import dataclass
 
 from .entities.starship import Starship
@@ -43,7 +43,7 @@ from .entities.base import GridPosition, GameObject
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.9"
+__version__: Final[str] = "0.0.10"
 
 
 @dataclass
@@ -129,10 +129,10 @@ class GameModel:
         """Initialize the game model with default state."""
         # Map system
         self.galaxy = GalaxyMap()
-        self.current_sector: Optional[SectorMap] = None
+        self.current_sector: SectorMap | None = None
 
         # Player and entities
-        self.player_ship: Optional[Starship] = None
+        self.player_ship: Starship | None = None
         self.game_objects: list[GameObject] = []
 
         # Game systems
