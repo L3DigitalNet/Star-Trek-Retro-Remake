@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive save/load functionality
 - Entity sprite system for visual ship representation
 - Movement animation and pathfinding visualization
+- Mouse wheel zoom support
+- Minimap for navigation
+- Configurable z-level visibility range
+- Settings dialog window
+- Save/Load game dialogs
+- Menu bar integration
 
 ### Changed
 
@@ -27,6 +33,312 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - TBD
+
+## [0.0.10] - 2025-10-30
+
+### Added
+
+- **Enhanced PySide6 UI Layout**: Complete Qt window integration with control panel
+  - Left control panel with game controls and status displays
+  - Ship status display showing hull, shields, and energy
+  - Z-level indicator with automatic updates
+  - Message display area for game feedback
+  - Game control buttons (New Game, Save, Load, Settings, Quit)
+  - Proper horizontal layout separating UI controls from game display
+  - Centered game display area with title and instructions
+
+- **Standalone Integration Demo** (`demo_qt_pygame_integration.py`)
+  - Complete working example of PySide6 + pygame-ce integration
+  - Control panel with buttons and status displays
+  - Animated bouncing circle (USS Enterprise simulation)
+  - 60 FPS rendering with proper timing
+  - Clean resource management and shutdown handling
+  - Fully documented for learning and reference
+
+- **Comprehensive Documentation**
+  - `PYSIDE6_PYGAME_INTEGRATION.md`: Technical integration guide
+  - `demo_qt_pygame_integration_doc.md`: Demo file documentation
+  - `QT_PYGAME_INTEGRATION_README.md`: Quick start guide
+  - Detailed architecture diagrams and code examples
+  - Best practices and troubleshooting guide
+
+### Changed
+
+- **View Architecture** (`view.py`)
+  - Refactored from simple vertical layout to horizontal split layout
+  - Game display now 1280x900 (from 1920x1080) to accommodate control panel
+  - Main window size adjusted to 1920x1080 for better screen utilization
+  - `show_message()` now updates UI message display in real-time
+  - `set_z_level()` now updates UI label automatically
+  - `show_ship_status()` now updates UI status panel with ship details
+
+- **Image Conversion API** (Performance & Compatibility)
+  - Updated from deprecated `pygame.image.tostring()` to `pygame.image.tobytes()`
+  - Applied to both `view.py` and `demo_qt_pygame_integration.py`
+  - Eliminates deprecation warnings
+  - Future-proof API usage for pygame-ce 2.3.0+
+
+### Technical Implementation
+
+- **Layout Structure**:
+  - `QHBoxLayout` for main window (control panel | game area)
+  - Control panel: `QGroupBox` with `QVBoxLayout` for vertical stacking
+  - Game area: `QWidget` with `QVBoxLayout` for title/display/instructions
+
+- **Qt Signal/Slot Pattern**:
+  - Button clicks connected to handler methods
+  - Clean separation between UI events and game logic
+  - Proper method naming convention (`_on_action`)
+
+- **Resource Management**:
+  - Pre-allocated buffers for image conversion
+  - Cached fonts to prevent per-frame allocation
+  - Proper cleanup in `closeEvent()`
+  - Timer management for clean shutdown
+
+- **Coordinate Handling**:
+  - Mouse events from Qt widgets
+  - Coordinate conversion (Qt → pygame)
+  - Bounds validation before forwarding to controller
+
+### Files Added
+
+- `STRR/demo_qt_pygame_integration.py` - Standalone demo
+- `STRR/demo_qt_pygame_integration_doc.md` - Demo documentation
+- `STRR/src/game/PYSIDE6_PYGAME_INTEGRATION.md` - Technical docs
+- `QT_PYGAME_INTEGRATION_README.md` - Quick start guide
+
+### Files Modified
+
+- `STRR/src/game/view.py` - Enhanced UI layout
+- `STRR/docs/CHANGELOG.md` - This file
+- Date Changed fields updated in modified files
+
+### Integration Benefits
+
+- **Developer Experience**: Clear separation between Qt UI and pygame rendering
+- **User Experience**: Professional windowed interface with proper controls
+- **Maintainability**: Well-documented pattern for future UI additions
+- **Performance**: 60 FPS maintained with efficient rendering pipeline
+- **Flexibility**: Easy to add more Qt widgets (dialogs, menus, settings)
+
+## [0.0.9] - 2025-10-30
+
+### Fixed
+
+- **CRITICAL: Race Condition in Sector Loading** (`model.py`)
+  - Added validation after `get_sector()` to ensure sector exists before creating player ship
+  - Added validation that `place_entity()` succeeds when placing player ship
+  - Prevents game initialization with `None` sector or failed entity placement
+  - Raises `RuntimeError` with descriptive message if initialization fails
+
+- **CRITICAL: Entity Position Desynchronization** (`model.py`)
+  - Ship position now updated BEFORE calling `move_entity()` instead of after
+  - Ensures `ship.position` and `sector.entities` dictionary stay synchronized
+  - Added rollback mechanism: if sector move fails, ship position reverts to old position
+  - Prevents entity duplication or orphaned references in sector map
+
+- **HIGH: Missing Bounds Validation in Mouse Clicks** (`controller.py`)
+  - Added dual validation for grid positions from screen-to-world conversion
+  - First validates against renderer bounds (visual grid)
+  - Then validates against sector map bounds (logical grid)
+  - Prevents invalid positions from being selected or moved to
+  - Added descriptive logging for both validation failures
+
+- **HIGH: Division by Zero Risk in Zoom** (`isometric_grid.py`)
+  - Enforced minimum tile dimensions of 4 pixels in `set_zoom()`
+  - Prevents division by zero in coordinate conversion formulas
+  - Minimum z-level offset of 2 pixels also enforced
+  - Ensures safe math operations at extreme zoom levels (down to 25%)
+
+- **MEDIUM: Grid Size Mismatch** (`isometric_grid.py`)
+  - Fixed `create_sector_grid()` to use 20×20 grid matching `SectorMap.grid_size`
+  - Previously used 30×30 causing wasted rendering and confusion
+  - Updated camera offset calculation for correct grid centering
+  - All dimensions now consistent between sector map and renderer
+
+- **MEDIUM: Move Execution Optimization** (`model.py`)
+  - Engine system existence check moved before distance calculation
+  - Prevents expensive distance calculation when engine is missing
+  - More efficient early-exit pattern for invalid moves
+
+### Changed
+
+- Updated `test_isometric_grid.py` to reflect corrected 20×20 sector grid dimensions
+- Enhanced error messages with descriptive `RuntimeError` exceptions
+- Improved logging detail in controller for coordinate validation
+- Updated "Date Changed" fields in affected modules (model.py, controller.py, isometric_grid.py)
+
+### Technical Details
+
+- All 75 unit tests passing after fixes
+- No breaking changes to public APIs
+- Improved robustness for edge cases and error conditions
+- Better separation of concerns between renderer and sector map bounds
+
+## [0.0.8] - 2025-10-30
+
+### Changed
+
+- **Simplified Grid Color Scheme**: Monochrome design for maximum clarity
+  - Current z-level: Pure white (255, 255, 255) with full opacity (alpha=255)
+  - Adjacent z-levels: Gray (128, 128, 128) with low transparency (alpha=80)
+  - Removed color-coding per z-level for cleaner, less distracting display
+  - Creates stark contrast between active and context layers
+  - Easier to focus on current gameplay plane
+
+### Removed
+
+- Z-level color differentiation (blue, cyan, purple, amber, red scheme)
+- Color-based z-level identification - replaced with opacity/dash patterns
+
+### Technical Implementation
+
+- Modified `GridRenderer.render_z_level()` to use white/gray colors based on current z-level
+- Updated transparency values: current=255 (full opacity), adjacent=80 (very transparent)
+- Simplified color logic: no more color index calculations or z-level color arrays
+- Dashed line patterns still differentiate between current (solid) and adjacent (dashed)
+
+## [0.0.7] - 2025-10-30
+
+### Changed
+
+- **Limited Z-Level Visibility**: Only show current level ± 1 for reduced clutter
+  - Renders current z-level + one above + one below only
+  - Dramatically reduces visual noise (from 5 layers to maximum 3)
+  - Simplified transparency: current=220, below=100, above=140
+  - Easier to focus on immediate gameplay area
+  - Temporary change for testing purposes; will be configurable later
+
+### Technical Implementation
+
+- Modified `GameView.render_sector_map()` to calculate visible z-range:
+  - `min_z = max(0, current_z_level - 1)`
+  - `max_z = min(max_z_levels - 1, current_z_level + 1)`
+- Loop only iterates through visible range instead of all z-levels
+- Simplified alpha values since only 3 levels maximum are ever visible
+- Maintains dashed line system for adjacent levels
+
+## [0.0.6] - 2025-10-30
+
+### Added
+
+- **Dashed Grid Lines for Inactive Z-Levels**: Significantly reduces visual clutter
+  - Current z-level: Solid lines (no dashing)
+  - Distance 1: Light dashing (16px dash, 4px gap)
+  - Distance 2: Medium dashing (12px dash, 8px gap)
+  - Distance 3+: Heavy dashing (8px dash, 16px gap - very sparse)
+  - Progressively sparser dashing makes distant layers less distracting
+  - Combined with color differentiation and transparency for optimal depth perception
+
+### Changed
+
+- **Grid Rendering Algorithm**: Enhanced to support variable dash patterns
+  - `render_z_level()` now accepts `current_z_level` parameter for dash calculation
+  - `_draw_grid_lines()` calculates dash parameters based on distance from active plane
+  - New `_draw_dashed_line()` helper function for efficient dash rendering
+  - Dashed lines use normalized vector math for precise dash placement
+
+### Technical Implementation
+
+- Added `_draw_dashed_line()` method to `GridRenderer`:
+  - Calculates line vector and distance
+  - Normalizes direction for consistent dash spacing
+  - Iterates through pattern (dash + gap) to draw segments
+  - Handles partial dashes at line endpoints
+
+- Updated `render_z_level()` signature to accept optional `current_z_level` parameter
+- Updated `_draw_grid_lines()` to calculate and apply dash patterns based on z-level distance
+- Modified `GameView.render_sector_map()` to pass current z-level for dash calculation
+
+### Visual Impact
+
+The combination of three visual techniques now creates excellent depth perception:
+
+1. **Distinct hue per z-level** (color coding)
+2. **Distance-based transparency** (alpha fading)
+3. **Progressive dash density** (NEW - reduces visual noise)
+
+Result: Far z-levels appear as subtle, sparse dashed hints while the current level remains clear and prominent.
+
+## [0.0.5] - 2025-10-30
+
+### Added
+
+- **Zoom Functionality**: Dynamic zoom in/out capability with keyboard controls
+  - Zoom range: 25% to 400% (0.25x to 4.0x)
+  - Keyboard shortcuts: `+`/`=` to zoom in, `-` to zoom out, `0` to reset
+  - Smooth zoom transitions with 20% increment per step
+  - Tile dimensions scale proportionally with zoom level
+  - Z-level offset scales with zoom for consistent depth perception
+  - Zoom level logged for debugging
+
+- **1920x1080 Display Resolution**: Updated window and surface sizes for modern displays
+  - Main window: 1920x1080 pixels
+  - Game surface: 1920x1080 pixels
+  - Widget minimum size: 1920x1080 pixels
+  - Provides larger viewport for better grid visualization
+
+### Changed
+
+- **Enhanced Z-Level Color Differentiation**: Improved visual distinction between layers
+  - New color scheme with distinct hues per z-level:
+    - Z=0: Dark blue (60, 60, 140) - Deep space
+    - Z=1: Cyan-green (80, 140, 120) - Low orbit
+    - Z=2: Purple (140, 100, 140) - Mid orbit
+    - Z=3: Amber (140, 120, 60) - High orbit
+    - Z=4: Reddish (140, 80, 80) - Upper atmosphere
+  - Improved transparency algorithm:
+    - Current level: 220 alpha (mostly opaque)
+    - Levels below: Fade darker (180 - distance*70, min 30)
+    - Levels above: Fade lighter (200 - distance*50, min 50)
+  - Creates better depth perception with asymmetric fading
+
+### Technical Implementation
+
+- `GridRenderer` class:
+  - Added `zoom_level`, `min_zoom`, `max_zoom` attributes
+  - Added `base_tile_width`, `base_tile_height` for zoom calculations
+  - Implemented `set_zoom()`, `zoom_in()`, `zoom_out()`, `reset_zoom()` methods
+  - Tile dimensions now mutable to support dynamic scaling
+  - Z-level offset scales proportionally with zoom
+
+- `GameView` class:
+  - Updated window geometry to 1920x1080
+  - Updated game surface to 1920x1080
+  - Enhanced z-level rendering with asymmetric transparency
+  - Added keyboard mappings for zoom controls
+
+- `GameController` class:
+  - Added zoom key handlers (K_PLUS, K_EQUALS, K_MINUS, K_0)
+  - Integrated zoom calls to GridRenderer methods
+  - Logging for zoom operations
+
+## [0.0.4] - 2025-10-30
+
+### Fixed
+
+- **Z-Level Rendering**: All z-levels now render simultaneously with transparency-based depth visualization
+  - Current z-level renders fully opaque (alpha=255)
+  - Other z-levels fade based on distance from current level (alpha=255 - distance*60, minimum 40)
+  - Creates true 3D visualization showing multiple layers of the grid simultaneously
+  - Bottom-to-top rendering order ensures proper depth layering
+  - Each z-level renders to a separate surface with SRCALPHA for transparency support
+
+- **Mouse Click Coordinate Conversion**: Fixed mouse input mapping from Qt widget to pygame surface
+  - Accounts for QLabel widget offset within the window
+  - Properly converts widget-relative coordinates to pygame surface coordinates
+  - Calculates pixmap display offset (centered in widget)
+  - Clamps coordinates to valid pygame surface bounds
+  - Added detailed logging for debugging coordinate transformations
+
+### Technical Details
+
+- Modified `GameView.render_sector_map()` to iterate through all z-levels instead of just current level
+- Each z-level renders to temporary surface with alpha transparency before compositing to main surface
+- Updated `GameDisplay.mousePressEvent()` to calculate widget-to-surface coordinate transformation
+- Mouse coordinates now accurately map to grid cells under cursor
+- Z-level switching (PageUp/PageDown) maintains proper transparency for all visible layers
 
 ## [0.0.3] - 2025-10-30
 

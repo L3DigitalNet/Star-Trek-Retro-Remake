@@ -137,19 +137,19 @@ class TestGridRendererInitialization:
             grid_width=15,
             grid_height=15,
             max_z_levels=3,
-            camera_offset=(500, 200)
+            camera_offset=(500, 200),
         )
         assert renderer.tile_width == 48
         assert renderer.tile_height == 24
         assert renderer.grid_width == 15
         assert renderer.grid_height == 15
         assert renderer.max_z_levels == 3
-        assert renderer.camera_offset == [500, 200]
+        assert renderer.camera_offset == (500, 200)
 
     def test_camera_offset_initialization(self):
         """Test camera offset is properly set."""
         renderer = GridRenderer(camera_offset=(100, 200))
-        assert renderer.camera_offset == [100, 200]
+        assert renderer.camera_offset == (100, 200)
 
 
 class TestCoordinateConversion:
@@ -161,7 +161,7 @@ class TestCoordinateConversion:
         return GridRenderer(
             tile_width=64,
             tile_height=32,
-            camera_offset=(0, 0)  # No camera offset for easier testing
+            camera_offset=(0, 0),  # No camera offset for easier testing
         )
 
     def test_origin_conversion(self, renderer):
@@ -299,7 +299,7 @@ class TestCameraOperations:
         """Test updating camera offset."""
         renderer = GridRenderer(camera_offset=(0, 0))
         renderer.set_camera_offset((100, 200))
-        assert renderer.camera_offset == [100, 200]
+        assert renderer.camera_offset == (100, 200)
 
     def test_camera_affects_screen_coords(self):
         """Test that camera offset affects screen coordinates."""
@@ -396,8 +396,8 @@ class TestFactoryFunctions:
         assert isinstance(renderer, GridRenderer)
         assert renderer.tile_width == 32
         assert renderer.tile_height == 16
-        assert renderer.grid_width == 30
-        assert renderer.grid_height == 30
+        assert renderer.grid_width == 20  # Fixed to match SectorMap dimensions
+        assert renderer.grid_height == 20  # Fixed to match SectorMap dimensions
         assert renderer.max_z_levels == 5
 
 

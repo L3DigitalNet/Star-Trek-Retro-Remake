@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 10-30-2025 (v0.0.9 - Bug fixes)
 License: MIT
 
 Features:
@@ -39,11 +39,11 @@ from typing import Final, Optional
 from dataclasses import dataclass
 
 from .entities.starship import Starship
-from .entities.base import GridPosition
+from .entities.base import GridPosition, GameObject
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.9"
 
 
 @dataclass
@@ -56,6 +56,7 @@ class CombatResult:
         message: Descriptive message about the result
         damage: Amount of damage dealt (if applicable)
     """
+
     success: bool
     message: str
     damage: int = 0
@@ -89,10 +90,7 @@ class TurnManager:
 
     def get_turn_info(self) -> dict[str, int | str]:
         """Get current turn information."""
-        return {
-            "turn_number": self.turn_number,
-            "current_phase": self.current_phase
-        }
+        return {"turn_number": self.turn_number, "current_phase": self.current_phase}
 
     def _process_ai_turns(self) -> None:
         """Process AI entity turns and actions."""
@@ -135,7 +133,7 @@ class GameModel:
 
         # Player and entities
         self.player_ship: Optional[Starship] = None
-        self.game_objects: list[object] = []  # Will be properly typed later
+        self.game_objects: list[GameObject] = []
 
         # Game systems
         self.turn_manager = TurnManager()
@@ -143,15 +141,23 @@ class GameModel:
 
     def initialize_new_game(self) -> None:
         """Set up a new game with default starting conditions."""
+        # Load starting sector FIRST
+        self.current_sector = self.galaxy.get_sector(0, 0)
+
+        # Validate sector was loaded successfully
+        if not self.current_sector:
+            raise RuntimeError("Failed to load starting sector (0, 0)")
+
         # Create player ship at starting position
         start_position = GridPosition(5, 5, 1)
         self.player_ship = self._create_player_ship(start_position)
 
-        # Load starting sector
-        self.current_sector = self.galaxy.get_sector(0, 0)
-
         # Add player ship to game objects
         self.game_objects.append(self.player_ship)
+
+        # Register ship in sector entities dictionary
+        if not self.current_sector.place_entity(self.player_ship, start_position):
+            raise RuntimeError(f"Failed to place player ship at {start_position}")
 
     def execute_move(self, ship: Starship, destination: GridPosition) -> bool:
         """
@@ -164,32 +170,52 @@ class GameModel:
         Returns:
             True if movement was successful, False otherwise
         """
+        # Check for active sector
+        if not self.current_sector:
+            return False
+
         # Validate movement
         if not self._is_valid_move(ship, destination):
             return False
 
-        # Calculate movement cost
-        distance = int(ship.position.distance_to(destination))
-        engines = ship.get_system('engines')
-
+        # Get engine system and validate it exists
+        engines = ship.get_system("engines")
         if not engines:
             return False
 
+        # Calculate movement cost
+        distance = int(ship.position.distance_to(destination))
         fuel_cost = engines.calculate_movement_cost(distance)
 
         # Check fuel availability
         if engines.fuel < fuel_cost:
             return False
 
-        # Execute movement
+        # Store old position for rollback if needed
+        old_position = ship.position
+
+        # Update ship position BEFORE moving in sector map
+        # This ensures ship.position and sector.entities stay synchronized
         ship.position = destination
+
+        # Move entity in sector map (updates entities dictionary)
+        if not self.current_sector.move_entity(old_position, destination):
+            # Rollback ship position if sector move failed
+            ship.position = old_position
+            return False
+
+        # Deduct fuel and advance turn
         engines.fuel -= fuel_cost
         self.turn_manager.advance_turn()
 
+        # Cleanup inactive objects after turn
+        self._cleanup_inactive_objects()
+
         return True
 
-    def resolve_combat(self, attacker: Starship, target: Starship,
-                      weapon_type: str) -> CombatResult:
+    def resolve_combat(
+        self, attacker: Starship, target: Starship, weapon_type: str
+    ) -> CombatResult:
         """
         Resolve combat between two starships.
 
@@ -202,13 +228,14 @@ class GameModel:
             CombatResult containing the outcome
         """
         # Get attacker's weapon system
-        weapons = attacker.get_system('weapons')
+        weapons = attacker.get_system("weapons")
         if not weapons or not weapons.active:
             return CombatResult(False, "Weapons offline")
 
         # Check targeting capability
-        if not weapons.can_target(target.position, attacker.position,
-                                 attacker.orientation):
+        if not weapons.can_target(
+            target.position, attacker.position, attacker.orientation
+        ):
             return CombatResult(False, "Target out of range")
 
         # Calculate and apply damage
@@ -254,7 +281,7 @@ class GameModel:
         Returns:
             True if move is valid, False otherwise
         """
-        # Check if we have a current sector
+        # Explicit check for current sector (defensive programming for early version)
         if not self.current_sector:
             return False
 
@@ -279,3 +306,21 @@ class GameModel:
             Configured player starship
         """
         return Starship(position, "Constitution", "Enterprise")
+
+    def _cleanup_inactive_objects(self) -> None:
+        """
+        Remove destroyed objects from game to prevent memory leaks.
+
+        Filters out all game objects where active=False. Uses isinstance
+        check to ensure type safety.
+        """
+        initial_count = len(self.game_objects)
+        self.game_objects = [
+            obj
+            for obj in self.game_objects
+            if isinstance(obj, GameObject) and obj.active
+        ]
+        removed_count = initial_count - len(self.game_objects)
+
+        if removed_count > 0:
+            pass  # Cleanup logging deferred until v1.0.0

@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 10-30-2025 (v0.0.9 - Bug fixes)
 License: MIT
 
 Features:
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from .view import GameView
     from .entities.starship import Starship
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.9"
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ class GameController:
         _render: Render game display
     """
 
-    def __init__(self, model: 'GameModel'):
+    def __init__(self, model: "GameModel"):
         """
         Initialize the game controller.
 
@@ -89,7 +89,7 @@ class GameController:
             model: Game model reference
         """
         self.model = model
-        self.view: Optional['GameView'] = None
+        self.view: Optional["GameView"] = None
 
         # Initialize game state management
         self.state_manager = GameStateManager()
@@ -99,7 +99,7 @@ class GameController:
         self.running = False
         self.clock = pygame.time.Clock()
 
-    def set_view(self, view: 'GameView') -> None:
+    def set_view(self, view: "GameView") -> None:
         """
         Set the view reference.
 
@@ -137,11 +137,10 @@ class GameController:
         elif self.view:
             # Update view with new state
             self.view.render_sector_map(
-                self.model.current_sector,
-                self.model.game_objects
+                self.model.current_sector, self.model.game_objects
             )
 
-    def handle_combat_action(self, target: 'Starship', weapon_type: str) -> None:
+    def handle_combat_action(self, target: "Starship", weapon_type: str) -> None:
         """
         Handle combat action request.
 
@@ -153,9 +152,7 @@ class GameController:
             return
 
         # Resolve combat through model
-        result = self.model.resolve_combat(
-            self.model.player_ship, target, weapon_type
-        )
+        result = self.model.resolve_combat(self.model.player_ship, target, weapon_type)
 
         # Display result through view
         if self.view:
@@ -172,8 +169,7 @@ class GameController:
         # Update view if available
         if self.view:
             self.view.render_sector_map(
-                self.model.current_sector,
-                self.model.game_objects
+                self.model.current_sector, self.model.game_objects
             )
 
     def save_game(self, filepath: str) -> bool:
@@ -203,8 +199,7 @@ class GameController:
         # Update view if load was successful
         if success and self.view:
             self.view.render_sector_map(
-                self.model.current_sector,
-                self.model.game_objects
+                self.model.current_sector, self.model.game_objects
             )
 
         return success
@@ -215,35 +210,9 @@ class GameController:
         sector_state = SectorState(self.state_manager)
         self.state_manager.register_state(GameMode.SECTOR_MAP, sector_state)
 
-    def _game_loop(self) -> None:
-        """Main game loop."""
-        while self.running:
-            # Calculate delta time
-            dt = self.clock.tick(60) / 1000.0  # Convert to seconds
-
-            # Process events
-            self._handle_events()
-
-            # Update game logic
-            self._update(dt)
-
-            # Render display
-            self._render()
-
-    def _handle_events(self) -> None:
-        """Process pygame-ce events."""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and self.view:
-                # Handle mouse clicks for grid selection
-                self._handle_mouse_click(event.pos)
-            elif event.type == pygame.KEYDOWN:
-                # Handle keyboard input
-                self._handle_keypress(event.key)
-            else:
-                # Pass events to current state
-                self.state_manager.handle_input(event)
+    # Note: _game_loop() and _handle_events() removed
+    # Events are now handled exclusively through Qt widgets (GameDisplay)
+    # Qt events are forwarded to _handle_mouse_click() and _handle_keypress()
 
     def _handle_mouse_click(self, mouse_pos: tuple[int, int]) -> None:
         """
@@ -259,15 +228,21 @@ class GameController:
 
         # Convert screen coordinates to grid position
         grid_pos = self.view.grid_renderer.screen_to_world(
-            mouse_pos,
-            self.view.current_z_level
+            mouse_pos, self.view.current_z_level
         )
 
         logger.info(f"Converted to grid position: {grid_pos}")
 
-        # Validate grid position
+        # Validate grid position is within renderer bounds
         if not self.view.grid_renderer.is_in_bounds(grid_pos):
-            logger.warning(f"Grid position {grid_pos} is out of bounds")
+            logger.warning(f"Grid position {grid_pos} is out of renderer bounds")
+            return
+
+        # Additional validation: check if position is within sector map bounds
+        if self.model.current_sector and not self.model.current_sector.is_in_bounds(
+            grid_pos
+        ):
+            logger.warning(f"Grid position {grid_pos} is out of sector bounds")
             return
 
         # Update view selection
@@ -290,17 +265,22 @@ class GameController:
 
         logger.info(f"Processing key press: {key}")
 
-        # Z-level controls
+        # Z-level controls (validation is centralized in set_z_level)
         if key == pygame.K_PAGEUP:
-            new_z = self.view.current_z_level + 1
-            if new_z < self.view.grid_renderer.max_z_levels:
-                logger.info(f"Changing z-level from {self.view.current_z_level} to {new_z}")
-                self.view.set_z_level(new_z)
+            self.view.set_z_level(self.view.current_z_level + 1)
         elif key == pygame.K_PAGEDOWN:
-            new_z = self.view.current_z_level - 1
-            if new_z >= 0:
-                logger.info(f"Changing z-level from {self.view.current_z_level} to {new_z}")
-                self.view.set_z_level(new_z)
+            self.view.set_z_level(self.view.current_z_level - 1)
+
+        # Zoom controls
+        elif key in (pygame.K_PLUS, pygame.K_EQUALS):
+            logger.info("Zooming in")
+            self.view.grid_renderer.zoom_in()
+        elif key == pygame.K_MINUS:
+            logger.info("Zooming out")
+            self.view.grid_renderer.zoom_out()
+        elif key == pygame.K_0:
+            logger.info("Resetting zoom")
+            self.view.grid_renderer.reset_zoom()
 
         # Camera panning
         elif key == pygame.K_LEFT:
@@ -340,12 +320,3 @@ class GameController:
         """
         # Update current state
         self.state_manager.update(dt)
-
-    def _render(self) -> None:
-        """Render game display."""
-        if self.view:
-            # Render current state
-            self.state_manager.render(self.view.game_surface)
-
-            # Update display
-            pygame.display.flip()

@@ -55,8 +55,7 @@ from typing import Final
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 # Add src directory to Python path for imports
@@ -64,7 +63,7 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from src.game.application import StarTrekRetroRemake
 
-__version__: Final[str] = "0.0.2"
+__version__: Final[str] = "0.0.10"
 
 
 def main() -> None:

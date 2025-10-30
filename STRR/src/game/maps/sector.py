@@ -30,11 +30,12 @@ Functions:
     - None
 """
 
+import random
 from typing import Final, Optional, Tuple, List, Dict
 
 from ..entities.base import GridPosition
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.2"
 
 
 class SectorMap:
@@ -64,24 +65,32 @@ class SectorMap:
         _initialize_sector: Set up sector based on type
     """
 
-    def __init__(self, coordinates: Tuple[int, int], sector_type: str = "standard"):
+    def __init__(
+        self,
+        coordinates: Tuple[int, int],
+        sector_type: str = "standard",
+        random_seed: int | None = None,
+    ):
         """
         Initialize a new sector map.
 
         Args:
             coordinates: Galaxy coordinates of this sector
             sector_type: Type of sector to create
+            random_seed: Optional seed for deterministic random generation (testing)
         """
+        # Store sector identification and configuration
         self.coordinates = coordinates
         self.sector_type = sector_type
-        self.grid_size = (20, 20, 5)  # width, height, depth
+        self.grid_size = (20, 20, 5)  # width, height, depth (3D grid)
+        self.random_seed = random_seed
 
-        # Entity and obstacle tracking
-        self.entities: Dict[Tuple[int, int, int], object] = {}
-        self.obstacles: set[Tuple[int, int, int]] = set()
-        self.environmental_effects: Dict[Tuple[int, int, int], str] = {}
+        # Initialize entity and obstacle tracking structures
+        self.entities: Dict[GridPosition, object] = {}
+        self.obstacles: set[GridPosition] = set()
+        self.environmental_effects: Dict[GridPosition, str] = {}
 
-        # Initialize sector based on type
+        # Generate sector content based on type
         self._initialize_sector()
 
     def is_in_bounds(self, position: GridPosition) -> bool:
@@ -94,9 +103,12 @@ class SectorMap:
         Returns:
             True if position is within bounds, False otherwise
         """
-        return (0 <= position.x < self.grid_size[0] and
-                0 <= position.y < self.grid_size[1] and
-                0 <= position.z < self.grid_size[2])
+        # Validate position against 3D grid boundaries
+        return (
+            0 <= position.x < self.grid_size[0]
+            and 0 <= position.y < self.grid_size[1]
+            and 0 <= position.z < self.grid_size[2]
+        )
 
     def has_obstacle(self, position: GridPosition) -> bool:
         """
@@ -108,7 +120,7 @@ class SectorMap:
         Returns:
             True if position has an obstacle, False otherwise
         """
-        return (position.x, position.y, position.z) in self.obstacles
+        return position in self.obstacles
 
     def place_entity(self, entity: object, position: GridPosition) -> bool:
         """
@@ -121,14 +133,16 @@ class SectorMap:
         Returns:
             True if placement was successful, False otherwise
         """
+        # Validate position is within sector bounds
         if not self.is_in_bounds(position):
             return False
 
+        # Prevent placement on obstacles
         if self.has_obstacle(position):
             return False
 
-        pos_tuple = (position.x, position.y, position.z)
-        self.entities[pos_tuple] = entity
+        # Register entity at position
+        self.entities[position] = entity
         return True
 
     def remove_entity(self, position: GridPosition) -> Optional[object]:
@@ -141,8 +155,7 @@ class SectorMap:
         Returns:
             Removed entity or None if no entity was present
         """
-        pos_tuple = (position.x, position.y, position.z)
-        return self.entities.pop(pos_tuple, None)
+        return self.entities.pop(position, None)
 
     def get_entity_at(self, position: GridPosition) -> Optional[object]:
         """
@@ -154,8 +167,7 @@ class SectorMap:
         Returns:
             Entity at position or None if empty
         """
-        pos_tuple = (position.x, position.y, position.z)
-        return self.entities.get(pos_tuple)
+        return self.entities.get(position)
 
     def add_obstacle(self, position: GridPosition) -> bool:
         """
@@ -170,8 +182,45 @@ class SectorMap:
         if not self.is_in_bounds(position):
             return False
 
-        pos_tuple = (position.x, position.y, position.z)
-        self.obstacles.add(pos_tuple)
+        self.obstacles.add(position)
+        return True
+
+    def move_entity(self, old_pos: GridPosition, new_pos: GridPosition) -> bool:
+        """
+        Move an entity from old position to new position.
+
+        Updates the entities dictionary to reflect the new position and
+        synchronizes the entity's position attribute if present.
+
+        Args:
+            old_pos: Current position of the entity
+            new_pos: Target position for the entity
+
+        Returns:
+            True if move was successful, False otherwise
+        """
+        # Validate target position is within sector bounds
+        if not self.is_in_bounds(new_pos):
+            return False
+
+        # Retrieve entity from current position
+        entity = self.entities.pop(old_pos, None)
+        if entity is None:
+            return False
+
+        # Verify target position is not blocked by obstacle
+        if self.has_obstacle(new_pos):
+            # Rollback: restore entity at original position
+            self.entities[old_pos] = entity
+            return False
+
+        # Complete move: register entity at new position
+        self.entities[new_pos] = entity
+
+        # Synchronize entity's internal position state to prevent desync
+        if hasattr(entity, "position"):
+            entity.position = new_pos
+
         return True
 
     def get_all_entities(self) -> List[Tuple[GridPosition, object]]:
@@ -181,27 +230,28 @@ class SectorMap:
         Returns:
             List of (position, entity) tuples
         """
-        entities = []
-        for pos_tuple, entity in self.entities.items():
-            position = GridPosition(pos_tuple[0], pos_tuple[1], pos_tuple[2])
-            entities.append((position, entity))
-        return entities
+        return list(self.entities.items())
 
     def _initialize_sector(self) -> None:
         """Set up sector based on type."""
-        # Add some default obstacles based on sector type
+        # Initialize RNG with optional seed for deterministic generation
+        rng = (
+            random.Random(self.random_seed) if self.random_seed is not None else random
+        )
+
+        # Generate sector content based on sector type
         if self.sector_type == "asteroid_field":
-            # Add random asteroids
-            import random
+            # Populate sector with randomly distributed asteroids
             for _ in range(10):
-                x = random.randint(0, self.grid_size[0] - 1)
-                y = random.randint(0, self.grid_size[1] - 1)
-                z = random.randint(0, self.grid_size[2] - 1)
+                x = rng.randint(0, self.grid_size[0] - 1)
+                y = rng.randint(0, self.grid_size[1] - 1)
+                z = rng.randint(0, self.grid_size[2] - 1)
                 self.add_obstacle(GridPosition(x, y, z))
 
         elif self.sector_type == "nebula":
-            # Add nebula effects
+            # Create nebula effect zone in central region
             for x in range(5, 15):
                 for y in range(5, 15):
                     for z in range(1, 4):
-                        self.environmental_effects[(x, y, z)] = "nebula"
+                        pos = GridPosition(x, y, z)
+                        self.environmental_effects[pos] = "nebula"
