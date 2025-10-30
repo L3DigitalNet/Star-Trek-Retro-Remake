@@ -5,25 +5,42 @@ mode: "agent"
 
 # Comprehensive Code Review
 
-Perform a complete code review of ${file} or project following repository guidelines.
+Perform a complete code review of the project following repository guidelines.
 
 ## General Guidelines
+
 - **MANDATORY**: Do not change any code logic or implementation, only suggest improvements
-- **MANDATORY**: Follow all repository guidelines in [copilot-instructions.md](../copilot-instructions.md)
+- **MANDATORY**: Follow all repository guidelines in ![copilot-instructions.md](../.github/copilot-instructions.md)
+- **MANDATORY**: Code and design should reflect the project's overall design goals in ![DESIGN.md](../.github/DESIGN.md):
 
 ## CRITICAL: Linux Environment Only
+
 - **IMPORTANT**: This repository is designed for **Linux environments ONLY**
 
 ## Core Standards
+
 - **Python 3.14+ REQUIRED**: Minimum version with latest language features
 - **Type hints MANDATORY**: ALL functions, methods, variables, constants, data structures, collections
-- **Standard library FIRST**: Use Python stdlib before ANY external dependencies - justify external deps with comments
 - **PEP 8 compliance**: Strict formatting and style requirements
 - **File headers**: Full docstring format with shebang, encoding, and complete metadata
 - **Streamlined docstrings**: Brief descriptions, 80-char limit, leverage type hints
-- **DRY principle**: Eliminate ALL duplication, use [common_lib](../../projects/common_lib/) for shared utilities
+
+## Architecture
+
+**Pattern:** Hybrid State Machine + Game Object + Component + MVC
+- **NOT full ECS** - Use Game Object with Component composition (simpler for turn-based games)
+- **pygame-ce** for rendering (game view) - Community Edition with Python 3.14+ support
+- **PySide6** for UI (menus, dialogs, settings)
+- **MVC separation** - Game logic independent of UI/rendering
+- **Object pooling** for projectiles, effects, temporary entities
+
+## Tooling
+
+- **GUI Design:** Qt Designer for all UI layouts
+- **Testing:** pytest framework for unit and integration tests
 
 ## Clean & Confident Design (Highest Priority)
+
 - **PREFER confident, clean code** over defensive programming patterns
 - **AVOID unnecessary null/None checks** when program flow guarantees valid values
 - **PREFER explicit initialization** and clear program flow over defensive conditionals
@@ -33,11 +50,11 @@ Perform a complete code review of ${file} or project following repository guidel
 - **Linear flow**: Confident execution paths with proper initialization order
 
 ## Version-Aware Approach
+
 - **BEFORE v1.0.0 (current)**: Focus on core functionality and clean architecture
 - **DEFER comprehensive error handling** until v1.0.0 - use architectural solutions instead
 - **NEVER** use bare `except:` statements in any version
 
-## Domain Guidelines
-Apply domain-specific patterns from [instructions/](../instructions/) if this is a CLI tool, desktop app, game, or library.
+## Summary of Changes and Recommendations
 
-Provide a summary of changes made and recommendations for further improvement.
+After completing the code review, please provide a summary of the changes made and any recommendations for further improvement.

@@ -1,14 +1,14 @@
 # Configuration Manager Documentation
 
 **File:** `STRR/src/engine/config_manager.py`
-**Version:** 0.0.1
+**Version:** 0.0.11
 **Last Updated:** 10-30-2025
 
 ---
 
 ## Purpose
 
-Manages loading and saving of configuration files. Supports **TOML** (primary) and **JSON** (fallback) formats. Provides centralized configuration access throughout the game.
+Manages loading and saving of configuration files using **TOML** format. Provides centralized configuration access throughout the game with type-safe operations and caching.
 
 ---
 
@@ -20,9 +20,8 @@ Manages loading and saving of configuration files. Supports **TOML** (primary) a
 
 **Key Methods:**
 
-- `load_config(filename, use_cache=True) -> dict`: Load TOML/JSON config
+- `load_config(filename, use_cache=True) -> dict`: Load TOML config
 - `save_config(filename, data)`: Save config as TOML
-- `migrate_json_to_toml(filename, remove_json=False) -> bool`: Convert JSON to TOML
 - `get_config_value(filename, key_path, default=None)`: Get nested value using dot notation
 - `set_config_value(filename, key_path, value)`: Set nested value
 - `clear_cache()`: Clear cached configs
@@ -68,15 +67,12 @@ Convenience functions for global configuration access:
 
 ## Format Support
 
-**TOML (Primary):**
+**TOML:**
 
-- Uses Python 3.14+ `tomllib` for reading
+- Uses Python 3.14+ `tomllib` for reading (standard library)
 - Uses `tomli_w` for writing
-
-**JSON (Fallback):**
-
-- Supports legacy JSON configs
-- Can migrate to TOML format
+- Human-readable format with comments
+- Type-safe data structures
 
 ---
 
@@ -86,7 +82,6 @@ Convenience functions for global configuration access:
 
 - `tomllib` (stdlib) - TOML reading
 - `tomli_w` - TOML writing
-- `json` (stdlib) - JSON support
 
 **Used by:**
 
@@ -97,5 +92,6 @@ Convenience functions for global configuration access:
 
 ## Change History
 
+- **10-30-2025** - v0.0.11: Removed JSON fallback support, TOML-only configuration
 - **10-30-2025** - Documentation created
 - **10-29-2025** - Configuration manager implemented

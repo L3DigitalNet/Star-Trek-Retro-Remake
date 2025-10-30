@@ -271,11 +271,17 @@ class EntityPool:
 
 ### Python Standards
 
+#### Environment Requirements
+
+- **Linux-Only**: All code targets Linux exclusively
+- **Python 3.14+**: Use latest language features (Path.copy(), match statements, etc.)
+- **No Windows Support**: No Windows-specific code or cross-platform abstractions
+
 #### Code Style
 
 - **PEP 8 Compliance**: Strict adherence to Python style guidelines
-- **Type Hints**: Comprehensive typing for all functions and variables
-- **Modern Syntax**: Python 3.14+ features (Path.copy(), match statements, etc.)
+- **Type Hints**: Comprehensive typing for all functions, variables, constants, collections
+- **Modern Syntax**: Python 3.14+ features (str | None, list[str], dict[str, int], Final, Protocol, TypedDict)
 - **F-strings Only**: No .format() or % string formatting
 
 #### Function Design
@@ -304,10 +310,36 @@ def calculate_weapon_damage(
 
 #### Documentation Standards
 
-- **Module Headers**: Comprehensive file documentation
-- **Class Documentation**: Purpose, attributes, methods
-- **Function Documentation**: Parameters, returns, examples
-- **Inline Comments**: Explain complex logic and design decisions
+**File Header Format:**
+
+- All Python files must have proper headers with shebang and encoding
+- Complete docstring format (see DOCUMENTATION_STANDARDS.md)
+- Header content must reflect current implementation
+- Update "Date Changed" when modified
+
+**Docstring Format:**
+
+- Follow repository's specified format
+- **Do not specify types in docstrings** - rely on type hints instead
+- Docstring content must reflect current code state
+
+**Inline Documentation:**
+
+- Inline comments for each significant code block
+- Comments at the top of code blocks, briefly explaining purpose
+- Document complex logic, Linux-specific implementations, and design decisions
+
+**Per-File Documentation:**
+
+- Every `.py` file in `STRR/` has matching `_doc.md` file in same directory
+- Comprehensive module documentation (purpose, architecture, usage, examples)
+- See `/docs/DOCUMENTATION_STANDARDS.md` for template and guidelines
+
+**Linux-Only Focus:**
+
+- All documentation must reflect Linux-only compatibility
+- No Windows references - use Linux paths, commands, and system requirements only
+- Python 3.14+ required - document latest language features
 
 ### File Organization
 

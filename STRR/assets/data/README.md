@@ -11,12 +11,12 @@ This directory contains game data files and configurations.
 
 ## Data Format
 
-All data files use JSON format for easy editing and version control.
-Files should maintain proper JSON syntax and structure.
+All data files use TOML format for easy editing and version control.
+Files should maintain proper TOML syntax and structure.
 
 ## Content Guidelines
 
 - Keep file sizes reasonable for performance
 - Use descriptive naming conventions
 - Maintain consistency with game data schema
-- Test all data files for valid JSON syntax
+- Test all data files for valid TOML syntax

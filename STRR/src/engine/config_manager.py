@@ -4,23 +4,23 @@
 Star Trek Retro Remake - Configuration Manager
 
 Description:
-    Utility module for loading and saving TOML configuration files with
-    fallback support for JSON files during migration. Provides a clean
-    interface for configuration management throughout the game.
+    Utility module for loading and saving TOML configuration files.
+    Provides a clean interface for configuration management throughout
+    the game with type-safe operations and caching support.
 
 Author: Star Trek Retro Remake Development Team
 Email: team@startrekretroremake.dev
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
-License: Open Source
+Date Changed: 10-30-2025 (v0.0.11 - Import fixes)
+License: MIT
 
 Features:
     - TOML configuration loading with Python 3.14+ stdlib
-    - JSON fallback support for migration compatibility
     - Type-safe configuration access with type hints
     - Configuration validation and error handling
-    - Automatic file format detection and conversion
+    - Configuration caching for performance
+    - Dot notation for nested value access
 
 Requirements:
     - Python 3.14+ for tomllib in standard library
@@ -28,15 +28,16 @@ Requirements:
 
 Classes:
     - ConfigManager: Main configuration loading/saving interface
-    - ConfigurationError: Custom exception for config-related errors
 
 Functions:
-    - load_config(): Load configuration from TOML or JSON
+    - load_config(): Load configuration from TOML
     - save_config(): Save configuration to TOML format
-    - migrate_json_to_toml(): Convert JSON config files to TOML
+    - get_config_value(): Get configuration value using dot notation
+    - set_config_value(): Set configuration value using dot notation
 """
 
-import json
+__version__: Final[str] = "0.0.11"
+
 import tomllib
 from pathlib import Path
 from typing import Any, Dict, Union, Optional
@@ -48,7 +49,7 @@ except ImportError:
     # Fallback for development - will need tomli_w for production
     tomli_w = None
 
-from ..game.exceptions import ConfigurationError
+from src.game.exceptions import ConfigurationError
 
 
 class ConfigManager:
@@ -66,7 +67,7 @@ class ConfigManager:
 
     def load_config(self, filename: str, use_cache: bool = True) -> Dict[str, Any]:
         """
-        Load configuration from TOML file with JSON fallback.
+        Load configuration from TOML file.
 
         Args:
             filename: Configuration filename (without extension)
@@ -81,35 +82,19 @@ class ConfigManager:
         if use_cache and filename in self.config_cache:
             return self.config_cache[filename]
 
-        # Try TOML first
         toml_path = self.config_dir / f"{filename}.toml"
-        if toml_path.exists():
-            try:
-                config_data = self._load_toml(toml_path)
-                if use_cache:
-                    self.config_cache[filename] = config_data
-                return config_data
-            except Exception as e:
-                raise ConfigurationError(
-                    f"Failed to load TOML config '{toml_path}': {e}"
-                ) from e
+        if not toml_path.exists():
+            raise ConfigurationError(f"Configuration file not found: {toml_path}")
 
-        # Fallback to JSON
-        json_path = self.config_dir / f"{filename}.json"
-        if json_path.exists():
-            try:
-                config_data = self._load_json(json_path)
-                if use_cache:
-                    self.config_cache[filename] = config_data
-                return config_data
-            except Exception as e:
-                raise ConfigurationError(
-                    f"Failed to load JSON config '{json_path}': {e}"
-                ) from e
-
-        raise ConfigurationError(
-            f"Configuration file not found: {filename}.toml or {filename}.json"
-        )
+        try:
+            config_data = self._load_toml(toml_path)
+            if use_cache:
+                self.config_cache[filename] = config_data
+            return config_data
+        except Exception as e:
+            raise ConfigurationError(
+                f"Failed to load TOML config '{toml_path}': {e}"
+            ) from e
 
     def save_config(self, filename: str, config_data: Dict[str, Any]) -> None:
         """
@@ -123,9 +108,7 @@ class ConfigManager:
             ConfigurationError: If configuration cannot be saved
         """
         if tomli_w is None:
-            raise ConfigurationError(
-                "tomli_w not available - cannot save TOML files"
-            )
+            raise ConfigurationError("tomli_w not available - cannot save TOML files")
 
         toml_path = self.config_dir / f"{filename}.toml"
 
@@ -134,7 +117,7 @@ class ConfigManager:
             toml_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Write TOML file
-            with open(toml_path, 'wb') as f:
+            with open(toml_path, "wb") as f:
                 tomli_w.dump(config_data, f)
 
             # Update cache
@@ -145,50 +128,13 @@ class ConfigManager:
                 f"Failed to save TOML config '{toml_path}': {e}"
             ) from e
 
-    def migrate_json_to_toml(self, filename: str,
-                           remove_json: bool = False) -> bool:
-        """
-        Migrate JSON configuration file to TOML format.
-
-        Args:
-            filename: Configuration filename (without extension)
-            remove_json: Whether to remove original JSON file after migration
-
-        Returns:
-            True if migration was successful, False if no JSON file exists
-
-        Raises:
-            ConfigurationError: If migration fails
-        """
-        json_path = self.config_dir / f"{filename}.json"
-
-        if not json_path.exists():
-            return False
-
-        try:
-            # Load JSON data
-            config_data = self._load_json(json_path)
-
-            # Save as TOML
-            self.save_config(filename, config_data)
-
-            # Optionally remove JSON file
-            if remove_json:
-                json_path.unlink()
-
-            return True
-
-        except Exception as e:
-            raise ConfigurationError(
-                f"Failed to migrate '{filename}' from JSON to TOML: {e}"
-            ) from e
-
     def clear_cache(self) -> None:
         """Clear configuration cache."""
         self.config_cache.clear()
 
-    def get_config_value(self, filename: str, key_path: str,
-                        default: Any = None) -> Any:
+    def get_config_value(
+        self, filename: str, key_path: str, default: Any = None
+    ) -> Any:
         """
         Get specific configuration value using dot notation.
 
@@ -204,7 +150,7 @@ class ConfigManager:
 
         # Navigate nested dictionary using dot notation
         current = config
-        for key in key_path.split('.'):
+        for key in key_path.split("."):
             if isinstance(current, dict) and key in current:
                 current = current[key]
             else:
@@ -225,7 +171,7 @@ class ConfigManager:
 
         # Navigate to parent dictionary
         current = config
-        keys = key_path.split('.')
+        keys = key_path.split(".")
         for key in keys[:-1]:
             if key not in current:
                 current[key] = {}
@@ -239,13 +185,8 @@ class ConfigManager:
 
     def _load_toml(self, file_path: Path) -> Dict[str, Any]:
         """Load TOML file using Python 3.14+ stdlib."""
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             return tomllib.load(f)
-
-    def _load_json(self, file_path: Path) -> Dict[str, Any]:
-        """Load JSON file."""
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
 
 
 # Convenience functions for global configuration access

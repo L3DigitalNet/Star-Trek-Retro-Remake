@@ -1,6 +1,6 @@
 # Documentation Standards
 
-**Version:** 0.0.2
+**Version:** 0.0.3
 **Last Updated:** 10-30-2025
 **Status:** Active Policy
 
@@ -10,7 +10,63 @@
 
 This document defines the documentation standards for the Star Trek Retro Remake project, establishing clear rules for where documentation should be located and what it should contain.
 
+## CRITICAL: Linux Environment Only
+
+- **MANDATORY**: All documentation must reflect **Linux-only compatibility**
+- **NO Windows references** - document Linux paths, commands, system requirements only
+- **Python 3.14+ REQUIRED**: Document latest language features and requirements
+- Use forward slashes for paths, Linux-specific commands, and Linux environment assumptions
+
 ---
+
+## General Documentation Guidelines
+
+### File Header Format Compliance
+
+**All Python files must have proper headers following repository standards:**
+
+- Include shebang: `#!/usr/bin/env python3`
+- Include encoding: `# -*- coding: utf-8 -*-`
+- Complete docstring format with:
+  - Description (what the module does and why)
+  - Author (full name or team name)
+  - Email (contact email)
+  - GitHub (repository URL)
+  - Date Created (MM-DD-YYYY)
+  - Date Changed (MM-DD-YYYY - update when modified)
+  - License (license type)
+  - Features (key features as bullet list)
+  - Requirements (dependencies and environment)
+  - Known Issues (current limitations)
+  - Planned Features (future enhancements)
+  - Classes (brief class descriptions)
+  - Functions (brief function descriptions)
+- Header content must reflect current code implementation
+- Update "Date Changed" to current date when modified
+
+### Docstring Format Compliance
+
+- All docstrings follow the repository's specified format (see copilot-instructions.md)
+- **Do not specify types in docstrings** - rely on type hints instead
+- Docstring content must reflect current code state
+- Use consistent formatting throughout the project
+
+### Inline Documentation Standards
+
+- Inline comments for each significant code block for readability and AI autocompletion context
+- Comments at the top of code blocks, briefly explaining purpose (preferably one line)
+- Add/update inline comments for:
+  - Complex logic
+  - Linux-specific implementations
+  - Important design decisions
+  - Non-obvious behavior
+
+### Minimal .md File Creation Policy
+
+- **IMPORTANT**: Only create/update README.md, PROJECT-DOC.md, CHANGELOG.md as needed
+- Exception: auto-generated API docs in library folders (common_lib/docs/)
+- Per-file `_doc.md` files required for all `.py` files in `STRR/` directory
+- Avoid creating unnecessary documentation files
 
 ## Documentation Structure
 
@@ -320,4 +376,10 @@ A: Stick with Markdown (`.md`) for consistency. All project documentation uses M
 
 ## Revision History
 
+- **0.0.3** (10-30-2025) - Added comprehensive documentation guidelines:
+  - Linux-only environment requirements
+  - File header format compliance standards
+  - Docstring format compliance (no types in docstrings)
+  - Inline documentation standards
+  - Minimal .md file creation policy
 - **0.0.2** (10-30-2025) - Initial documentation standards established

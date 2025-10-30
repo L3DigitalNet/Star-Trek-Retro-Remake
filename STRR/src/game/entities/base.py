@@ -34,12 +34,12 @@ Functions:
 
 import uuid
 from dataclasses import dataclass
-from typing import Final, Optional
+from typing import Final
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.10"
 
 
-@dataclass
+@dataclass(frozen=True)
 class GridPosition:
     """
     3D grid position with z-level support.
@@ -47,16 +47,19 @@ class GridPosition:
     Represents a position in the game's 3D grid system where x and y are
     the horizontal coordinates and z represents the vertical level.
 
+    Immutable (frozen) for use as dictionary keys and in sets.
+
     Attributes:
         x: Horizontal x-coordinate
         y: Horizontal y-coordinate
         z: Vertical z-level (default 0)
     """
+
     x: int
     y: int
     z: int = 0
 
-    def distance_to(self, other: 'GridPosition') -> float:
+    def distance_to(self, other: "GridPosition") -> float:
         """
         Calculate 3D distance to another position.
 
@@ -69,7 +72,15 @@ class GridPosition:
         dx = self.x - other.x
         dy = self.y - other.y
         dz = self.z - other.z
-        return (dx*dx + dy*dy + dz*dz) ** 0.5
+        return (dx * dx + dy * dy + dz * dz) ** 0.5
+
+    def __add__(self, other: "GridPosition") -> "GridPosition":
+        """Add two grid positions component-wise."""
+        return GridPosition(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other: "GridPosition") -> "GridPosition":
+        """Subtract two grid positions component-wise."""
+        return GridPosition(self.x - other.x, self.y - other.y, self.z - other.z)
 
 
 class GameObject:
@@ -106,7 +117,7 @@ class GameObject:
         self.position = position
         self.name = name
         self.active = True
-        self.faction: Optional[str] = None
+        self.faction: str | None = None
 
     def update(self, dt: float) -> None:
         """

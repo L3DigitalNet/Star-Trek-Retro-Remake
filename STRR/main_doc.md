@@ -1,7 +1,7 @@
 # Main Entry Point Documentation
 
 **File:** `STRR/main.py`
-**Version:** 0.0.2
+**Version:** 0.0.10
 **Last Updated:** 10-30-2025
 
 ---
@@ -179,7 +179,7 @@ def main() -> None:
 ### Environment Requirements
 
 - **Python:** 3.14+ (uses modern type hints and stdlib features)
-- **Platform:** Linux (primary target)
+- **Platform:** Linux only (not compatible with Windows or macOS)
 - **Dependencies:** pygame-ce (Community Edition), PySide6 (installed in virtual environment)
 
 ### Path Structure
@@ -361,5 +361,6 @@ Then users can run: `strr` instead of `python main.py`
 
 ## Change History
 
+- **10-30-2025** - Updated documentation to version 0.0.10, clarified Linux-only compatibility, enhanced inline comments
 - **10-30-2025** - Initial documentation created
 - **10-29-2025** - File created with basic entry point implementation

@@ -7,7 +7,7 @@ description: "Arrange classes, functions, and methods in a logical order followi
 
 For the given ${file}, rearrange the classes, functions, and methods to follow a logical structure.
 
-Follow guidelines in [repository instructions](../copilot-instructions.md) if not specified below.
+Follow guidelines in ![repository instructions](../copilot-instructions.md) if not specified below.
 
 ## General Guidelines
 - **MANDATORY**: Do not change any code logic or implementation

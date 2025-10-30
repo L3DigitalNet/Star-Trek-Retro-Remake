@@ -5,7 +5,7 @@ mode: "agent"
 
 # Create or Update Project Documentation
 
-Handle all documentation tasks for ${file} or project.
+Handle all documentation tasks for the project.
 
 ## Basic Process Flow
 1. Analyze the current code in the file or project
@@ -46,7 +46,37 @@ Ensure all files have proper headers following repository standards with shebang
 - **IMPORTANT**: Only create/update README.md, PROJECT-DOC.md, CHANGELOG.md as needed. The exception is for auto-generated API docs in library folders (common_lib/docs/).
 
 ## Project Documentation
-- **README.md**: Create or update comprehensive README.md with project directory structure, installation, usage, examples for Linux.
-- **PROJECT-DOC.md**: Ensure PROJECT-DOC.md reflects architecture, design patterns, and Linux-specific considerations.
+
+### General Documentation Files
+
+- **README.md**: Create or update comprehensive README.md with project directory structure, installation, usage, etc.
 - **CHANGELOG.md**: Maintain CHANGELOG.md with version history, changes, and Linux-specific notes.
-- Follow [repository guidelines](../copilot-instructions.md) for documentation standards.
+
+### Project Documentation (Big Picture) -> Star-Trek-Retro-Remake/docs/*.md
+
+Create or update the following documentation files in the `docs/` directory:
+
+- **ARCHITECTURE.md**: Detailed architecture document covering system design, patterns used, and module interactions.
+- **CALL_CHAIN_FLOW.md**: Contains visual flow charts showing how the game's components interact, where to implement specific features, and the execution flow from startup to gameplay.
+- **DOCUMENTATION_STANDARDS.md**: This document defines the documentation standards for the Star Trek Retro Remake project, establishing clear rules for where documentation should be located and what it should contain.
+- **ARCHITECTURE.md**: Detailed architecture document covering system design, patterns used, and module interactions.
+- **PYTHON_FILE_REFERENCE.md**: This document provides a clear reference for the purpose of each Python file in the Star Trek Retro Remake project and indicates where to add specific types of code.
+- **VERSIONING_GUIDELINES.md**: This document outlines the simplified versioning approach for the Python repository. The new system uses a clean MAJOR.MINOR.PATCH format without development stage extensions and integrates with the `/version-update` prompt command for automated version management.
+- **QTDESIGNER_WORKFLOW.md**: The Star Trek Retro Remake project uses Qt Designer for UI design and PySide6 for runtime UI management. This document describes the workflow for designing, compiling, and using UI files.
+
+### Component Documentation (File-Level) -> Star-Trek-Retro-Remake/STRR/
+
+- Create or update `_doc.md` files for each *.py file in the STRR/ directory (recursively).
+- Each `_doc.md` file should provide comprehensive documentation for its corresponding Python module, including purpose, architecture, usage examples, and integration points.
+
+### Testing Documentation
+
+- It is not necessary to create separate documentation files for test modules.
+- If there are existing test documentation files they should be relocated to the /tests/ directory.
+
+### Other Documentation
+
+- Create or update one README.md file for each of the following directories:
+ - /backup/ and subdirectories
+ - /scripts/ and subdirectories
+- This README.md should describe the purpose of each file in the respective directory, its purpose, and relation to the overall project.

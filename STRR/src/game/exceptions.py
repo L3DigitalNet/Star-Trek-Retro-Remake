@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 10-30-2025 (v0.0.11 - Type hint fixes)
 License: MIT
 
 Features:
@@ -38,7 +38,7 @@ Functions:
 
 from typing import Final, Optional
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.11"
 
 
 class GameError(Exception):
@@ -70,7 +70,9 @@ class InvalidMoveError(GameError):
     an invalid position (out of bounds, blocked, etc.).
     """
 
-    def __init__(self, message: str = "Invalid move attempt", **kwargs):
+    def __init__(
+        self, message: str = "Invalid move attempt", **kwargs: str | int | float
+    ) -> None:
         """
         Initialize invalid move error.
 
@@ -94,7 +96,7 @@ class InsufficientResourcesError(GameError):
         resource_type: str,
         required: float,
         available: float,
-        message: Optional[str] = None
+        message: Optional[str] = None,
     ):
         """
         Initialize insufficient resources error.
@@ -115,8 +117,8 @@ class InsufficientResourcesError(GameError):
             {
                 "resource_type": resource_type,
                 "required": required,
-                "available": available
-            }
+                "available": available,
+            },
         )
 
 
@@ -149,7 +151,9 @@ class CombatError(GameError):
     invalid conditions (out of range, no valid target, etc.).
     """
 
-    def __init__(self, message: str = "Combat error occurred", **kwargs):
+    def __init__(
+        self, message: str = "Combat error occurred", **kwargs: str | int | float
+    ) -> None:
         """
         Initialize combat error.
 
@@ -172,8 +176,8 @@ class ConfigurationError(GameError):
         self,
         config_name: str,
         message: Optional[str] = None,
-        **kwargs
-    ):
+        **kwargs: str | int | float,
+    ) -> None:
         """
         Initialize configuration error.
 
@@ -200,8 +204,8 @@ class SaveLoadError(GameError):
         operation: str,
         filepath: str,
         message: Optional[str] = None,
-        **kwargs
-    ):
+        **kwargs: str | int | float,
+    ) -> None:
         """
         Initialize save/load error.
 
@@ -214,8 +218,7 @@ class SaveLoadError(GameError):
         if message is None:
             message = f"Failed to {operation} game from '{filepath}'"
         super().__init__(
-            message,
-            {"operation": operation, "filepath": filepath, **kwargs}
+            message, {"operation": operation, "filepath": filepath, **kwargs}
         )
 
 
@@ -227,12 +230,7 @@ class StateTransitionError(GameError):
     game states in an invalid manner.
     """
 
-    def __init__(
-        self,
-        from_state: str,
-        to_state: str,
-        message: Optional[str] = None
-    ):
+    def __init__(self, from_state: str, to_state: str, message: Optional[str] = None):
         """
         Initialize state transition error.
 
@@ -243,10 +241,7 @@ class StateTransitionError(GameError):
         """
         if message is None:
             message = f"Invalid transition from '{from_state}' to '{to_state}'"
-        super().__init__(
-            message,
-            {"from_state": from_state, "to_state": to_state}
-        )
+        super().__init__(message, {"from_state": from_state, "to_state": to_state})
 
 
 class EntityNotFoundError(GameError):

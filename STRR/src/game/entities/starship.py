@@ -32,15 +32,19 @@ Functions:
     - None
 """
 
-from typing import Final, Optional, Dict
+from typing import Final
 
 from .base import GameObject, GridPosition
 from ..components.ship_systems import (
-    ShipSystem, WeaponSystems, ShieldSystems,
-    EngineSystems, SensorSystems, LifeSupportSystems
+    ShipSystem,
+    WeaponSystems,
+    ShieldSystems,
+    EngineSystems,
+    SensorSystems,
+    LifeSupportSystems,
 )
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.10"
 
 
 class Starship(GameObject):
@@ -80,23 +84,23 @@ class Starship(GameObject):
         self.ship_class = ship_class
 
         # Initialize ship systems using component composition
-        self.systems: Dict[str, ShipSystem] = {
-            'weapons': WeaponSystems(),
-            'shields': ShieldSystems(),
-            'engines': EngineSystems(),
-            'sensors': SensorSystems(),
-            'life_support': LifeSupportSystems()
+        self.systems: dict[str, ShipSystem] = {
+            "weapons": WeaponSystems(),
+            "shields": ShieldSystems(),
+            "engines": EngineSystems(),
+            "sensors": SensorSystems(),
+            "life_support": LifeSupportSystems(),
         }
 
         # Ship resources and crew (simplified for initial implementation)
-        self.crew: Optional[object] = None  # Will be implemented later
-        self.resources: Optional[object] = None  # Will be implemented later
+        self.crew: object | None = None  # Will be implemented later
+        self.resources: object | None = None  # Will be implemented later
 
         # Ship state
         self.hull_integrity: float = 100.0
         self.orientation: int = 0  # 0-359 degrees
 
-    def get_system(self, system_name: str) -> Optional[ShipSystem]:
+    def get_system(self, system_name: str) -> ShipSystem | None:
         """
         Get a specific ship system.
 
@@ -117,7 +121,7 @@ class Starship(GameObject):
             damage_type: Type of damage (kinetic, energy, etc.)
         """
         # Shield absorption first
-        shields = self.get_system('shields')
+        shields = self.get_system("shields")
         if shields and shields.active:
             amount = shields.absorb_damage(amount, damage_type)
 

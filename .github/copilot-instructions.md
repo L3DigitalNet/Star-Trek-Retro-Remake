@@ -42,7 +42,15 @@ Turn-based strategy game set in Kirk-era Star Trek universe. Features grid-based
 - Standard library first, justify external dependencies
 
 **Version Strategy:**
-- Format: MAJOR.MINOR.PATCH (start 0.0.1)
+- Format: MAJOR.MINOR.PATCH (currently at v0.0.10)
+- AI can freely increment PATCH by 0.0.1 for any non-trivial changes
+- Must update: `pyproject.toml`, modified file `__version__`, `CHANGELOG.md`, file "Date Changed"
+- Increment rules:
+  - Bug fixes, refactoring, small features: +0.0.1 (PATCH)
+  - New major features or subsystems: +0.1.0 (MINOR) - requires approval
+  - Breaking changes or complete rewrites: +1.0.0 (MAJOR) - requires approval
+- All modified core modules get current version number
+- Supporting modules can stay at lower versions until modified
 - Defer error handling until v1.0.0
 - Focus: clean architecture, core game logic, state transitions
 
@@ -117,9 +125,12 @@ Functions:
 - Use fixtures, parametrize, descriptive names
 
 **Version Management:**
-- Update `docs/CHANGELOG.md` on version changes
-- Update "Date Changed" in file headers
-- Categorize: Added/Changed/Fixed/Removed
+- AI increments version by 0.0.1 for any non-trivial change
+- Update all modified files: `pyproject.toml`, file `__version__`, "Date Changed" header
+- Update `/docs/CHANGELOG.md` with new version entry
+- Categorize changes: Added/Changed/Fixed/Removed
+- Version consistency: All core modules use current project version
+- Supporting/unchanged modules keep their existing version numbers
 
 **Documentation Standard:**
 - Every `.py` file in `STRR/` has a matching `_doc.md` file in the same directory
@@ -127,12 +138,38 @@ Functions:
 - Content: Comprehensive module documentation (purpose, architecture, usage, examples)
 - General/cross-cutting docs go in `/docs/` root folder
 - See `/docs/DOCUMENTATION_STANDARDS.md` for template and guidelines
+- **MANDATORY**: All documentation must reflect **Linux-only compatibility**
+- **NO Windows references** - document Linux paths, commands, system requirements only
+- **Python 3.14+ REQUIRED**: Document latest language features and requirements
+
+**File Header Standards:**
+- All files must have proper headers following repository standards
+- Include shebang (`#!/usr/bin/env python3`) and encoding (`# -*- coding: utf-8 -*-`)
+- Complete docstring format with Description, Author, Email, GitHub, Date Created, Date Changed, License, Features, Requirements, Known Issues, Planned Features, Classes, Functions
+- Header content must reflect current code implementation
+- Update "Date Changed" to current date when modified
+
+**Docstring Format:**
+- All docstrings follow repository's specified format (see file header example above)
+- **Do not specify types in docstrings** - rely on type hints instead
+- Docstring content must reflect current code state
+- Use consistent formatting throughout the project
+
+**Inline Documentation:**
+- Inline comments for each significant code block for readability and AI autocompletion context
+- Comments at the top of code blocks, briefly explaining purpose (preferably one line)
+- Add/update inline comments for complex logic, Linux-specific implementations, and important decisions
+
+**Minimal .md File Creation:**
+- **IMPORTANT**: Only create/update README.md, PROJECT-DOC.md, CHANGELOG.md as needed
+- Exception: auto-generated API docs in library folders (common_lib/docs/)
+- Per-file `_doc.md` files required for all `.py` files in `STRR/` directory
 
 ## AI Code Generation Rules
 
 1. **Dependencies:** Standard library first, justify external dependencies
 2. **Reuse:** Check existing codebase, consolidate duplicates
-3. **Quality:** Complete examples, type hints for ALL elements, proper headers
+3. **Quality:** Complete examples, type hints for ALL elements, proper headers with complete docstrings
 4. **Architecture:** Follow Hybrid State Machine + Game Object + Component + MVC, SOLID principles
 5. **Game Systems:** Ship systems as components (WeaponSystems, ShieldSystems) not full ECS
 6. **State Machine:** Use specific modes (GALAXY_MAP, SECTOR_MAP, COMBAT) not generic states
@@ -141,13 +178,15 @@ Functions:
 9. **Framework Separation:** pygame-ce rendering separate from PySide6 UI
 10. **Confident Design:** Architectural solutions over defensive checks
 11. **Version Aware:** Defer error handling until v1.0.0
-12. **Documentation:** Every `.py` file has matching `_doc.md` in same directory
+12. **Documentation:** Every `.py` file has matching `_doc.md` in same directory with comprehensive module docs
 13. **Testing:** pytest for business logic, AAA pattern
-14. **Versioning:** Update CHANGELOG.md on changes
-15. **Comments:** Inline for significant blocks
-16. **Type Safety:** Runtime matches annotations
+14. **Versioning:** Increment by 0.0.1 for changes, update pyproject.toml, __version__, Date Changed, CHANGELOG.md
+15. **Comments:** Inline for significant blocks, explain complex logic and design decisions
+16. **Type Safety:** Runtime matches annotations, no types in docstrings (use type hints)
 17. **Separation:** Clear component boundaries
 18. **Pooling:** Reuse projectiles, effects, temporary objects
+19. **Linux-Only:** All code, docs, and examples must target Linux exclusively
+20. **Header Compliance:** All files have proper shebang, encoding, and complete docstring headers
 
 ## Decision Framework
 
