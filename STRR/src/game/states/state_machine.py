@@ -38,7 +38,7 @@ from enum import Enum
 from typing import Final, Optional, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import pygame
+    import pygame_ce as pygame
 
 __version__: Final[str] = "0.0.1"
 

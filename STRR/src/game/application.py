@@ -21,14 +21,14 @@ Features:
     - Hybrid State Machine + Game Object + Component architecture for Star Trek game objects
     - Object pooling for efficient memory management
     - Separated game logic from rendering for testability using MVC pattern
-    - PyGame for game engine, PySide6 for UI/menus
+    - pygame-ce for game engine, PySide6 for UI/menus
     - Standard library first approach
     - Clean confident design patterns
 
 Requirements:
     - Linux environment
     - Python 3.14+ for latest language features
-    - PyGame for game engine functionality
+    - pygame-ce (Community Edition) for game engine functionality
     - PySide6 for UI, menus, and settings
 
 Classes:
@@ -41,7 +41,7 @@ Functions:
 import sys
 from typing import Final
 
-import pygame
+import pygame_ce as pygame
 from PySide6.QtWidgets import QApplication
 
 from game.controller import GameController
@@ -69,7 +69,7 @@ class StarTrekRetroRemake:
         shutdown: Clean shutdown of the application
 
     Private methods:
-        _initialize_systems: Initialize PyGame and PySide6 systems
+        _initialize_systems: Initialize pygame-ce and PySide6 systems
         _cleanup: Clean up resources on shutdown
     """
 
@@ -132,7 +132,7 @@ class StarTrekRetroRemake:
 
     def _cleanup(self) -> None:
         """Clean up resources on shutdown."""
-        # Cleanup PyGame
+        # Cleanup pygame-ce
         pygame.quit()
 
         # Cleanup PySide6

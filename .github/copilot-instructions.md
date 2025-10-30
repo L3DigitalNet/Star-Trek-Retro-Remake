@@ -14,7 +14,7 @@ Turn-based strategy game set in Kirk-era Star Trek universe. Features grid-based
 
 **Pattern:** Hybrid State Machine + Game Object + Component + MVC
 - **NOT full ECS** - Use Game Object with Component composition (simpler for turn-based games)
-- **PyGame** for rendering (game view)
+- **pygame-ce** for rendering (game view) - Community Edition with Python 3.14+ support
 - **PySide6** for UI (menus, dialogs, settings)
 - **MVC separation** - Game logic independent of UI/rendering
 - **Object pooling** for projectiles, effects, temporary entities
@@ -72,14 +72,14 @@ Features:
     - Object pooling for efficient memory management
     - 3D grid system with z-levels for space representation
     - Separated game logic from rendering for testability
-    - PyGame for game rendering, PySide6 for UI/menus/dialogs
+    - pygame-ce (Community Edition) for game rendering, PySide6 for UI/menus/dialogs
     - Standard library first approach
     - Clean confident design patterns
 
 Requirements:
     - Linux environment
     - Python 3.14+ for latest language features
-    - PyGame for game engine rendering
+    - pygame-ce (Community Edition) for game engine rendering (replaces pygame for Python 3.14+ compatibility)
     - PySide6 for UI, menus, settings, and dialogs
 
 Known Issues:
@@ -138,7 +138,7 @@ Functions:
 6. **State Machine:** Use specific modes (GALAXY_MAP, SECTOR_MAP, COMBAT) not generic states
 7. **Grid Logic:** 3D positioning (x, y, z) for all spatial calculations
 8. **Turn-Based:** All actions advance turn counter, support initiative
-9. **Framework Separation:** PyGame rendering separate from PySide6 UI
+9. **Framework Separation:** pygame-ce rendering separate from PySide6 UI
 10. **Confident Design:** Architectural solutions over defensive checks
 11. **Version Aware:** Defer error handling until v1.0.0
 12. **Documentation:** Every `.py` file has matching `_doc.md` in same directory

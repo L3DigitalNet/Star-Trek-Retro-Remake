@@ -23,7 +23,7 @@ Features:
 Requirements:
     - Linux environment
     - Python 3.14+ for latest language features
-    - PyGame for event handling
+    - pygame-ce (Community Edition) for event handling
 
 Classes:
     - GameController: Main controller coordinating model and view
@@ -34,7 +34,7 @@ Functions:
 
 from typing import Final, Optional, TYPE_CHECKING
 
-import pygame
+import pygame_ce as pygame
 
 from .states.state_machine import GameStateManager, GameMode
 from .entities.base import GridPosition
@@ -60,7 +60,7 @@ class GameController:
         view: Game view handling UI and rendering
         state_manager: Game state machine manager
         running: Whether the controller is active
-        clock: PyGame clock for timing
+        clock: pygame-ce clock for timing
 
     Public methods:
         set_view: Set the view reference
@@ -72,7 +72,7 @@ class GameController:
 
     Private methods:
         _setup_states: Initialize game states
-        _handle_events: Process PyGame events
+        _handle_events: Process pygame-ce events
         _update: Update game logic
         _render: Render game display
     """
@@ -233,7 +233,7 @@ class GameController:
             self._render()
 
     def _handle_events(self) -> None:
-        """Process PyGame events."""
+        """Process pygame-ce events."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False

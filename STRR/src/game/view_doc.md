@@ -11,7 +11,7 @@
 The `view.py` file implements the **View** component of the MVC architecture. It is responsible for **all visual output** including:
 
 - PySide6 UI windows, menus, and dialogs
-- PyGame game surface rendering
+- pygame-ce game surface rendering
 - Displaying game state visually
 - User interface updates
 
@@ -32,7 +32,7 @@ The View receives updates from the Controller and renders the current game state
 ### Dual-Framework Integration
 
 - **PySide6:** Main window, menus, dialogs, settings UI
-- **PyGame:** Game rendering surface embedded in PySide6 window
+- **pygame-ce:** Game rendering surface embedded in PySide6 window
 
 ---
 
@@ -46,7 +46,7 @@ The View receives updates from the Controller and renders the current game state
 
 - `controller` (GameController): Reference to controller for coordinated actions
 - `main_window` (QMainWindow): PySide6 main application window
-- `game_surface` (pygame.Surface): PyGame rendering surface (800x600)
+- `game_surface` (pygame.Surface): pygame-ce rendering surface (800x600)
 - `update_timer` (QTimer): 60 FPS update timer
 
 **Key Methods:**
@@ -82,7 +82,7 @@ view.run()  # Show window
 **Dependencies:**
 
 - `game.controller.GameController` - For coordinated actions
-- `pygame` - Game rendering
+- `pygame-ce` - Game rendering (Community Edition for Python 3.14+ compatibility)
 - `PySide6.QtWidgets` - UI framework
 
 **Used by:**
@@ -95,7 +95,7 @@ view.run()  # Show window
 ## Implementation Status
 
 **Current:** Placeholder implementation with stubs
-**TODO:** Full PyGame/PySide6 integration, rendering logic
+**TODO:** Full pygame-ce/PySide6 integration, rendering logic
 
 ---
 

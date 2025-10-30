@@ -121,7 +121,7 @@
 #### Develop Basic Map Rendering with Z-Level Support
 
 - This will be the basis for both the sector map and combat map.
-- Will test in a pygame window first (ignore PySide6 integration for now)
+- Will test in a pygame-ce window first (ignore PySide6 integration for now)
 
 - **Steps:**
 
@@ -176,7 +176,7 @@
 
 - [ ] **Testing Strategy Alignment** - Expand testing approach to match project guidelines
   - Define pytest framework usage for core logic testing
-  - Specify integration testing for PySide6/PyGame interaction
+  - Specify integration testing for PySide6/pygame-ce interaction
   - Document AI testing and performance benchmarking
 
 ### Low Priority Improvements
@@ -218,7 +218,7 @@ Star Trek fans, strategy game enthusiasts, and players who enjoy turn-based tact
 ### 1.3 Platform and Technical Requirements
 
 - PC (Linux initially, with potential for Windows in the future)
-- Developed using Python with PyGame for game engine and PySide6 for UI
+- Developed using Python with pygame-ce (Community Edition) for game engine and PySide6 for UI
 
 ### 1.4 Competitive Analysis
 
@@ -506,7 +506,7 @@ Inspired by UI's windowed desktop games largely around the mid-1990s era. An exa
 
 - The main game will be contained within a PySide6 application window
 - Much of the interaction will be through widgets such as menus, dialogs, and buttons
-- The main game view (map) will be rendered using PyGame embedded within the PySide6 application
+- The main game view (map) will be rendered using pygame-ce embedded within the PySide6 application
 - The map will be centered in the application window with UI elements surrounding it
 - Pop-up dialogs will be used for mission briefings, ship status, and other information
 
@@ -582,7 +582,7 @@ The game will use a hybrid architecture optimized for turn-based strategy games:
 ##### Model-View-Controller (MVC) Separation
 
 - **Model**: Game logic, state, and data (pure Python)
-- **View**: PySide6 UI widgets and PyGame rendering
+- **View**: PySide6 UI widgets and pygame-ce rendering
 - **Controller**: Input handling and state transitions
 - Enables independent testing of game logic
 
@@ -665,7 +665,7 @@ class GameModel:
     def resolve_combat(self, attacker: Starship, target: Starship) -> CombatResult: ...
 
 class GameView:
-    """PySide6 UI and PyGame rendering (no game logic)."""
+    """PySide6 UI and pygame-ce rendering (no game logic)."""
     def __init__(self, controller):
         self.controller = controller
         self.main_window = MainWindow()
@@ -735,7 +735,7 @@ class ResourceManager:
 ```text
 PySide6 Main Window
     ├── Menu System (PySide6 widgets)
-    ├── Game View (PyGame embedded surface)
+    ├── Game View (pygame-ce embedded surface)
     ├── Dialog System (PySide6 dialogs)
     └── Status Panels (PySide6 widgets)
 
@@ -769,7 +769,7 @@ Game Model (Pure Logic)
 **UI Tests:**
 
 - PySide6 widget behavior
-- PyGame rendering validation
+- pygame-ce rendering validation
 - User interaction flows
 
 This hybrid architecture provides:

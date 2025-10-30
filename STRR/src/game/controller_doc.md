@@ -39,7 +39,7 @@ while running:
     render()         # Draw to screen
 ```
 
-Fixed timestep at 60 FPS using PyGame clock.
+Fixed timestep at 60 FPS using pygame-ce clock.
 
 ---
 
@@ -55,7 +55,7 @@ Fixed timestep at 60 FPS using PyGame clock.
 - `view` (Optional[GameView]): Display and UI
 - `state_manager` (GameStateManager): Game state machine
 - `running` (bool): Game loop flag
-- `clock` (pygame.time.Clock): Frame timing
+- `clock` (pygame.time.Clock): Frame timing (pygame-ce)
 
 **Public Methods:**
 
@@ -148,7 +148,7 @@ while self.running:
 - `game.model.GameModel` - Game state
 - `game.view.GameView` - Display
 - `game.states.state_machine.GameStateManager` - State management
-- `pygame` - Event loop and timing
+- `pygame-ce` - Event loop and timing (Community Edition for Python 3.14+ compatibility)
 
 **Used by:**
 

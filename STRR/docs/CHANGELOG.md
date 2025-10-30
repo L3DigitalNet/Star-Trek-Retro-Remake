@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added (Planned Features)
 
-- PySide6 UI integration with embedded PyGame rendering
+- PySide6 UI integration with embedded pygame-ce rendering
 - Advanced AI behavior system for enemy ships
 - Mission generation and dynamic storytelling system
 - Audio and visual effects framework
@@ -17,7 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- TBD
+- Migrated from pygame to pygame-ce (Community Edition) for Python 3.14+ compatibility
+- Updated all imports to use `import pygame_ce as pygame`
+- Updated all documentation to reflect pygame-ce usage
+- Updated pyproject.toml dependencies and mypy configuration
 
 ### Fixed
 
@@ -77,7 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Implementation
 
 - **Architecture**: Hybrid State Machine + Game Object + Component + MVC pattern
-- **Game Loop**: Fixed timestep implementation ready for PyGame integration
+- **Game Loop**: Fixed timestep implementation ready for pygame-ce integration
 - **Entity System**: GameObject base with Starship and SpaceStation implementations
 - **Component Pattern**: Modular ship systems with damage/repair mechanics
 - **State Management**: GameStateManager with mode transition validation
@@ -125,7 +128,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Known Limitations
 
-- UI integration pending (PySide6/PyGame coordination not yet implemented)
+- UI integration pending (PySide6/pygame-ce coordination not yet implemented)
 - Combat AI behavior requires implementation
 - Save/load functionality needs development
 - Asset loading and caching system pending
@@ -133,7 +136,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Next Development Phase (v0.1.0)
 
-- PySide6 main window implementation with embedded PyGame widget
+- PySide6 main window implementation with embedded pygame-ce widget
 - Basic ship movement and exploration mechanics
 - Simple combat system with AI opponents
 - Resource management UI and feedback systems

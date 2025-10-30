@@ -21,14 +21,14 @@ Features:
     - Hybrid State Machine + Game Object + Component architecture for Star Trek game objects
     - Object pooling for efficient memory management
     - Separated game logic from rendering for testability using MVC pattern
-    - PyGame for game engine, PySide6 for UI/menus
+    - pygame-ce (Community Edition) for game engine, PySide6 for UI/menus
     - Standard library first approach
     - Clean confident design patterns
 
 Requirements:
     - Linux environment
     - Python 3.14+ for latest language features
-    - PyGame for game engine functionality
+    - pygame-ce (Community Edition) for game engine functionality
     - PySide6 for UI, menus, and settings
     - Custom utilities located at ../common_lib/
 

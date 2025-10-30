@@ -19,7 +19,7 @@ Features:
     - Hybrid State Machine + Game Object + Component + MVC architecture
     - Turn-based tactical combat with detailed ship systems
     - 3D grid-based exploration with multiple z-levels
-    - PyGame game engine with PySide6 UI framework
+    - pygame-ce (Community Edition) game engine with PySide6 UI framework
     - Comprehensive testing framework with pytest
     - Object pooling and memory management for performance
     - Clean separation of game logic from UI for testability
@@ -28,7 +28,7 @@ Features:
 Requirements:
     - Linux environment (primary target platform)
     - Python 3.14+ for latest language features and syntax
-    - PyGame 2.5+ for game engine functionality
+    - pygame-ce 2.5+ for game engine functionality (Community Edition for Python 3.14+ support)
     - PySide6 6.7+ for UI, menus, and dialogs
     - pytest 8.0+ for comprehensive testing framework
 
@@ -45,13 +45,13 @@ Project Structure:
     - /docs/: Project documentation and guides
 
 Known Issues:
-    - PySide6/PyGame integration pending implementation
+    - PySide6/pygame-ce integration pending implementation
     - Combat system requires AI behavior implementation
     - Asset loading system needs optimization
     - Save/load functionality not yet implemented
 
 Planned Features:
-    - Complete PySide6 UI implementation with embedded PyGame
+    - Complete PySide6 UI implementation with embedded pygame-ce
     - Advanced AI for enemy ships and factions
     - Mission generation and dynamic storytelling
     - Comprehensive audio and visual effects
@@ -61,7 +61,7 @@ Planned Features:
 Classes:
     - GameApplication: Main application controller and coordinator
     - GameModel: Pure game logic and state management
-    - GameView: PySide6 UI and PyGame rendering
+    - GameView: PySide6 UI and pygame-ce rendering
     - GameController: Input handling and state transitions
     - GameStateManager: State machine coordination
     - GameObject: Base class for all game entities
@@ -117,7 +117,7 @@ Star Trek Retro Remake is a turn-based, grid-based strategy game that captures t
 - Basic AI for enemy ships and NPCs
 - Save/load functionality
 - Mission system and objectives
-- PySide6 UI with embedded PyGame rendering
+- PySide6 UI with embedded pygame-ce rendering
 
 #### Future Expansions (v1.1+)
 
@@ -178,7 +178,7 @@ class GameModel:
         # Pure business logic for ship movement
 
 class GameView:
-    """PySide6 UI and PyGame rendering (no game logic)."""
+    """PySide6 UI and pygame-ce rendering (no game logic)."""
     def render_sector_map(self, sector: SectorMap) -> None:
         # UI rendering without game state modification
 
@@ -336,7 +336,7 @@ from pathlib import Path
 from dataclasses import dataclass
 
 # Third-party imports
-import pygame
+import pygame_ce as pygame
 from PySide6.QtWidgets import QWidget
 
 # Local imports
@@ -390,13 +390,13 @@ src/
 
 ## Implementation Details
 
-### PyGame Integration
+### pygame-ce Integration
 
 #### Game Loop Structure
 
 ```python
 class GameApplication:
-    """Main application with PyGame/PySide6 integration."""
+    """Main application with pygame-ce/PySide6 integration."""
 
     def __init__(self):
         pygame.init()
@@ -427,7 +427,7 @@ class GameApplication:
 
 ```python
 class MainWindow(QMainWindow):
-    """Main application window with embedded PyGame."""
+    """Main application window with embedded pygame-ce."""
 
     def __init__(self):
         super().__init__()

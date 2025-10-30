@@ -39,25 +39,25 @@ This document provides a clear reference for the purpose of each Python file in 
 **Contains:**
 
 - `StarTrekRetroRemake` class - main application controller
-- System initialization (PyGame + PySide6)
+- System initialization (pygame-ce + PySide6)
 - Application lifecycle management
 - MVC component coordination
 
 **Add code here for:**
 
-- **PyGame window initialization** ⭐ (in `_initialize_systems()`)
+- **pygame-ce window initialization** ⭐ (in `_initialize_systems()`)
 - PySide6 Qt application setup
 - Linking Model-View-Controller components
 - Application-wide resource management
 - Main loop coordination
 - Shutdown procedures
 
-**Key Method for PyGame Setup:**
+**Key Method for pygame-ce Setup:**
 
 ```python
 def _initialize_systems(self) -> None:
-    # Add PyGame display.set_mode() here
-    # Add PyGame.init() configurations here
+    # Add pygame.display.set_mode() here
+    # Add pygame.init() configurations here
 ```
 
 ---
@@ -87,7 +87,7 @@ def _initialize_systems(self) -> None:
 **DO NOT add here:**
 
 - Any UI code
-- PyGame rendering
+- pygame-ce rendering
 - PySide6 widgets
 - Direct user input handling
 
@@ -101,12 +101,12 @@ def _initialize_systems(self) -> None:
 
 - `GameView` class - manages all visual output
 - PySide6 main window
-- PyGame surface integration
+- pygame-ce surface integration
 
 **Add code here for:**
 
-- **PyGame rendering logic** ⭐
-- **PyGame surface drawing**
+- **pygame-ce rendering logic** ⭐
+- **pygame-ce surface drawing**
 - PySide6 widget creation
 - UI layout management
 - Dialog boxes
@@ -116,7 +116,7 @@ def _initialize_systems(self) -> None:
 
 **Key Areas:**
 
-- `_setup_pygame_widget()` - embed PyGame in Qt
+- `_setup_pygame_widget()` - embed pygame-ce in Qt
 - `_render_grid()` - sector grid rendering
 - `_render_game_object()` - entity rendering
 - `render_sector_map()` - main game view
@@ -136,7 +136,7 @@ def _initialize_systems(self) -> None:
 
 **Add code here for:**
 
-- **PyGame event handling** ⭐
+- **pygame-ce event handling** ⭐
 - Input processing (keyboard, mouse)
 - Command execution
 - Model-View synchronization
@@ -147,7 +147,7 @@ def _initialize_systems(self) -> None:
 
 ```python
 def _game_loop(self) -> None:
-    # Main game loop with PyGame clock
+    # Main game loop with pygame-ce clock
     # Event handling → Update → Render cycle
 ```
 
@@ -392,14 +392,14 @@ subscribe_event("ship_destroyed", my_handler)
 - Initialize `pygame.display.set_mode()`
 - Set window title, icon, etc.
 
-### **PyGame Rendering**
+### **pygame-ce Rendering**
 
 → `/star_trek_retro_remake/src/game/view.py`
 
 - Methods: `_render_grid()`, `_render_game_object()`, `render_sector_map()`
 - All drawing code goes here
 
-### **PyGame Event Handling**
+### **pygame-ce Event Handling**
 
 → `/star_trek_retro_remake/src/game/controller.py`
 
@@ -448,7 +448,7 @@ subscribe_event("ship_destroyed", my_handler)
 main.py
   └─> application.py (StarTrekRetroRemake)
        ├─> model.py (GameModel) ← Pure game logic
-       ├─> view.py (GameView) ← PyGame + PySide6 rendering
+       ├─> view.py (GameView) ← pygame-ce + PySide6 rendering
        └─> controller.py (GameController) ← Coordination + Input
             ├─> states/state_machine.py (GameStateManager)
             ├─> commands.py (CommandHistory)
@@ -468,7 +468,7 @@ main.py
 ## Notes
 
 - **Separation of Concerns:** Keep game logic in `model.py`, rendering in `view.py`, coordination in `controller.py`
-- **PyGame vs PySide6:** PyGame for game rendering, PySide6 for menus/dialogs/settings
+- **pygame-ce vs PySide6:** pygame-ce for game rendering, PySide6 for menus/dialogs/settings
 - **3D Grid:** All positions use `GridPosition(x, y, z)` - remember the z-level!
 - **Turn-Based:** All actions should advance turn counter
 - **Component Pattern:** Ship systems are components, not full ECS

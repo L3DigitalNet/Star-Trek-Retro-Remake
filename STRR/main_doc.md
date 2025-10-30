@@ -180,7 +180,7 @@ def main() -> None:
 
 - **Python:** 3.14+ (uses modern type hints and stdlib features)
 - **Platform:** Linux (primary target)
-- **Dependencies:** PyGame, PySide6 (installed in virtual environment)
+- **Dependencies:** pygame-ce (Community Edition), PySide6 (installed in virtual environment)
 
 ### Path Structure
 
@@ -311,7 +311,7 @@ python3.14 main.py  # Use specific version
 
 ### Issue: Display/Graphics errors on startup
 
-**Symptom:** PyGame or display-related errors
+**Symptom:** pygame-ce or display-related errors
 
 **Cause:** Missing display environment (especially when SSH'd into a machine)
 

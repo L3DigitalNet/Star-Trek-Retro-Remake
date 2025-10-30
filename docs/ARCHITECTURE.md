@@ -420,7 +420,7 @@ Clean separation of concerns:
 
 ```python
 from typing import List, Optional, Dict
-import pygame
+import pygame_ce as pygame
 from PySide6.QtWidgets import QMainWindow, QWidget
 
 class GameModel:

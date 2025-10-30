@@ -4,7 +4,7 @@
 Star Trek Retro Remake - Game View
 
 Description:
-    Game view implementation using PySide6 for UI and PyGame for game rendering.
+    Game view implementation using PySide6 for UI and pygame-ce for game rendering.
     Implements the View component of the MVC pattern.
 
 Author: Star Trek Retro Remake Development Team
@@ -16,7 +16,7 @@ License: MIT
 
 Features:
     - PySide6 main window and UI management
-    - PyGame game surface for rendering
+    - pygame-ce game surface for rendering
     - UI widgets and dialog management
     - Event handling and user interaction
 
@@ -24,7 +24,7 @@ Requirements:
     - Linux environment
     - Python 3.14+ for latest language features
     - PySide6 for UI framework
-    - PyGame for game rendering
+    - pygame-ce (Community Edition) for game rendering
 
 Classes:
     - GameView: Main view component implementing UI and rendering
@@ -36,7 +36,7 @@ Functions:
 import logging
 from typing import Final, TYPE_CHECKING
 
-import pygame
+import pygame_ce as pygame
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import QTimer
 
@@ -52,13 +52,13 @@ class GameView:
     """
     Main view component implementing UI and rendering.
 
-    Manages the PySide6 main window, PyGame rendering surface,
+    Manages the PySide6 main window, pygame-ce rendering surface,
     and all user interface elements using the View pattern.
 
     Attributes:
         controller: Reference to the game controller
         main_window: PySide6 main application window
-        game_surface: PyGame surface for game rendering
+        game_surface: pygame-ce surface for game rendering
         update_timer: Timer for regular UI updates
 
     Public methods:
@@ -70,7 +70,7 @@ class GameView:
 
     Private methods:
         _setup_ui: Initialize the user interface
-        _setup_pygame_widget: Set up PyGame integration
+        _setup_pygame_widget: Set up pygame-ce integration
         _update_display: Update the display regularly
     """
 
@@ -88,7 +88,7 @@ class GameView:
         self.main_window.setWindowTitle("Star Trek Retro Remake")
         self.main_window.setGeometry(100, 100, 1024, 768)
 
-        # Initialize PyGame surface
+        # Initialize pygame-ce surface
         pygame.init()
         self.game_surface = pygame.Surface((800, 600))
 
@@ -173,19 +173,19 @@ class GameView:
         game_label = QLabel("Star Trek Retro Remake - Game View")
         layout.addWidget(game_label)
 
-        # PyGame widget will be integrated here
+        # pygame-ce widget will be integrated here
         self._setup_pygame_widget()
 
     def _setup_pygame_widget(self) -> None:
-        """Set up PyGame integration widget."""
-        # Placeholder for PyGame widget integration
-        # This will embed the PyGame surface in the PySide6 window
+        """Set up pygame-ce integration widget."""
+        # Placeholder for pygame-ce widget integration
+        # This will embed the pygame-ce surface in the PySide6 window
         pass
 
     def _update_display(self) -> None:
         """Update the display regularly."""
-        # Update PyGame surface and convert to PySide6 display
-        # This will be implemented when PyGame integration is complete
+        # Update pygame-ce surface and convert to PySide6 display
+        # This will be implemented when pygame-ce integration is complete
         pass
 
     def _render_grid(self, sector_map) -> None:

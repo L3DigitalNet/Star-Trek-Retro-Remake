@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "pygame>=2.5.0",
+    "pygame-ce>=2.5.0",
     "PySide6>=6.10.0",
     "PySide6-Essentials>=6.10.0",
     "PySide6-Addons>=6.10.0",
@@ -141,7 +141,7 @@ strict_equality = true
 
 [[tool.mypy.overrides]]
 module = [
-    "pygame.*",
+    "pygame_ce.*",
     "PySide6.*",
 ]
 ignore_missing_imports = true
