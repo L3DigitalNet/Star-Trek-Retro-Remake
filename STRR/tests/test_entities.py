@@ -8,7 +8,7 @@ Description:
 
 Author: Star Trek Retro Remake Development Team
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 01-27-2025
 License: MIT
 """
 
@@ -142,14 +142,14 @@ class TestStarship:
         # Arrange
         initial_hull = test_starship.hull_integrity
         shields = test_starship.get_system("shields")
-        initial_shield_strength = shields.shield_strength
+        initial_shield_strength = shields.total_shield_strength
 
         # Act
         test_starship.take_damage(20, "energy")
 
         # Assert
         # Shields should absorb most energy damage
-        assert shields.shield_strength < initial_shield_strength
+        assert shields.total_shield_strength < initial_shield_strength
         assert (
             test_starship.hull_integrity == initial_hull
             or test_starship.hull_integrity > initial_hull - 20

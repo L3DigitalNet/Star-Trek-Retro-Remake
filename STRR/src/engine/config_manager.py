@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Configuration Manager
 
@@ -40,7 +39,7 @@ __version__: Final[str] = "0.0.11"
 
 import tomllib
 from pathlib import Path
-from typing import Any, Dict, Union, Optional
+from typing import Any, Dict, Optional, Union
 
 # For TOML writing, we'll use tomli_w (lightweight, stdlib-compatible)
 try:

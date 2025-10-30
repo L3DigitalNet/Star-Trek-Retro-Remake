@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-30-2025
-Date Changed: 10-30-2025
+Date Changed: 01-27-2025
 License: MIT
 
 Test Coverage:
@@ -50,6 +50,15 @@ def mock_model():
     model.current_sector = Mock()
     model.current_sector.is_in_bounds.return_value = True
     model.game_objects = []
+    model.get_turn_status.return_value = {
+        "turn_number": 1,
+        "action_points": 3,
+        "current_phase": "movement",
+    }
+    # Mock turn_manager
+    model.turn_manager = Mock()
+    model.turn_manager.get_current_entity.return_value = None
+    model.turn_manager.entities = []
     return model
 
 
@@ -136,6 +145,11 @@ class TestGameControllerShipMovement:
         """Test handling valid ship movement request."""
         # Arrange
         mock_model.execute_move.return_value = True
+        mock_model.get_turn_status.return_value = {
+            "turn_number": 1,
+            "current_phase": "action",
+            "action_points": 5,
+        }
         destination = GridPosition(6, 6, 0)
         mock_view = Mock()
         controller.set_view(mock_view)
@@ -148,6 +162,8 @@ class TestGameControllerShipMovement:
             mock_model.player_ship, destination
         )
         mock_view.render_sector_map.assert_called_once()
+        mock_view.update_ui_state.assert_called_once()
+        mock_view.update_turn_info.assert_called_once()
 
     def test_handle_ship_move_request_with_invalid_move(self, controller, mock_model):
         """Test handling invalid ship movement request."""
@@ -184,6 +200,8 @@ class TestGameControllerCombat:
         # Arrange
         target = Mock()
         mock_result = Mock()
+        mock_result.success = True
+        mock_result.message = "Hit for 15 damage!"
         mock_model.resolve_combat.return_value = mock_result
         mock_view = Mock()
         controller.set_view(mock_view)
@@ -195,7 +213,7 @@ class TestGameControllerCombat:
         mock_model.resolve_combat.assert_called_once_with(
             mock_model.player_ship, target, "phaser"
         )
-        mock_view.show_combat_dialog.assert_called_once_with(mock_result)
+        mock_view.show_message.assert_called_once_with(mock_result.message)
 
     def test_handle_combat_action_without_player_ship(self, controller, mock_model):
         """Test handling combat action when player ship doesn't exist."""
@@ -331,10 +349,17 @@ class TestGameControllerMouseInput:
         mock_view.grid_renderer.screen_to_world.return_value = GridPosition(5, 5, 0)
         mock_view.grid_renderer.is_in_bounds.return_value = True
         mock_view.current_z_level = 0
+        mock_view.move_mode = True  # Enable move mode for test
+        mock_view.move_btn = Mock()  # Mock button for move mode
         controller.set_view(mock_view)
         controller.model.current_sector.is_in_bounds.return_value = True
         controller.model.player_ship = Mock()
         controller.model.execute_move = Mock(return_value=True)
+        controller.model.get_turn_status.return_value = {
+            "turn_number": 1,
+            "current_phase": "action",
+            "action_points": 5,
+        }
         mouse_pos = (100, 100)
 
         # Act
@@ -351,10 +376,17 @@ class TestGameControllerMouseInput:
         mock_view.grid_renderer.screen_to_world.return_value = grid_pos
         mock_view.grid_renderer.is_in_bounds.return_value = True
         mock_view.current_z_level = 0
+        mock_view.move_mode = True  # Enable move mode for test
+        mock_view.move_btn = Mock()  # Mock button for move mode
         controller.set_view(mock_view)
         controller.model.current_sector.is_in_bounds.return_value = True
         controller.model.player_ship = Mock()
         controller.model.execute_move = Mock(return_value=True)
+        controller.model.get_turn_status.return_value = {
+            "turn_number": 1,
+            "current_phase": "action",
+            "action_points": 5,
+        }
         mouse_pos = (100, 100)
 
         # Act

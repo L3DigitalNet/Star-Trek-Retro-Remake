@@ -7,6 +7,301 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.21] - 2025-01-27
+
+### Fixed
+
+- **Division by Zero Guard**: Added safety check in `WeaponSystems.get_hit_chance()` to prevent division by zero when weapon has no range
+- **AI Turn Loop Scaling**: Fixed `_process_ai_turns()` to dynamically scale safety limit based on total entity count (minimum 20, or 2x entity count)
+- **Shield Effectiveness**: Ensured shields always absorb minimum damage (10% of incoming damage or available shield strength) when active, preventing complete bypass
+- **Type Consistency**: Verified `take_damage()` always returns consistent dict structure with all expected keys
+- **Command Signature**: Fixed `FireWeaponCommand.execute()` to pass distance parameter matching updated `calculate_damage()` signature
+- **Test Suite**: Updated all unit tests to match new shield facing system, weapon damage calculations, and controller mock requirements
+  - Fixed `test_ship_systems.py` weapon tests to use new 3-parameter signature with distance
+  - Updated shield tests to use `total_shield_strength` property and `shield_facings` dictionary
+  - Fixed `test_controller.py` mock to include `get_turn_status()` and `turn_manager` attributes
+  - Updated `test_entities.py` to use `total_shield_strength` instead of deprecated `shield_strength`
+
+### Changed
+
+- **Configuration System**: Moved all combat-related magic numbers to `game_settings.toml` under `[game.combat]` section
+  - Weapon firing arc (270°)
+  - Base accuracy (85%)
+  - Range penalty factor (40%)
+  - Critical hit chance (10%) and multiplier (1.5x)
+  - Shield effectiveness vs energy (85%) and kinetic (65%)
+  - Shield minimum absorption rate (10%)
+  - AI patrol radius (5 cells)
+  - AI flee threshold (30% hull)
+  - AI enemy cache duration (3 turns)
+- **Configuration Loading**: Added class-level config cache in `WeaponSystems` and `ShipAI` to load settings from TOML with fallback defaults
+- **Combat Calculations**: Updated all combat calculations to use configuration values instead of hardcoded constants
+
+### Optimized
+
+- **AI Performance**: Added enemy list caching in `ShipAI` to reduce scanning overhead (refreshes every 3 turns by default)
+- **Warning Logging**: Added warning log when AI turn safety limit is reached for debugging
+
+### Testing
+
+- **Coverage**: Maintained 80%+ coverage for critical paths (ship_systems: 81.45%, commands: 84.83%, starship: 96.15%)
+- **Test Count**: All 292 unit tests passing with updated mock fixtures and test expectations
+
+## [0.0.20] - 2025-10-30
+
+### Added
+
+- **Advanced Weapon Systems**: Complete weapon mechanics implementation
+  - Firing arc calculations (270° forward arc by default)
+  - Line of sight checking with obstacle detection
+  - Range-based accuracy calculations (85% base, reduced by range)
+  - Weapon cooldown system (1.0s torpedoes, 0.5s phasers)
+  - Hit chance calculation with range penalties
+  - Phasers: 15 damage base, 5 cell range, loses 30% damage at max range
+  - Torpedoes: 30 damage base, 8 cell range, maintains full damage
+  - Fire weapon action costs: 1 AP for phasers, 2 AP for torpedoes
+
+- **Directional Shield System**: Shield facings with positional damage
+  - Four shield facings: forward, aft, port, starboard
+  - 25 shield points per facing (100 total)
+  - Automatic facing determination based on attacker position
+  - Damage absorption: 85% for energy, 65% for kinetic
+  - Per-facing recharge at 2.0 points per second
+  - Shield redistribution system for tactical management
+  - Hull damage when shields penetrated
+
+- **Combat Resolution System**: Complete combat mechanics
+  - Critical hit system (10% chance, 1.5x damage multiplier)
+  - Range modifiers affecting weapon effectiveness
+  - Damage reporting with shields absorbed/hull damage breakdown
+  - Action point consumption for combat actions
+  - Weapon type selection (phasers vs torpedoes)
+  - Target validation with range and arc checks
+  - Line of sight obstacle checking
+
+- **Advanced Damage System**: Hull and system damage mechanics
+  - Shield-first damage absorption with facing system
+  - Hull integrity tracking (0-100%)
+  - System damage when hull drops below 50%
+  - Random system damage on critical hull hits (30% base chance + hull damage factor)
+  - System efficiency degradation from damage
+  - Ship destruction at 0% hull integrity
+  - Damage result reporting with detailed breakdown
+
+- **AI System for NPC Ships**: Simple state machine AI
+  - Three AI states: PATROL, ATTACK, FLEE
+  - State transitions based on hull damage and enemy presence
+  - PATROL: Random movement within patrol radius
+  - ATTACK: Move toward and fire at nearest/weakest enemy
+  - FLEE: Retreat when hull below 30%, return to patrol when recovered
+  - Target selection with distance and hull integrity scoring
+  - Sensor range-based enemy detection
+  - AI processes automatically during end turn
+
+- **Combat UI Integration**: Target selection and weapon firing
+  - Target selection dialog with distance display
+  - Weapon type chooser (Phasers 1 AP / Torpedoes 2 AP)
+  - Target list showing ship name, class, and range
+  - Combat result messages with detailed feedback
+  - Fire button opens target selection when enemies in range
+  - "No targets in range" message when appropriate
+  - Automatic UI updates after combat actions
+
+### Changed
+
+- **WeaponSystems Component** (v0.0.20): Enhanced with advanced combat features
+  - Added firing arc, line of sight, and accuracy calculations
+  - Implemented cooldown and hit chance systems
+  - Range-based damage calculations
+  - Obstacle detection for line of sight
+
+- **ShieldSystems Component** (v0.0.20): Directional shield implementation
+  - Changed from single shield pool to four directional facings
+  - Automatic hit facing determination from attacker position
+  - Per-facing recharge and damage absorption
+  - Shield redistribution capability
+
+- **Starship Entity** (v0.0.20): Enhanced damage and AI support
+  - Updated `take_damage()` with detailed damage result reporting
+  - Added `_apply_system_damage()` for critical hull damage
+  - Added `ai_controller` attribute for NPC ships
+  - Added `is_player` flag to distinguish player ship
+  - Added `set_ai_controller()` method
+
+- **GameModel** (v0.0.20): Combat and AI integration
+  - Enhanced `resolve_combat()` with complete combat mechanics
+  - Added `get_potential_targets()` for weapon range queries
+  - Added `_initialize_ai()` to create AI controllers for NPCs
+  - Added `process_ai_turn()` for AI decision processing
+  - Player ship marked with `is_player=True` flag
+  - NPC ships automatically get AI controllers
+
+- **GameController** (v0.0.20): Combat action coordination
+  - Enhanced `handle_combat_action()` with full combat flow
+  - Added `get_available_targets()` for UI target lists
+  - Added `_process_ai_turns()` to handle AI during end turn
+  - AI turns process automatically until player's turn
+  - Combat UI updates with damage feedback
+
+- **GameView** (v0.0.20): Combat UI implementation
+  - Replaced fire button placeholder with full target selection
+  - Added weapon type selection dialog
+  - Added target list with ship info and range
+  - Fixed isometric_grid import path (../engine/)
+  - Consolidated Qt imports to eliminate duplicates
+
+### Technical Details
+
+- **File Updates**:
+  - `ship_systems.py` (v0.0.20): Advanced weapon and shield systems
+  - `starship.py` (v0.0.20): Damage system and AI integration
+  - `model.py` (v0.0.20): Combat resolution and AI processing
+  - `controller.py` (v0.0.20): Combat coordination and AI turns
+  - `view.py` (v0.0.20): Target selection and combat UI
+  - `ship_ai.py` (v0.0.20): New AI module for NPC behavior
+  - `main.py` (v0.0.20): Version bump
+  - `pyproject.toml`: Version bump to 0.0.20
+
+- **New Modules**:
+  - `STRR/src/game/ai/`: New AI package
+  - `STRR/src/game/ai/ship_ai.py`: ShipAI class with state machine
+
+- **Architecture Pattern**: Maintains clean MVC with added AI layer
+  - Model contains pure combat logic and AI processing
+  - Controller coordinates combat actions and AI turns
+  - View provides combat UI without game logic
+  - AI operates on model data without direct view access
+
+- **Combat Mechanics Balance**:
+  - Phasers: Fast, cheap, shorter range, better for multiple targets
+  - Torpedoes: Slow, expensive, longer range, more damage
+  - Shields provide significant protection until depleted
+  - Critical hits add tactical excitement
+  - Range penalties encourage positioning
+
+### Milestone Progress
+
+**Completed: "Implement Basic Combat System"**
+
+- ✅ Weapon firing mechanics with firing arcs and line of sight
+- ✅ Shield and damage calculations with directional facings
+- ✅ Combat resolution with positioning and range factors
+- ✅ Basic AI for enemy ship behavior (patrol/attack/flee)
+- ✅ Target selection UI with weapon type chooser
+- ✅ Critical hit system and range modifiers
+- ✅ Line of sight and obstruction checking
+
+**Next Milestone: "Implement Resource Management System"**
+
+- Energy allocation system for ship subsystems
+- Supplies tracking (fuel, medical, spare parts)
+- Crew morale and efficiency systems
+- Ship system condition and maintenance
+
+## [0.0.19] - 2025-10-30
+
+### Added
+
+- **Move Mode System**: Interactive ship movement with UI feedback
+  - "Move Ship" button toggles move mode on/off
+  - Visual feedback: button text changes to "Cancel Move" when active
+  - Status messages guide user through move process
+  - Mouse click on grid moves ship when mode is active
+  - Automatic mode deactivation after movement
+
+- **Combat Action Button Handlers**: Placeholder implementations for future combat features
+  - Fire Weapons button with feedback message
+  - Scan Target button with feedback message
+  - Evasive Maneuvers button with feedback message
+  - All buttons provide appropriate "not yet implemented" messages
+
+- **Utility Action Button Handlers**: Placeholder implementations for future features
+  - Dock at Station button with feedback message
+  - Hail Ship button with feedback message
+  - Ready for future milestone implementation
+
+- **Mode Switcher Integration**: Toolbar buttons connected to state machine
+  - Galaxy Map mode button (shows "not yet implemented" message)
+  - Sector Map mode button (fully functional, transitions to sector state)
+  - Combat Mode button (shows "not yet implemented" message)
+  - Proper state validation and UI updates on mode changes
+
+- **Real-Time UI Status Updates**: Automatic UI refresh after game state changes
+  - New `update_ui_state()` method in GameView
+  - Updates ship status (hull, shields, energy) after every action
+  - Updates ship position display after movement
+  - Updates sector name display from sector coordinates
+  - Integrated into all state-changing controller methods
+
+### Changed
+
+- **Zoom Control Integration**: Improved zoom button functionality
+  - Toolbar zoom buttons now call proper GridRenderer methods
+  - `_on_zoom_in()` uses `grid_renderer.zoom_in()`
+  - `_on_zoom_out()` uses `grid_renderer.zoom_out()`
+  - `_on_zoom_reset()` uses `grid_renderer.reset_zoom()`
+  - Status messages show current zoom level
+
+- **Mouse Click Behavior**: Move mode integration with click handler
+  - Controller `handle_mouse_click()` now checks `view.move_mode`
+  - Ship only moves on click when move mode is active
+  - Automatic feedback and mode reset after successful move
+  - Prevents accidental movement from exploration clicks
+
+- **Controller State Management**: Enhanced UI synchronization
+  - `handle_ship_move_request()` now calls `update_ui_state()`
+  - `start_new_game()` initializes all UI elements
+  - `load_game()` refreshes UI after load
+  - `end_turn()` updates UI for new turn state
+
+- **Rotation Button**: Clarified placeholder status
+  - Shows "Rotation not yet implemented" message
+  - Prepared for future orientation system
+
+### Fixed
+
+- **Sector Name Display**: Fixed AttributeError in UI updates
+  - SectorMap doesn't have `name` attribute
+  - Now generates name from coordinates: "Sector X-Y"
+  - Prevents crashes when updating sector label
+
+### Technical Details
+
+- **File Updates**:
+  - `view.py` (v0.0.19): Added move mode, updated all button handlers, added `update_ui_state()`
+  - `controller.py` (v0.0.19): Added mode switching methods, integrated UI updates
+  - `main.py` (v0.0.19): Version bump
+  - `pyproject.toml`: Version bump to 0.0.19
+
+- **Architecture Pattern**: Maintains MVC separation
+  - View handles UI events and user feedback
+  - Controller coordinates between model and view
+  - Model contains pure game logic without UI dependencies
+
+- **User Experience**: Improved interaction flow
+  - Clear visual feedback for all actions
+  - Toggle-based move mode prevents accidental actions
+  - Status messages guide user through game features
+  - Disabled features clearly communicate future availability
+
+### Milestone Progress
+
+**Completed: "Connect UI to Game Logic"**
+
+- ✅ Wire UI action buttons to controller methods
+- ✅ Implement real-time UI updates from game state
+- ✅ Add status panel updates when state changes
+- ✅ Connect movement actions to ship movement on grid
+- ✅ Connect zoom controls to isometric grid view
+- ✅ Implement mode switching between states
+
+**Next Milestone: "Implement Basic Combat System"**
+
+- Weapon firing mechanics with visual feedback
+- Shield and damage calculations
+- Combat resolution with positioning factors
+- Basic AI for enemy ship behavior
+
 ## [0.0.18] - 2025-10-30
 
 ### Added

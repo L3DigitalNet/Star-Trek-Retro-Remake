@@ -116,25 +116,29 @@
 
 ## Milestones
 
+### Current Project Status (v0.0.20 - October 30, 2025)
+
+**Project Phase:** Core Systems Implementation (Pre-Alpha)
+
+**Recently Completed:**
+
+- Basic combat system with weapons, shields, and AI (v0.0.20)
+- UI to game logic connections (v0.0.19)
+- Turn-based game loop with initiative and action points (v0.0.18)
+- Complete PySide6 + pygame-ce UI integration (v0.0.10, v0.0.16, v0.0.18)
+- Isometric grid rendering with z-levels (v0.0.3-v0.0.15)
+- Basic starship entities with visual representation (v0.0.12)
+- Starship movement system with turn integration (v0.0.3-v0.0.18)
+
+**Current Focus:** Ready for resource management system implementation
+
+**Next Major Goal:** Add energy allocation, supplies, crew morale, and maintenance
+
 ### In Progress Milestones
 
-#### Implement Turn-Based Game Loop
-
-- Fixed timestep game loop with input → update → render phases
-- Turn counter and action point system
-- Initiative system for multiple entities
-- State persistence between turns
+Currently none - ready to start next milestone!
 
 ### Next Milestones
-
-#### Connect UI to Game Logic (High Priority)
-
-- Wire UI action buttons to controller methods for ship commands
-- Implement real-time UI updates from game state (hull, shields, energy, position)
-- Add status panel updates when game state changes
-- Connect movement actions to ship movement on grid
-- Connect zoom controls to isometric grid view
-- Implement mode switching between Galaxy/Sector/Combat states
 
 #### Implement Basic Combat System
 
@@ -219,7 +223,84 @@
 
 ### Completed Milestones
 
-#### Basic Map Rendering with Z-Level Support
+#### Implement Basic Combat System (v0.0.20)
+
+- ✅ Weapon firing mechanics with firing arcs and line of sight
+  - 270° forward firing arc for all weapons
+  - Line of sight checking with obstacle detection
+  - Range-based accuracy (85% base, reduced by distance)
+  - Weapon cooldown system (1.0s torpedoes, 0.5s phasers)
+- ✅ Shield and damage calculations with directional facings
+  - Four shield facings (forward, aft, port, starboard)
+  - 25 shield points per facing (100 total)
+  - Automatic facing determination based on attacker position
+  - 85% absorption for energy, 65% for kinetic damage
+- ✅ Combat resolution with positioning and orientation factors
+  - Critical hit system (10% chance, 1.5x damage)
+  - Range modifiers for weapon effectiveness
+  - Action point costs (1 AP phasers, 2 AP torpedoes)
+  - Line of sight and obstruction checking
+- ✅ Basic AI for enemy ship behavior
+  - Simple state machine (PATROL, ATTACK, FLEE)
+  - Target selection with distance and hull scoring
+  - Automatic AI processing during end turn
+  - Flee behavior at 30% hull integrity
+- ✅ Target selection UI with weapon chooser
+  - Target list with ship name, class, and range
+  - Weapon type selection (Phasers/Torpedoes)
+  - Combat feedback messages
+  - "No targets in range" handling
+
+Features implemented:
+
+- Advanced WeaponSystems with firing arcs, line of sight, accuracy
+- Directional ShieldSystems with four facings
+- Combat resolution with critical hits and range modifiers
+- Hull and system damage with degradation
+- AI state machine for NPC ships (patrol, attack, flee)
+- Target selection dialog with weapon chooser
+- Complete combat flow from targeting to damage resolution
+- AI automatic processing during turn advancement
+
+#### Connect UI to Game Logic (v0.0.19)
+
+- ✅ Wire UI action buttons to controller methods for ship commands
+- ✅ Implement real-time UI updates from game state (hull, shields, energy, position)
+- ✅ Add status panel updates when game state changes
+- ✅ Connect movement actions to ship movement on grid (move mode toggle)
+- ✅ Connect zoom controls to isometric grid view (toolbar buttons)
+- ✅ Implement mode switching between Galaxy/Sector/Combat states
+- Features implemented:
+  - Move mode system with toggle button (Move Ship / Cancel Move)
+  - Automatic UI state updates after all game actions
+  - Combat action button handlers (Fire, Scan, Evasive) with placeholders
+  - Utility action button handlers (Dock, Hail) with placeholders
+  - Mode switcher buttons fully connected to state machine
+  - Real-time status panel updates (ship name, hull, shields, energy, position)
+  - Sector name display from coordinates
+  - User feedback messages for all actions
+  - Zoom controls integrated with proper GridRenderer methods
+
+#### Implement Turn-Based Game Loop (v0.0.18)
+
+- ✅ Fixed timestep game loop with input → update → render phases
+- ✅ Turn counter and action point system
+- ✅ Initiative system for multiple entities (higher initiative acts first)
+- ✅ State persistence between turns
+- ✅ Entity registration and turn order management
+- ✅ Action point restoration and consumption
+- ✅ UI integration with turn display and End Turn button
+- ✅ Movement integrated with action point system (1 AP per grid cell)
+- Features implemented:
+  - GameObject base class with initiative and action point attributes
+  - TurnManager with initiative-based sorting and turn advancement
+  - Player ship gets 5 action points and initiative 10
+  - NPC ships get 3 action points and initiative 6-9
+  - Turn phases: input → action → resolution
+  - Automatic turn advancement when action points depleted
+  - Turn information display in UI (turn number, phase, action points)
+
+#### Basic Map Rendering with Z-Level Support (v0.0.3-v0.0.15)
 
 - Implemented grid-based isometric rendering with multi-layer z-level support
 - Features include:
@@ -233,7 +314,7 @@
   - Z-level switching via PageUp/PageDown keys
   - Camera panning with arrow keys
 
-#### Basic Starship Entities
+#### Basic Starship Entities (v0.0.12)
 
 - Created foundational game objects that can be placed and rendered on the isometric grid
 - **Completed Steps:**
@@ -246,7 +327,7 @@
   7. ✅ Multiple starships rendered simultaneously on the map
   8. ✅ Faction-based color coding (Federation blue, Klingon red, Romulan green, etc.)
 
-#### Z-Level Visualization Enhancements
+#### Z-Level Visualization Enhancements (v0.0.13-v0.0.15)
 
 - **Z-Level Reference Lines** (v0.0.13):
   - Vertical dashed lines from ships to their projected position on the active layer
@@ -261,7 +342,7 @@
   - Yellow text with semi-transparent background
   - Provides quick positional context
 
-#### Integrated PySide6 with pygame-ce
+#### Integrated PySide6 with pygame-ce (v0.0.10, v0.0.16, v0.0.18)
 
 - ✅ Embed pygame-ce rendering surface within PySide6 main window (v0.0.10)
 - ✅ Implement MVC separation (game logic independent of UI)
@@ -274,10 +355,12 @@
 - ✅ Add status panels showing ship hull, shields, energy, position
 - ✅ Add organized action buttons (Movement, Combat, Utilities groups)
 - ✅ Implement mini-map placeholder and legend for future navigation
-- ✅ Connect UI signals to placeholder handler methods
+- ✅ Connect UI signals to working handler methods (v0.0.18)
 - ✅ Professional windowed interface with proper Qt widgets
+- ✅ End Turn button connected to turn management system (v0.0.18)
+- ✅ Turn display shows turn number, phase, and action points (v0.0.18)
 
-#### Basic Starship Movement System
+#### Basic Starship Movement System (v0.0.3-v0.0.18)
 
 - ✅ Enable starships to move across the grid with turn-based mechanics
 - ✅ Vector-based movement system with orientation tracking
@@ -286,6 +369,9 @@
 - ✅ Diagonal movement support (up-right, down-left, etc.)
 - ✅ Movement cost calculations based on the Pythagorean theorem
 - ✅ Distance-based and environment-aware movement costs
+- ✅ Movement integrated with action point system (v0.0.18)
+- ✅ Click-to-move functionality from UI (v0.0.3)
+- ✅ Automatic turn advancement when movement depletes action points (v0.0.18)
 
 ## CRITICAL TODO LIST
 
@@ -362,8 +448,8 @@ Star Trek fans, strategy game enthusiasts, and players who enjoy turn-based tact
 
 ### 1.3 Platform and Technical Requirements
 
-- PC (Linux initially, with potential for Windows in the future)
-- Developed using Python with pygame-ce (Community Edition) for game engine and PySide6 for UI
+- **Linux Only**: PC (Linux exclusively - no Windows or macOS support planned)
+- Developed using Python 3.14+ with pygame-ce (Community Edition) for game engine and PySide6 for UI
 
 ### 1.4 Competitive Analysis
 
@@ -1098,8 +1184,8 @@ This hybrid architecture provides:
 
 ### 9.2 Platform Requirements
 
-- Initial release will target Linux platforms
-- Future plans may include support for Windows and macOS platforms
+- **Linux Only**: All development targets Linux exclusively
+- No Windows or macOS support planned - code and design are Linux-specific
 
 ### 9.3 Performance Requirements
 

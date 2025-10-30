@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Game Controller
 
@@ -11,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025 (v0.0.18 - Turn-based system)
+Date Changed: 10-31-2025
 License: MIT
 
 Features:
@@ -19,6 +18,8 @@ Features:
     - Input handling and event processing
     - Game state management and transitions
     - Command processing and validation
+    - Combat action coordination with targeting
+    - Target selection and weapon firing
 
 Requirements:
     - Linux environment
@@ -32,21 +33,21 @@ Functions:
     - None
 """
 
-from typing import Final, TYPE_CHECKING
 import logging
+from typing import TYPE_CHECKING, Final
 
 import pygame
 
-from .states.state_machine import GameStateManager, GameMode
-from .states.sector_state import SectorState
 from .entities.base import GridPosition
+from .states.sector_state import SectorState
+from .states.state_machine import GameMode, GameStateManager
 
 if TYPE_CHECKING:
+    from .entities.starship import Starship
     from .model import GameModel
     from .view import GameView
-    from .entities.starship import Starship
 
-__version__: Final[str] = "0.0.18"
+__version__: Final[str] = "0.0.21"
 
 logger = logging.getLogger(__name__)
 
@@ -126,9 +127,7 @@ class GameController:
         Args:
             destination: Target position for movement
         """
-        if not self.model.player_ship:
-            return
-
+        # player_ship is guaranteed to exist after start_new_game()
         # Execute movement through model
         success = self.model.execute_move(self.model.player_ship, destination)
 
@@ -139,6 +138,10 @@ class GameController:
             self.view.render_sector_map(
                 self.model.current_sector, self.model.game_objects
             )
+            # Update UI elements (ship status, position, etc.)
+            self.view.update_ui_state()
+            # Update turn display
+            self._update_turn_display()
 
     def handle_combat_action(self, target: "Starship", weapon_type: str) -> None:
         """
@@ -146,17 +149,37 @@ class GameController:
 
         Args:
             target: Target starship
-            weapon_type: Type of weapon to use
+            weapon_type: Type of weapon to use (phaser or torpedo)
         """
-        if not self.model.player_ship:
-            return
-
+        # player_ship is guaranteed to exist after start_new_game()
         # Resolve combat through model
         result = self.model.resolve_combat(self.model.player_ship, target, weapon_type)
 
         # Display result through view
         if self.view:
-            self.view.show_combat_dialog(result)
+            if result.success:
+                self.view.show_message(result.message)
+                # Update view after combat
+                self.view.render_sector_map(
+                    self.model.current_sector, self.model.game_objects
+                )
+                self.view.update_ui_state()
+                self._update_turn_display()
+            else:
+                self.view.show_message(f"Attack failed: {result.message}")
+
+    def get_available_targets(self, weapon_type: str = "phaser") -> list["Starship"]:
+        """
+        Get list of available targets for player's current weapon.
+
+        Args:
+            weapon_type: Type of weapon to consider for targeting
+
+        Returns:
+            List of targetable enemy ships
+        """
+        # player_ship is guaranteed to exist after start_new_game()
+        return self.model.get_potential_targets(self.model.player_ship, weapon_type)
 
     def start_new_game(self) -> None:
         """Initialize and start a new game."""
@@ -171,6 +194,8 @@ class GameController:
             self.view.render_sector_map(
                 self.model.current_sector, self.model.game_objects
             )
+            # Update all UI elements
+            self.view.update_ui_state()
             # Update turn information display
             self._update_turn_display()
 
@@ -203,6 +228,9 @@ class GameController:
             self.view.render_sector_map(
                 self.model.current_sector, self.model.game_objects
             )
+            # Update all UI elements
+            self.view.update_ui_state()
+            # Update turn information display
             self._update_turn_display()
 
         return success
@@ -211,16 +239,93 @@ class GameController:
         """
         End the current entity's turn and advance to next.
 
-        Updates the view to reflect new turn state.
+        Processes AI turns for NPCs and updates the view.
         """
+        from .entities.starship import Starship
+
         self.model.end_current_turn()
+
+        # Process AI turns until it's player's turn again
+        self._process_ai_turns()
 
         # Update view with new turn information
         if self.view:
             self.view.render_sector_map(
                 self.model.current_sector, self.model.game_objects
             )
+            # Update all UI elements
+            self.view.update_ui_state()
+            # Update turn information display
             self._update_turn_display()
+
+    def _process_ai_turns(self) -> None:
+        """
+        Process AI turns until it's the player's turn.
+
+        Runs AI logic for all NPC ships in turn order.
+        """
+        # Get current entity from turn manager
+        current_entity = self.model.turn_manager.get_current_entity()
+
+        # Keep processing AI turns until player's turn
+        # Safety limit scales with total entity count
+        total_entities = len(self.model.turn_manager.entities)
+        max_ai_turns = max(20, total_entities * 2)  # At least 20, or 2x entity count
+        turns_processed = 0
+
+        while current_entity and isinstance(current_entity, Starship):
+            # Stop if it's the player's turn
+            if current_entity.is_player:
+                break
+
+            # Stop if safety limit reached (prevents infinite loops)
+            if turns_processed >= max_ai_turns:
+                logger.warning(f"AI turn limit reached ({max_ai_turns}), breaking loop")
+                break
+
+            # Process AI turn if ship has AI controller
+            if current_entity.ai_controller:
+                self.model.process_ai_turn(current_entity)
+
+            # Advance to next entity
+            self.model.turn_manager.next_entity()
+            current_entity = self.model.turn_manager.get_current_entity()
+            turns_processed += 1
+
+    def switch_to_galaxy_mode(self) -> None:
+        """
+        Switch to Galaxy Map mode.
+
+        Transitions the game state to galaxy-level strategic view.
+        """
+        logger.info("Switching to Galaxy Map mode")
+        # TODO: Implement galaxy map state and rendering (future milestone)
+        if self.view:
+            self.view.show_message("Galaxy Map not yet implemented")
+
+    def switch_to_sector_mode(self) -> None:
+        """
+        Switch to Sector Map mode.
+
+        Transitions the game state to sector-level tactical view.
+        """
+        logger.info("Switching to Sector Map mode")
+        self.state_manager.transition_to(GameMode.SECTOR_MAP)
+        if self.view:
+            self.view.render_sector_map(
+                self.model.current_sector, self.model.game_objects
+            )
+
+    def switch_to_combat_mode(self) -> None:
+        """
+        Switch to Combat mode.
+
+        Transitions the game state to combat-focused view.
+        """
+        logger.info("Switching to Combat mode")
+        # TODO: Implement combat mode state and rendering (next milestone)
+        if self.view:
+            self.view.show_message("Combat Mode not yet implemented")
 
     def _setup_states(self) -> None:
         """Initialize game states."""
@@ -266,10 +371,14 @@ class GameController:
         # Update view selection
         self.view.set_selected_cell(grid_pos)
 
-        # Attempt to move player ship to clicked position
-        if self.model.player_ship:
-            logger.debug(f"Attempting to move ship to {grid_pos}")
+        # If move mode is active, attempt to move player ship
+        if self.view.move_mode and self.model.player_ship:
+            logger.debug(f"Move mode: Attempting to move ship to {grid_pos}")
             self.handle_ship_move_request(grid_pos)
+            # Deactivate move mode after successful click
+            self.view.move_mode = False
+            self.view.move_btn.setText("Move Ship")
+            self.view.show_message(f"Moving to position {grid_pos}")
 
     def handle_keypress(self, key: int) -> None:
         """

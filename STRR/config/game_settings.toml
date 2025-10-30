@@ -24,6 +24,24 @@ turn_timer = 30                # Turn time limit in seconds (0 = unlimited)
 galaxy = [10, 10]              # Galaxy map dimensions [width, height]
 sector = [20, 20, 5]           # Sector map dimensions [width, height, z-levels]
 
+[game.combat]
+# Weapon system settings
+weapon_firing_arc = 270        # Default firing arc in degrees
+weapon_accuracy_base = 0.85    # Base weapon accuracy (0.0 - 1.0)
+weapon_range_penalty = 0.4     # Accuracy penalty at max range (0.0 - 1.0)
+critical_hit_chance = 0.1      # Chance of critical hit (0.0 - 1.0)
+critical_hit_multiplier = 1.5  # Damage multiplier for critical hits
+
+# Shield system settings
+shield_energy_effectiveness = 0.85  # Shield effectiveness vs energy weapons (0.0 - 1.0)
+shield_kinetic_effectiveness = 0.65 # Shield effectiveness vs kinetic weapons (0.0 - 1.0)
+shield_min_absorption = 0.1    # Minimum damage absorbed by active shields (0.0 - 1.0)
+
+# AI behavior settings
+ai_patrol_radius = 5           # Patrol radius in grid cells
+ai_flee_threshold = 30.0       # Hull integrity % to trigger flee behavior
+ai_enemy_cache_turns = 3       # Turns to cache enemy list before refresh
+
 [audio]
 master_volume = 0.8            # Master audio volume (0.0 - 1.0)
 music_volume = 0.6             # Background music volume

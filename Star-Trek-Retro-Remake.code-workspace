@@ -4,5 +4,18 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.black-formatter",
+			"editor.formatOnSave": true,
+			"editor.codeActionsOnSave": {
+				"source.organizeImports.ruff": "explicit"
+			}
+		},
+		"ruff.enable": true,
+		"ruff.organizeImports": true,
+		"pyright.disableLanguageServices": false,
+		"pyright.useLibraryCodeForTypes": true,
+		"pyright.typeCheckingMode": "basic"
+	}
 }

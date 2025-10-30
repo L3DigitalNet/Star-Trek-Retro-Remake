@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Starship Entity
 
@@ -17,6 +16,8 @@ License: MIT
 Features:
     - Component composition for ship systems
     - Modular weapon, shield, engine, and sensor systems
+    - Directional shields with facing system
+    - Advanced damage system with hull and system damage
     - Crew and resource management
     - Damage and repair mechanics
 
@@ -32,19 +33,22 @@ Functions:
     - None
 """
 
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
-from .base import GameObject, GridPosition
 from ..components.ship_systems import (
+    EngineSystems,
+    LifeSupportSystems,
+    SensorSystems,
+    ShieldSystems,
     ShipSystem,
     WeaponSystems,
-    ShieldSystems,
-    EngineSystems,
-    SensorSystems,
-    LifeSupportSystems,
 )
+from .base import GameObject, GridPosition
 
-__version__: Final[str] = "0.0.12"
+if TYPE_CHECKING:
+    from ..ai.ship_ai import ShipAI
+
+__version__: Final[str] = "0.0.20"
 
 
 class Starship(GameObject):
@@ -64,15 +68,19 @@ class Starship(GameObject):
         orientation: Current facing direction (0-359 degrees)
         color: RGB color tuple for rendering
         size: Base size in pixels for rendering
+        ai_controller: AI controller for NPC ships (None for player ship)
+        is_player: Whether this is the player's ship
 
     Public methods:
         get_system: Retrieve a specific ship system
         take_damage: Apply damage to ship systems and hull
         repair_system: Repair a damaged ship system
         get_orientation_radians: Get orientation in radians for rendering
+        set_ai_controller: Attach AI controller to this ship
 
     Private methods:
         _get_faction_color: Determine color based on faction
+        _apply_system_damage: Apply damage to systems when hull critical
     """
 
     def __init__(
@@ -81,6 +89,7 @@ class Starship(GameObject):
         ship_class: str,
         name: str = "",
         faction: str = "Federation",
+        is_player: bool = False,
     ):
         """
         Initialize a new starship.
@@ -90,10 +99,12 @@ class Starship(GameObject):
             ship_class: Ship class designation
             name: Ship name
             faction: Faction affiliation (Federation, Klingon, Romulan, etc.)
+            is_player: Whether this is the player's ship
         """
         super().__init__(position, name)
         self.ship_class = ship_class
         self.faction = faction
+        self.is_player = is_player
 
         # Initialize ship systems using component composition
         self.systems: dict[str, ShipSystem] = {
@@ -115,6 +126,9 @@ class Starship(GameObject):
         # Visual representation attributes
         self.color = self._get_faction_color(faction)
         self.size = 16  # Base size in pixels for rendering
+
+        # AI controller (None for player ship)
+        self.ai_controller: "ShipAI | None" = None
 
     def _get_faction_color(self, faction: str) -> tuple[int, int, int]:
         """
@@ -150,24 +164,82 @@ class Starship(GameObject):
         """
         return self.systems.get(system_name)
 
-    def take_damage(self, amount: int, damage_type: str = "kinetic") -> None:
+    def take_damage(
+        self,
+        amount: int,
+        damage_type: str = "energy",
+        attacker_pos: GridPosition | None = None,
+    ) -> dict[str, int | str]:
         """
         Apply damage to ship systems and hull.
 
         Args:
             amount: Amount of damage to apply
             damage_type: Type of damage (kinetic, energy, etc.)
+            attacker_pos: Position of attacker for shield facing calculation
+
+        Returns:
+            Dictionary with damage results (shields_absorbed, hull_damage, facing_hit)
         """
+        result: dict[str, int | str] = {
+            "shields_absorbed": 0,
+            "hull_damage": 0,
+            "facing_hit": "unknown",
+        }
+
         # Shield absorption first
         shields = self.get_system("shields")
         if shields and shields.active:
-            amount = shields.absorb_damage(amount, damage_type)
+            remaining = shields.absorb_damage(
+                amount,
+                damage_type,
+                ship_orientation=self.orientation,
+                attacker_pos=attacker_pos,
+                ship_pos=self.position,
+            )
+            result["shields_absorbed"] = amount - remaining
+            amount = remaining
+
+            # Determine which facing was hit for reporting
+            if attacker_pos:
+                result["facing_hit"] = shields._determine_hit_facing(
+                    self.position, attacker_pos, self.orientation
+                )
 
         # Apply remaining damage to hull
         if amount > 0:
             self.hull_integrity = max(0, self.hull_integrity - amount)
+            result["hull_damage"] = amount
+
+            # Check for critical damage to systems
+            if self.hull_integrity < 50:
+                self._apply_system_damage(amount)
+
+            # Destroy ship if hull fails
             if self.hull_integrity <= 0:
                 self.destroy()
+
+        return result
+
+    def _apply_system_damage(self, hull_damage: int) -> None:
+        """
+        Apply damage to ship systems when hull is critically damaged.
+
+        Args:
+            hull_damage: Amount of hull damage taken
+        """
+        import random
+
+        # Chance of system damage increases as hull weakens
+        damage_chance = 0.3 + (1.0 - self.hull_integrity / 100.0) * 0.4
+
+        if random.random() < damage_chance:
+            # Select random system to damage
+            system_names = list(self.systems.keys())
+            if system_names:
+                damaged_system = random.choice(system_names)
+                system = self.systems[damaged_system]
+                system.damage(hull_damage * 0.1)  # System takes 10% of hull damage
 
     def repair_system(self, system_name: str, repair_amount: float) -> bool:
         """
@@ -196,6 +268,15 @@ class Starship(GameObject):
         import math
 
         return math.radians(self.orientation)
+
+    def set_ai_controller(self, ai: "ShipAI") -> None:
+        """
+        Attach AI controller to this ship.
+
+        Args:
+            ai: AI controller instance
+        """
+        self.ai_controller = ai
 
 
 class SpaceStation(GameObject):

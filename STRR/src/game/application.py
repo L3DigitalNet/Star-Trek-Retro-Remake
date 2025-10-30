@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Game Application
 
@@ -48,7 +47,7 @@ from .controller import GameController
 from .model import GameModel
 from .view import GameView
 
-__version__: Final[str] = "0.0.10"
+__version__: Final[str] = "0.0.21"
 
 
 class StarTrekRetroRemake:

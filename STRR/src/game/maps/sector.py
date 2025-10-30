@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Sector Map
 
@@ -31,7 +30,7 @@ Functions:
 """
 
 import random
-from typing import Final, Optional, Tuple, List, Dict
+from typing import Dict, Final, List, Optional, Tuple
 
 from ..entities.base import GridPosition
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Star Trek Retro Remake - Custom Exceptions
+Star Trek Retro Remake - Game Exceptions
 
 Description:
     Custom exception classes for game-specific error handling.

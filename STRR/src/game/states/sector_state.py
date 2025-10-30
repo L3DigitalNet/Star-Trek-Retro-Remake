@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Star Trek Retro Remake - Sector Map State
+Star Trek Retro Remake - Sector State
 
 Description:
     Game state for sector exploration and navigation.
@@ -29,11 +28,11 @@ Functions:
     - None
 """
 
-from typing import Final, TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import pygame
 
-from .state_machine import GameState, GameMode
+from .state_machine import GameMode, GameState
 
 if TYPE_CHECKING:
     from .state_machine import GameStateManager
@@ -56,7 +55,7 @@ class SectorState(GameState):
         render: Render sector view
     """
 
-    def __init__(self, state_manager: 'GameStateManager'):
+    def __init__(self, state_manager: "GameStateManager"):
         """
         Initialize the sector state.
 

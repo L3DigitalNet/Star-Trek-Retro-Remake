@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Game Model
 
@@ -11,13 +10,17 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025 (v0.0.18 - Turn-based system)
+Date Changed: 10-31-2025 (v0.0.21 - Bug fixes and configuration)
 License: MIT
 
 Features:
     - Pure game logic with no UI dependencies
     - Galaxy and sector map management
-    - Turn-based game mechanics
+    - Turn-based game mechanics with action points
+    - Advanced combat system with weapons and shields
+    - Line of sight and firing arc calculations
+    - Directional shield system with facings
+    - Critical hit system and range modifiers
     - Starship and entity management
     - Mission and event systems
     - Save/load game state functionality
@@ -35,15 +38,15 @@ Functions:
     - None
 """
 
-from typing import Final
 from dataclasses import dataclass
+from typing import Final
 
+from .entities.base import GameObject, GridPosition
 from .entities.starship import Starship
-from .entities.base import GridPosition, GameObject
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.18"
+__version__: Final[str] = "0.0.21"
 
 
 @dataclass
@@ -208,9 +211,19 @@ class TurnManager:
 
     def _process_ai_turns(self) -> None:
         """Process AI entity turns and actions."""
-        # AI processing logic will be implemented in future milestone
-        # For now, AI entities will skip their turn
-        pass
+        from .entities.starship import Starship
+
+        # Get current entity
+        current_entity = (
+            self.turn_order[self.current_entity_index] if self.turn_order else None
+        )
+
+        if current_entity and isinstance(current_entity, Starship):
+            # Check if entity has AI controller
+            if current_entity.ai_controller and not current_entity.is_player:
+                # Let AI make decisions and act
+                # AI will use action points and may end turn early
+                pass  # AI updates are called from GameModel now
 
     def _sort_by_initiative(self) -> None:
         """Sort active entities by initiative (highest first)."""
@@ -299,6 +312,9 @@ class GameModel:
         # Add test ships for milestone demonstration
         self._add_test_ships()
 
+        # Initialize AI for NPC ships
+        self._initialize_ai()
+
         # Start first turn
         self.turn_manager.advance_turn()
 
@@ -376,27 +392,137 @@ class GameModel:
         Args:
             attacker: The attacking starship
             target: The target starship
-            weapon_type: Type of weapon being used
+            weapon_type: Type of weapon being used (phaser or torpedo)
 
         Returns:
             CombatResult containing the outcome
         """
+        import random
+
         # Get attacker's weapon system
         weapons = attacker.get_system("weapons")
         if not weapons or not weapons.active:
-            return CombatResult(False, "Weapons offline")
+            return CombatResult(False, "Weapons offline", 0)
 
-        # Check targeting capability
+        # Check action points
+        action_cost = 2 if weapon_type == "torpedo" else 1
+        if not attacker.has_action_points(action_cost):
+            return CombatResult(False, "Insufficient action points", 0)
+
+        # Check targeting capability (range and arc)
         if not weapons.can_target(
-            target.position, attacker.position, attacker.orientation
+            target.position, attacker.position, attacker.orientation, weapon_type
         ):
-            return CombatResult(False, "Target out of range")
+            return CombatResult(False, "Target out of range or arc", 0)
 
-        # Calculate and apply damage
-        damage = weapons.calculate_damage(weapon_type, target)
-        target.take_damage(damage)
+        # Check line of sight
+        obstacles = [
+            obj
+            for obj in self.game_objects
+            if obj != attacker and obj != target and obj.active
+        ]
+        if not weapons.check_line_of_sight(
+            attacker.position, target.position, obstacles
+        ):
+            return CombatResult(False, "Line of sight blocked", 0)
 
-        return CombatResult(True, f"Hit for {damage} damage", damage)
+        # Fire weapon
+        if not weapons.fire_weapon(weapon_type):
+            return CombatResult(False, f"Unable to fire {weapon_type}", 0)
+
+        # Calculate hit chance
+        distance = attacker.position.distance_to(target.position)
+        hit_chance = weapons.get_hit_chance(distance, weapon_type)
+
+        # Roll for hit
+        roll = random.random()
+        if roll > hit_chance:
+            # Miss
+            attacker.spend_action_points(action_cost)
+            return CombatResult(False, f"{weapon_type.capitalize()} missed target", 0)
+
+        # Calculate damage
+        damage = weapons.calculate_damage(weapon_type, distance, target)
+
+        # Load combat config for critical hits
+        from .components.ship_systems import WeaponSystems
+
+        config = WeaponSystems._load_combat_config()
+        crit_chance = config.get("critical_hit_chance", 0.1)
+        crit_multiplier = config.get("critical_hit_multiplier", 1.5)
+
+        # Check for critical hit (from config)
+        is_critical = random.random() < crit_chance
+        if is_critical:
+            damage = int(damage * crit_multiplier)
+
+        # Apply damage to target
+        damage_type = "energy" if weapon_type == "phaser" else "kinetic"
+        damage_result = target.take_damage(damage, damage_type, attacker.position)
+
+        # Deduct action points
+        attacker.spend_action_points(action_cost)
+
+        # Check if attacker's turn is over
+        if attacker.action_points <= 0:
+            self.turn_manager.next_entity()
+
+        # Build result message
+        crit_text = " (CRITICAL HIT)" if is_critical else ""
+        shield_text = (
+            f" (shields absorbed {damage_result['shields_absorbed']})"
+            if damage_result["shields_absorbed"] > 0
+            else ""
+        )
+        hull_text = (
+            f" hull damage: {damage_result['hull_damage']}"
+            if damage_result["hull_damage"] > 0
+            else ""
+        )
+        facing_text = (
+            f" {damage_result['facing_hit']} shields"
+            if damage_result["facing_hit"] != "unknown"
+            else ""
+        )
+
+        message = f"{weapon_type.capitalize()} hit{crit_text}!{facing_text}{shield_text}{hull_text}"
+
+        return CombatResult(True, message, damage)
+
+    def get_potential_targets(
+        self, attacker: Starship, weapon_type: str = "phaser"
+    ) -> list[Starship]:
+        """
+        Get list of valid targets for a ship.
+
+        Args:
+            attacker: Ship looking for targets
+            weapon_type: Type of weapon to consider for range
+
+        Returns:
+            List of targetable enemy ships
+        """
+        weapons = attacker.get_system("weapons")
+        if not weapons or not weapons.active:
+            return []
+
+        targets: list[Starship] = []
+
+        # Find all enemy ships in range
+        for obj in self.game_objects:
+            if isinstance(obj, Starship) and obj.active and obj != attacker:
+                # Check if different faction (enemy)
+                if obj.faction != attacker.faction:
+                    # Check if in range and arc
+                    if weapons.can_target(
+                        obj.position,
+                        attacker.position,
+                        attacker.orientation,
+                        weapon_type,
+                    ):
+                        targets.append(obj)
+
+        return targets
 
     def save_game(self, filepath: str) -> bool:
         """
@@ -435,10 +561,7 @@ class GameModel:
         Returns:
             True if move is valid, False otherwise
         """
-        # Explicit check for current sector (defensive programming for early version)
-        if not self.current_sector:
-            return False
-
+        # current_sector is guaranteed to exist after initialize_new_game()
         # Check sector bounds
         if not self.current_sector.is_in_bounds(destination):
             return False
@@ -459,7 +582,9 @@ class GameModel:
         Returns:
             Configured player starship
         """
-        return Starship(position, "Constitution", "Enterprise", "Federation")
+        return Starship(
+            position, "Constitution", "Enterprise", "Federation", is_player=True
+        )
 
     def _add_test_ships(self) -> None:
         """
@@ -500,6 +625,32 @@ class GameModel:
             # Register ship with turn manager for combat
             self.turn_manager.register_entity(ship)
 
+    def _initialize_ai(self) -> None:
+        """
+        Initialize AI controllers for NPC ships.
+
+        Creates and attaches AI controllers to all non-player ships.
+        """
+        from .ai.ship_ai import ShipAI
+        from .entities.starship import Starship
+
+        for obj in self.game_objects:
+            if isinstance(obj, Starship) and not obj.is_player:
+                # Create and attach AI controller
+                ai = ShipAI(obj)
+                obj.set_ai_controller(ai)
+
+    def process_ai_turn(self, ship: Starship) -> None:
+        """
+        Process one turn for an AI-controlled ship.
+
+        Args:
+            ship: AI-controlled starship
+        """
+        if ship.ai_controller:
+            ship.ai_controller.update(self)
+            self.turn_manager.register_entity(ship)
+
     def end_current_turn(self) -> None:
         """
         Manually end the current entity's turn.
@@ -533,16 +684,7 @@ class GameModel:
         """
         Remove destroyed objects from game to prevent memory leaks.
 
-        Filters out all game objects where active=False. Uses isinstance
-        check to ensure type safety.
+        Filters out all game objects where active=False. All objects in
+        game_objects list are guaranteed to be GameObject instances.
         """
-        initial_count = len(self.game_objects)
-        self.game_objects = [
-            obj
-            for obj in self.game_objects
-            if isinstance(obj, GameObject) and obj.active
-        ]
-        removed_count = initial_count - len(self.game_objects)
-
-        if removed_count > 0:
-            pass  # Cleanup logging deferred until v1.0.0
+        self.game_objects = [obj for obj in self.game_objects if obj.active]

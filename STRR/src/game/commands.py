@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Command Pattern
 
@@ -42,7 +41,7 @@ from .entities.base import GridPosition
 from .entities.starship import Starship
 from .exceptions import InvalidMoveError
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.21"
 
 logger = logging.getLogger(__name__)
 
@@ -188,7 +187,9 @@ class MoveShipCommand(Command):
             ship: Starship to move
             destination: Target position
         """
-        super().__init__(f"Move {ship.name} to ({destination.x}, {destination.y}, {destination.z})")
+        super().__init__(
+            f"Move {ship.name} to ({destination.x}, {destination.y}, {destination.z})"
+        )
         self.ship = ship
         self.destination = destination
         self.previous_position: Optional[GridPosition] = None
@@ -203,12 +204,10 @@ class MoveShipCommand(Command):
         """
         # Store previous state
         self.previous_position = GridPosition(
-            self.ship.position.x,
-            self.ship.position.y,
-            self.ship.position.z
+            self.ship.position.x, self.ship.position.y, self.ship.position.z
         )
 
-        engines = self.ship.get_system('engines')
+        engines = self.ship.get_system("engines")
         if engines:
             self.previous_fuel = engines.fuel
 
@@ -223,7 +222,7 @@ class MoveShipCommand(Command):
                     "Insufficient fuel",
                     ship=self.ship.name,
                     required=fuel_cost,
-                    available=engines.fuel
+                    available=engines.fuel,
                 )
 
             # Execute move
@@ -247,7 +246,7 @@ class MoveShipCommand(Command):
         self.ship.position = self.previous_position
 
         # Restore fuel
-        engines = self.ship.get_system('engines')
+        engines = self.ship.get_system("engines")
         if engines:
             engines.fuel = self.previous_fuel
 
@@ -284,9 +283,7 @@ class FireWeaponCommand(Command):
             target: Target starship
             weapon_type: Type of weapon to fire
         """
-        super().__init__(
-            f"{attacker.name} fires {weapon_type} at {target.name}"
-        )
+        super().__init__(f"{attacker.name} fires {weapon_type} at {target.name}")
         self.attacker = attacker
         self.target = target
         self.weapon_type = weapon_type
@@ -304,20 +301,23 @@ class FireWeaponCommand(Command):
         self.previous_target_hull = self.target.hull_integrity
 
         # Get weapon system
-        weapons = self.attacker.get_system('weapons')
+        weapons = self.attacker.get_system("weapons")
         if not weapons or not weapons.active:
             return False
 
         # Check targeting
         if not weapons.can_target(
-            self.target.position,
-            self.attacker.position,
-            self.attacker.orientation
+            self.target.position, self.attacker.position, self.attacker.orientation
         ):
             return False
 
+        # Calculate distance for damage calculation
+        distance = self.attacker.position.distance_to(self.target.position)
+
         # Calculate and apply damage
-        self.damage_dealt = weapons.calculate_damage(self.weapon_type, self.target)
+        self.damage_dealt = weapons.calculate_damage(
+            self.weapon_type, distance, self.target
+        )
         self.target.take_damage(self.damage_dealt)
 
         # Fire weapon (consumes ammo if torpedo)
@@ -341,7 +341,7 @@ class FireWeaponCommand(Command):
 
         # Restore ammo if torpedo was fired
         if self.weapon_type == "torpedo":
-            weapons = self.attacker.get_system('weapons')
+            weapons = self.attacker.get_system("weapons")
             if weapons:
                 weapons.torpedo_count += 1
 

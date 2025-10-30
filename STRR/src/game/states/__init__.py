@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Star Trek Retro Remake - Game States Package
+Star Trek Retro Remake - States Package
 
 Description:
     Game state management package implementing the State Machine pattern

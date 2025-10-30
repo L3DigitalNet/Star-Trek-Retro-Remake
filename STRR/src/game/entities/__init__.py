@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Entities Package
 
@@ -15,14 +14,14 @@ License: MIT
 
 from typing import Final
 
-from .base import GridPosition, GameObject
-from .starship import Starship, SpaceStation
+from .base import GameObject, GridPosition
+from .starship import SpaceStation, Starship
 
 __version__: Final[str] = "0.0.1"
 
 __all__ = [
-    'GridPosition',
-    'GameObject',
-    'Starship',
-    'SpaceStation',
+    "GridPosition",
+    "GameObject",
+    "Starship",
+    "SpaceStation",
 ]

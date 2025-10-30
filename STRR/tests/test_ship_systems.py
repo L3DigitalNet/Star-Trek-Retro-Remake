@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-30-2025
-Date Changed: 10-30-2025
+Date Changed: 01-27-2025
 License: MIT
 
 Test Coverage:
@@ -217,24 +217,26 @@ class TestWeaponSystems:
         # Arrange
         weapons = WeaponSystems()
         target = Mock()
+        distance = 0.0  # Point blank range
 
         # Act
-        damage = weapons.calculate_damage("phaser", target)
+        damage = weapons.calculate_damage("phaser", distance, target)
 
         # Assert
-        assert damage == 10
+        assert damage == 15  # Base phaser damage at point blank
 
     def test_calculate_damage_torpedo(self):
         """Test torpedo damage calculation."""
         # Arrange
         weapons = WeaponSystems()
         target = Mock()
+        distance = 0.0  # Point blank range
 
         # Act
-        damage = weapons.calculate_damage("torpedo", target)
+        damage = weapons.calculate_damage("torpedo", distance, target)
 
         # Assert
-        assert damage == 25
+        assert damage == 30  # Base torpedo damage
 
     def test_calculate_damage_with_reduced_efficiency(self):
         """Test damage calculation with damaged weapons."""
@@ -242,12 +244,13 @@ class TestWeaponSystems:
         weapons = WeaponSystems()
         weapons.efficiency = 0.5
         target = Mock()
+        distance = 0.0  # Point blank range
 
         # Act
-        damage = weapons.calculate_damage("phaser", target)
+        damage = weapons.calculate_damage("phaser", distance, target)
 
         # Assert
-        assert damage == 5
+        assert damage == 7  # 15 * 0.5 efficiency = 7.5 -> 7
 
     def test_fire_weapon_phaser_success(self):
         """Test successful phaser firing."""
@@ -316,9 +319,13 @@ class TestShieldSystems:
 
         # Assert
         assert shields.name == "Shields"
-        assert shields.shield_strength == 100.0
+        assert shields.total_shield_strength == 100.0
         assert shields.max_shield_strength == 100.0
-        assert shields.recharge_rate == 5.0
+        assert shields.recharge_rate == 2.0  # Per facing per second
+        assert len(shields.shield_facings) == 4
+        assert all(
+            shields.shield_facings[facing] == 25.0 for facing in shields.facing_names
+        )
 
     def test_absorb_damage_energy_type(self):
         """Test shield absorption of energy damage."""
@@ -326,12 +333,15 @@ class TestShieldSystems:
         shields = ShieldSystems()
         incoming_damage = 50
 
-        # Act
+        # Act - hits forward facing by default
         remaining_damage = shields.absorb_damage(incoming_damage, "energy")
 
-        # Assert
-        assert remaining_damage == 10  # 50 - (50 * 0.8)
-        assert shields.shield_strength == 60.0  # 100 - 40
+        # Assert - energy effectiveness is 0.85, so absorbs 42.5
+        # Forward facing had 25.0, so absorbs 25.0 and takes it down to 0
+        # Remaining: 50 - 25 = 25
+        assert remaining_damage == 25
+        assert shields.shield_facings["forward"] == 0.0
+        assert shields.total_shield_strength == 75.0  # 25 * 3 remaining facings
 
     def test_absorb_damage_kinetic_type(self):
         """Test shield absorption of kinetic damage."""
@@ -339,18 +349,23 @@ class TestShieldSystems:
         shields = ShieldSystems()
         incoming_damage = 50
 
-        # Act
+        # Act - hits forward facing by default
         remaining_damage = shields.absorb_damage(incoming_damage, "kinetic")
 
-        # Assert
-        assert remaining_damage == 20  # 50 - (50 * 0.6)
-        assert shields.shield_strength == 70.0  # 100 - 30
+        # Assert - kinetic effectiveness is 0.65, would absorb 32.5
+        # But forward facing only has 25.0, so absorbs only 25.0
+        # Remaining: 50 - 25 = 25
+        assert remaining_damage == 25
+        assert shields.shield_facings["forward"] == 0.0
+        assert shields.total_shield_strength == 75.0
 
     def test_absorb_damage_when_shields_depleted(self):
         """Test damage absorption with depleted shields."""
         # Arrange
         shields = ShieldSystems()
-        shields.shield_strength = 0.0
+        # Deplete all shield facings
+        for facing in shields.facing_names:
+            shields.shield_facings[facing] = 0.0
         incoming_damage = 50
 
         # Act
@@ -358,7 +373,7 @@ class TestShieldSystems:
 
         # Assert
         assert remaining_damage == 50
-        assert shields.shield_strength == 0.0
+        assert shields.total_shield_strength == 0.0
 
     def test_absorb_damage_when_shields_inactive(self):
         """Test damage absorption with inactive shields."""
@@ -377,52 +392,65 @@ class TestShieldSystems:
         """Test manual shield recharge."""
         # Arrange
         shields = ShieldSystems()
-        shields.shield_strength = 50.0
+        # Damage forward facing
+        shields.shield_facings["forward"] = 10.0
+        # Starting total: 10 + 25 + 25 + 25 = 85
 
-        # Act
-        shields.recharge_shields(25.0)
+        # Act - recharge 8.0 distributed across 4 facings = 2.0 each
+        shields.recharge_shields(8.0)
 
         # Assert
-        assert shields.shield_strength == 75.0
+        assert shields.shield_facings["forward"] == 12.0  # 10 + 2
+        # Other facings cap at 25, so: 12 + 25 + 25 + 25 = 87
+        assert shields.total_shield_strength == 87.0
 
     def test_recharge_shields_caps_at_max(self):
-        """Test shield recharge doesn't exceed maximum."""
+        """Test shield recharge doesn't exceed maximum per facing."""
         # Arrange
         shields = ShieldSystems()
-        shields.shield_strength = 90.0
+        shields.shield_facings["forward"] = 23.0
+        # Starting: 23 + 25 + 25 + 25 = 98
 
-        # Act
+        # Act - try to add 50.0, distributed = 12.5 per facing
         shields.recharge_shields(50.0)
 
-        # Assert
-        assert shields.shield_strength == 100.0
+        # Assert - each facing caps at 25.0
+        assert (
+            shields.shield_facings["forward"] == 25.0
+        )  # 23 + 12.5 = 35.5 capped at 25
+        assert shields.total_shield_strength == 100.0  # All facings at max
 
     def test_shield_update_recharges_over_time(self):
         """Test shield automatic recharge during update."""
         # Arrange
         shields = ShieldSystems()
-        shields.shield_strength = 50.0
+        # Damage forward facing
+        shields.shield_facings["forward"] = 20.0
+        # Starting: 20 + 25 + 25 + 25 = 95
         dt = 1.0  # 1 second
 
         # Act
         shields.update(dt)
 
-        # Assert
-        assert shields.shield_strength == 55.0  # 50 + (5.0 * 1.0)
+        # Assert - recharge_rate is 2.0 per second per facing
+        # forward: 20 + (2.0 * 1.0 * 1.0 efficiency) = 22.0
+        assert shields.shield_facings["forward"] == 22.0
+        # Total: 22 + 25 + 25 + 25 = 97
+        assert shields.total_shield_strength == 97.0
 
     def test_shield_update_with_reduced_efficiency(self):
         """Test shield recharge with damaged system."""
         # Arrange
         shields = ShieldSystems()
-        shields.shield_strength = 50.0
+        shields.shield_facings["forward"] = 20.0
         shields.efficiency = 0.5
         dt = 1.0
 
         # Act
         shields.update(dt)
 
-        # Assert
-        assert shields.shield_strength == 52.5  # 50 + (5.0 * 1.0 * 0.5)
+        # Assert - recharge_rate 2.0 * dt 1.0 * efficiency 0.5 = 1.0
+        assert shields.shield_facings["forward"] == 21.0  # 20 + 1.0
 
 
 class TestEngineSystems:

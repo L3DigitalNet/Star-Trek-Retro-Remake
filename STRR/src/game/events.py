@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Star Trek Retro Remake - Event System
+Star Trek Retro Remake - Game Events
 
 Description:
     Event bus system for loose coupling between game components.
@@ -36,7 +35,7 @@ Functions:
 import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Final, Callable, Any, Optional
+from typing import Any, Callable, Final, Optional
 
 __version__: Final[str] = "0.0.1"
 
@@ -45,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 class EventPriority(Enum):
     """Priority levels for event handling."""
+
     LOW = auto()
     NORMAL = auto()
     HIGH = auto()
@@ -70,6 +70,7 @@ class GameEvent:
         mark_handled: Mark event as handled
         is_handled: Check if event has been handled
     """
+
     event_type: str
     data: dict[str, Any] = field(default_factory=dict)
     priority: EventPriority = EventPriority.NORMAL
@@ -100,6 +101,7 @@ class EventListener:
         priority: Listener priority for execution order
         event_filter: Optional filter function for events
     """
+
     callback: Callable[[GameEvent], None]
     priority: EventPriority = EventPriority.NORMAL
     event_filter: Optional[Callable[[GameEvent], bool]] = None
@@ -140,7 +142,7 @@ class EventBus:
         event_type: str,
         callback: Callable[[GameEvent], None],
         priority: EventPriority = EventPriority.NORMAL,
-        event_filter: Optional[Callable[[GameEvent], bool]] = None
+        event_filter: Optional[Callable[[GameEvent], bool]] = None,
     ) -> None:
         """
         Register an event listener.
@@ -159,13 +161,12 @@ class EventBus:
 
         logger.debug(
             "Subscribed listener for event '%s' with priority %s",
-            event_type, priority.name
+            event_type,
+            priority.name,
         )
 
     def unsubscribe(
-        self,
-        event_type: str,
-        callback: Callable[[GameEvent], None]
+        self, event_type: str, callback: Callable[[GameEvent], None]
     ) -> bool:
         """
         Remove an event listener.
@@ -182,7 +183,8 @@ class EventBus:
 
         initial_count = len(self.listeners[event_type])
         self.listeners[event_type] = [
-            listener for listener in self.listeners[event_type]
+            listener
+            for listener in self.listeners[event_type]
             if listener.callback != callback
         ]
 
@@ -213,7 +215,8 @@ class EventBus:
 
         logger.debug(
             "Publishing event '%s' to %d listeners",
-            event.event_type, len(sorted_listeners)
+            event.event_type,
+            len(sorted_listeners),
         )
 
         # Dispatch to each listener
@@ -227,7 +230,9 @@ class EventBus:
                 except Exception as e:
                     logger.error(
                         "Error in event listener for '%s': %s",
-                        event.event_type, e, exc_info=True
+                        event.event_type,
+                        e,
+                        exc_info=True,
                     )
 
     def clear(self, event_type: Optional[str] = None) -> None:
@@ -268,11 +273,7 @@ class EventBus:
         listeners = self.listeners.get(event_type, [])
         return sorted(listeners, key=lambda l: l.priority.value, reverse=True)
 
-    def _should_handle_event(
-        self,
-        listener: EventListener,
-        event: GameEvent
-    ) -> bool:
+    def _should_handle_event(self, listener: EventListener, event: GameEvent) -> bool:
         """
         Check if listener should handle event based on filter.
 
@@ -324,7 +325,7 @@ def subscribe_event(
     event_type: str,
     callback: Callable[[GameEvent], None],
     priority: EventPriority = EventPriority.NORMAL,
-    event_filter: Optional[Callable[[GameEvent], bool]] = None
+    event_filter: Optional[Callable[[GameEvent], bool]] = None,
 ) -> None:
     """
     Convenience function to subscribe to global event bus.
@@ -338,10 +339,7 @@ def subscribe_event(
     get_event_bus().subscribe(event_type, callback, priority, event_filter)
 
 
-def unsubscribe_event(
-    event_type: str,
-    callback: Callable[[GameEvent], None]
-) -> bool:
+def unsubscribe_event(event_type: str, callback: Callable[[GameEvent], None]) -> bool:
     """
     Convenience function to unsubscribe from global event bus.
 

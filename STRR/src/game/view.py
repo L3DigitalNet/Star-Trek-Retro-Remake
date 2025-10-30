@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Game View
 
@@ -11,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025 (v0.0.18 - Turn-based system)
+Date Changed: 10-30-2025
 License: MIT
 
 Features:
@@ -19,6 +18,8 @@ Features:
     - pygame-ce game surface for rendering
     - UI widgets and dialog management
     - Event handling and user interaction
+    - Target selection dialog for combat
+    - Weapon firing with phaser and torpedo options
 
 Requirements:
     - Linux environment
@@ -35,32 +36,21 @@ Functions:
 
 import logging
 from pathlib import Path
-from typing import Final, TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import pygame
-from PySide6.QtWidgets import (
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QGroupBox,
-    QProgressBar,
-    QDockWidget,
-)
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QImage, QPixmap, QMouseEvent, QKeyEvent, QAction
+from PySide6.QtGui import QAction, QImage, QKeyEvent, QMouseEvent, QPixmap
 from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QPushButton
 
-# Import isometric grid renderer
-from engine.isometric_grid import GridRenderer, create_sector_grid
+from ..engine.isometric_grid import create_sector_grid
 
 if TYPE_CHECKING:
-    from game.controller import GameController
-    from game.entities.base import GridPosition
+    from .controller import GameController
+    from .entities.base import GridPosition
 
-__version__: Final[str] = "0.0.18"
+__version__: Final[str] = "0.0.21"
 
 logger = logging.getLogger(__name__)
 
@@ -224,6 +214,7 @@ class GameView:
         self.grid_renderer = create_sector_grid()
         self.current_z_level = 0  # Current visible z-level
         self.selected_cell: GridPosition | None = None
+        self.move_mode: bool = False  # Whether move mode is active
 
         # Font caching to prevent creating fonts every frame
         self._fonts: dict[int, pygame.font.Font] = {
@@ -530,41 +521,40 @@ class GameView:
         self.main_window.close()
 
     def _on_galaxy_mode(self) -> None:
-        """Handle Galaxy Mode action."""
+        """Handle Galaxy Mode toolbar action."""
         logger.info("Switching to Galaxy Map mode")
-        # State machine integration deferred
+        self.controller.switch_to_galaxy_mode()
+        self.show_message("Switched to Galaxy Map")
 
     def _on_sector_mode(self) -> None:
-        """Handle Sector Mode action."""
+        """Handle Sector Mode toolbar action."""
         logger.info("Switching to Sector Map mode")
-        # State machine integration deferred
+        self.controller.switch_to_sector_mode()
+        self.show_message("Switched to Sector Map")
 
     def _on_combat_mode(self) -> None:
-        """Handle Combat Mode action."""
+        """Handle Combat Mode toolbar action."""
         logger.info("Switching to Combat mode")
-        # State machine integration deferred
+        self.controller.switch_to_combat_mode()
+        self.show_message("Switched to Combat Mode")
 
     def _on_zoom_in(self) -> None:
-        """Handle Zoom In action."""
-        if hasattr(self.grid_renderer, "zoom"):
-            current_zoom = self.grid_renderer.zoom
-            new_zoom = min(4.0, current_zoom * 1.2)
-            self.grid_renderer.zoom = new_zoom
-            logger.info(f"Zoom in: {new_zoom:.2f}x")
+        """Handle Zoom In toolbar action."""
+        self.grid_renderer.zoom_in()
+        logger.info(f"Zoom in: {self.grid_renderer.zoom_level:.2f}x")
+        self.show_message(f"Zoom: {self.grid_renderer.zoom_level:.2f}x")
 
     def _on_zoom_out(self) -> None:
-        """Handle Zoom Out action."""
-        if hasattr(self.grid_renderer, "zoom"):
-            current_zoom = self.grid_renderer.zoom
-            new_zoom = max(0.5, current_zoom / 1.2)
-            self.grid_renderer.zoom = new_zoom
-            logger.info(f"Zoom out: {new_zoom:.2f}x")
+        """Handle Zoom Out toolbar action."""
+        self.grid_renderer.zoom_out()
+        logger.info(f"Zoom out: {self.grid_renderer.zoom_level:.2f}x")
+        self.show_message(f"Zoom: {self.grid_renderer.zoom_level:.2f}x")
 
     def _on_zoom_reset(self) -> None:
-        """Handle Zoom Reset action."""
-        if hasattr(self.grid_renderer, "zoom"):
-            self.grid_renderer.zoom = 1.0
-            logger.info("Zoom reset: 1.0x")
+        """Handle Zoom Reset toolbar action."""
+        self.grid_renderer.reset_zoom()
+        logger.info("Zoom reset: 1.0x")
+        self.show_message("Zoom reset to 1.0x")
 
     def _on_end_turn(self) -> None:
         """Handle End Turn button click."""
@@ -572,32 +562,163 @@ class GameView:
         self.controller.end_turn()
 
     def _on_move(self) -> None:
-        """Handle Move button click."""
-        logger.info("Move action selected")
+        """
+        Handle Move button click.
+
+        Toggles move mode - when active, clicking on the grid will
+        move the player ship to that location.
+        """
+        self.move_mode = not self.move_mode
+        if self.move_mode:
+            logger.info("Move mode activated - click on grid to move ship")
+            self.show_message("Move Mode: Click on grid to move ship")
+            self.move_btn.setText("Cancel Move")
+        else:
+            logger.info("Move mode deactivated")
+            self.show_message("Move mode cancelled")
+            self.move_btn.setText("Move Ship")
 
     def _on_rotate(self) -> None:
-        """Handle Rotate button click."""
+        """
+        Handle Rotate button click.
+
+        Opens a dialog to select new orientation for the player ship.
+        """
         logger.info("Rotate action selected")
+        # TODO: Implement rotation dialog (future milestone)
+        self.show_message("Rotation not yet implemented")
 
     def _on_fire(self) -> None:
-        """Handle Fire button click."""
-        logger.info("Fire action selected")
+        """
+        Handle Fire Weapons button click.
+
+        Opens target selection dialog and fires weapons at selected target.
+        """
+        logger.info("Fire weapons action selected")
+
+        # Get available targets from controller
+        targets = self.controller.get_available_targets("phaser")
+
+        if not targets:
+            self.show_message("No targets in range")
+            return
+
+        # Show target selection dialog
+        from PySide6.QtWidgets import (
+            QDialog,
+            QHBoxLayout,
+            QLabel,
+            QListWidget,
+            QPushButton,
+            QVBoxLayout,
+        )
+
+        dialog = QDialog(self.main_window)
+        dialog.setWindowTitle("Select Target")
+        dialog.setMinimumWidth(300)
+
+        layout = QVBoxLayout()
+
+        # Add instructions
+        label = QLabel("Select target to fire phasers:")
+        layout.addWidget(label)
+
+        # Create target list
+        target_list = QListWidget()
+        for target in targets:
+            distance = self.controller.model.player_ship.position.distance_to(
+                target.position
+            )
+            target_list.addItem(
+                f"{target.name} ({target.ship_class}) - {distance:.1f} units"
+            )
+        layout.addWidget(target_list)
+
+        # Add weapon type selection
+        weapon_label = QLabel("Weapon type:")
+        layout.addWidget(weapon_label)
+
+        weapon_layout = QHBoxLayout()
+        phaser_btn = QPushButton("Phasers (1 AP)")
+        torpedo_btn = QPushButton("Torpedoes (2 AP)")
+        weapon_layout.addWidget(phaser_btn)
+        weapon_layout.addWidget(torpedo_btn)
+        layout.addLayout(weapon_layout)
+
+        # Add action buttons
+        button_layout = QHBoxLayout()
+        cancel_btn = QPushButton("Cancel")
+        button_layout.addWidget(cancel_btn)
+        layout.addLayout(button_layout)
+
+        dialog.setLayout(layout)
+
+        # Track selected weapon type
+        selected_weapon = ["phaser"]  # Default
+
+        # Connect buttons
+        def fire_phaser():
+            selected_weapon[0] = "phaser"
+            selected_index = target_list.currentRow()
+            if selected_index >= 0:
+                target = targets[selected_index]
+                dialog.accept()
+                self.controller.handle_combat_action(target, "phaser")
+
+        def fire_torpedo():
+            selected_weapon[0] = "torpedo"
+            selected_index = target_list.currentRow()
+            if selected_index >= 0:
+                target = targets[selected_index]
+                dialog.accept()
+                self.controller.handle_combat_action(target, "torpedo")
+
+        phaser_btn.clicked.connect(fire_phaser)
+        torpedo_btn.clicked.connect(fire_torpedo)
+        cancel_btn.clicked.connect(dialog.reject)
+
+        # Show dialog
+        dialog.exec()
 
     def _on_scan(self) -> None:
-        """Handle Scan button click."""
-        logger.info("Scan action selected")
+        """
+        Handle Scan Target button click.
+
+        Scans selected target for detailed information (placeholder).
+        """
+        logger.info("Scan target action selected")
+        # TODO: Implement target scanning system (next milestone)
+        self.show_message("Target scanning not yet implemented")
 
     def _on_evasive(self) -> None:
-        """Handle Evasive button click."""
+        """
+        Handle Evasive Maneuvers button click.
+
+        Activates defensive maneuvering (placeholder).
+        """
         logger.info("Evasive maneuvers selected")
+        # TODO: Implement evasive maneuvers system (next milestone)
+        self.show_message("Evasive maneuvers not yet implemented")
 
     def _on_dock(self) -> None:
-        """Handle Dock button click."""
-        logger.info("Dock action selected")
+        """
+        Handle Dock at Station button click.
+
+        Initiates docking procedure at nearby station (placeholder).
+        """
+        logger.info("Dock at station action selected")
+        # TODO: Implement docking system (future milestone)
+        self.show_message("Docking not yet implemented")
 
     def _on_hail(self) -> None:
-        """Handle Hail button click."""
-        logger.info("Hail action selected")
+        """
+        Handle Hail Ship button click.
+
+        Opens communication with selected ship (placeholder).
+        """
+        logger.info("Hail ship action selected")
+        # TODO: Implement communication system (future milestone)
+        self.show_message("Communications not yet implemented")
 
     def _update_display(self) -> None:
         """Update the display regularly."""
@@ -670,6 +791,27 @@ class GameView:
 
         if hasattr(self, "action_points_label") and self.action_points_label:
             self.action_points_label.setText(f"AP: {action_points}")
+
+    def update_ui_state(self) -> None:
+        """
+        Update all UI elements to reflect current game state.
+
+        Refreshes ship status, position, turn information, and sector name.
+        Called after any game state change that affects the UI.
+        """
+        # Update ship status if player ship exists
+        if self.controller.model.player_ship:
+            self.show_ship_status(self.controller.model.player_ship)
+
+        # Update sector name if available
+        if (
+            self.controller.model.current_sector
+            and hasattr(self, "sector_label")
+            and self.sector_label
+        ):
+            coords = self.controller.model.current_sector.coordinates
+            sector_name = f"Sector {coords[0]}-{coords[1]}"
+            self.sector_label.setText(sector_name)
 
     def set_selected_cell(self, position: "GridPosition") -> None:
         """

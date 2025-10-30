@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Star Trek Retro Remake - Game State Machine
+Star Trek Retro Remake - State Machine
 
 Description:
     Core game state machine implementing state management and transitions
@@ -35,7 +34,7 @@ Functions:
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Final, Optional, Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Final, Optional
 
 if TYPE_CHECKING:
     import pygame
@@ -50,6 +49,7 @@ class GameMode(Enum):
     Defines all possible states the game can be in and provides
     a clear interface for state transitions.
     """
+
     MAIN_MENU = "main_menu"
     GALAXY_MAP = "galaxy_map"
     SECTOR_MAP = "sector_map"
@@ -80,7 +80,7 @@ class GameState(ABC):
         None
     """
 
-    def __init__(self, state_manager: 'GameStateManager'):
+    def __init__(self, state_manager: "GameStateManager"):
         """
         Initialize the game state.
 
@@ -101,7 +101,7 @@ class GameState(ABC):
         pass
 
     @abstractmethod
-    def handle_input(self, event: 'pygame.event.Event') -> None:
+    def handle_input(self, event: "pygame.event.Event") -> None:
         """
         Process input events.
 
@@ -121,7 +121,7 @@ class GameState(ABC):
         pass
 
     @abstractmethod
-    def render(self, surface: 'pygame.Surface') -> None:
+    def render(self, surface: "pygame.Surface") -> None:
         """
         Render state-specific content.
 
@@ -207,7 +207,7 @@ class GameStateManager:
         if self.current_state:
             self.current_state.update(dt)
 
-    def render(self, surface: 'pygame.Surface') -> None:
+    def render(self, surface: "pygame.Surface") -> None:
         """
         Render current state.
 
@@ -217,7 +217,7 @@ class GameStateManager:
         if self.current_state:
             self.current_state.render(surface)
 
-    def handle_input(self, event: 'pygame.event.Event') -> None:
+    def handle_input(self, event: "pygame.event.Event") -> None:
         """
         Process input events for current state.
 

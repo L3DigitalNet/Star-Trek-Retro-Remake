@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Galaxy Map
 
@@ -30,7 +29,7 @@ Functions:
     - None
 """
 
-from typing import Final, Optional, Dict, Tuple
+from typing import Dict, Final, Optional, Tuple
 
 from .sector import SectorMap
 
@@ -144,8 +143,7 @@ class GalaxyMap:
         Returns:
             True if coordinates are valid, False otherwise
         """
-        return (0 <= x < self.galaxy_size[0] and
-                0 <= y < self.galaxy_size[1])
+        return 0 <= x < self.galaxy_size[0] and 0 <= y < self.galaxy_size[1]
 
     def _initialize_default_sectors(self) -> None:
         """Create starting sectors for the game."""
