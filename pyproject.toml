@@ -1,6 +1,6 @@
 [project]
 name = "star-trek-retro-remake"
-version = "0.0.1"
+version = "0.0.2"
 description = "A turn-based, grid-based Star Trek strategy game inspired by classic retro games"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -20,7 +20,10 @@ classifiers = [
 
 dependencies = [
     "pygame>=2.5.0",
-    "PySide6>=6.7.0",
+    "PySide6>=6.10.0",
+    "PySide6-Essentials>=6.10.0",
+    "PySide6-Addons>=6.10.0",
+    "shiboken6>=6.10.0",
     "tomli-w>=1.0.0",
 ]
 
@@ -31,6 +34,11 @@ dev = [
     "mypy>=1.7.0",
     "ruff>=0.1.6",
     "pre-commit>=3.5.0",
+]
+qt = [
+    "PySide6-Essentials>=6.10.0",
+    "PySide6-Addons>=6.10.0",
+    "shiboken6>=6.10.0",
 ]
 
 [project.urls]

@@ -7,7 +7,7 @@ Turn-based strategy game set in Kirk-era Star Trek universe. Features grid-based
 **Key References:**
 
 - Architecture details: `/docs/ARCHITECTURE.md`
-- Game design: `/GDD/DESIGN.md`
+- Game design: `/docs/DESIGN.md`
 - Python 3.14+ stdlib: https://docs.python.org/3.14/
 
 ## Architecture

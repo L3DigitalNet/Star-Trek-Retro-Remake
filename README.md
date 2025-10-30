@@ -62,21 +62,28 @@ pip install pygame>=2.5 PySide6>=6.7
 
 ```bash
 # Clone the repository
-git clone https://github.com/YourUsername/Star-Trek-Retro-Remake.git
+git clone https://github.com/L3DigitalNet/Star-Trek-Retro-Remake.git
 cd Star-Trek-Retro-Remake
 
-# Navigate to the game directory
-cd star_trek_retro_remake
+# Install package with dependencies (recommended)
+pip install -e .
+
+# Or install manually
+pip install pygame>=2.5 PySide6>=6.7
 
 # Run the game
+cd star_trek_retro_remake
 python3 main.py
 ```
 
 ### Development Setup
 
 ```bash
-# Install development dependencies
-pip install pytest>=8.0 pytest-cov
+# Install with development dependencies
+pip install -e .[dev]
+
+# Set up pre-commit hooks
+pre-commit install
 
 # Run tests to verify installation
 cd star_trek_retro_remake
@@ -84,6 +91,12 @@ python3 -m pytest tests/ -v
 
 # Run with coverage report
 python3 -m pytest tests/ --cov=src --cov-report=term-missing
+
+# Use Make commands for common tasks
+make test          # Run tests
+make lint          # Check code quality
+make format        # Format code
+make check         # Run all checks
 ```
 
 ## 🎯 Quick Gameplay Guide
@@ -184,7 +197,7 @@ python3 -m pytest tests/ --cov=src --cov-report=html
 
 ## 🚧 Development Status
 
-### Current Version: 0.0.1 (Pre-Alpha)
+### Current Version: 0.0.2 (Pre-Alpha)
 
 #### ✅ Completed
 
@@ -193,8 +206,11 @@ python3 -m pytest tests/ --cov=src --cov-report=html
 - [x] Entity system with Game Object pattern
 - [x] Component system for ship subsystems
 - [x] State machine for game mode transitions
-- [x] Basic configuration system
-- [x] Comprehensive test framework
+- [x] TOML-based configuration system (migrated from JSON)
+- [x] Comprehensive test framework with pytest
+- [x] Development tooling (Makefile, pre-commit hooks, CI/CD)
+- [x] Custom exception hierarchy and event system
+- [x] Command pattern for undo/redo functionality
 
 #### 🔄 In Progress
 
@@ -224,7 +240,7 @@ This is currently a solo indie project for personal enjoyment. While not activel
 
 ## 📄 Documentation
 
-- **[Game Design Document](GDD/DESIGN.md)**: Complete game design specification
+- **[Game Design Document](docs/DESIGN.md)**: Complete game design specification
 - **[Architecture Guide](docs/ARCHITECTURE.md)**: Technical implementation details
 - **[Project Documentation](star_trek_retro_remake/docs/PROJECT-DOC.md)**: Detailed project information
 - **[Change Log](star_trek_retro_remake/docs/CHANGELOG.md)**: Version history and updates

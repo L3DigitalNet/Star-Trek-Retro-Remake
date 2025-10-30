@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - TBD
 
-## [0.0.2] - 2025-10-29
+## [0.0.2] - 2025-10-30
 
 ### Added
 
@@ -45,6 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `sol_system.json` → `sol_system.toml` using array of tables for objects
 - Updated documentation to reflect TOML usage (ARCHITECTURE.md, DESIGN.md, PROJECT-DOC.md)
 - Enhanced configuration system with dot notation access and type safety
+- Updated version numbers across project files (pyproject.toml, main.py)
+- Corrected documentation path references from `/GDD/DESIGN.md` to `/docs/DESIGN.md`
+- Updated all file header "Date Changed" fields to reflect documentation updates
+
+### Fixed
+
+- Documentation path inconsistencies between README.md and copilot instructions
+- Version number mismatch between CHANGELOG.md (0.0.2) and project files (0.0.1)
 
 ## [0.0.1] - 2024-12-15
 

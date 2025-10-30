@@ -12,7 +12,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-29-2025
+Date Changed: 10-30-2025
 License: MIT
 
 Features:
@@ -57,7 +57,7 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from src.game.application import StarTrekRetroRemake
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.2"
 
 
 def main() -> None:
