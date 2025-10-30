@@ -2,6 +2,12 @@
 
 ## Table of Contents
 
+### Milestones
+
+- [In Progress Milestones](#in-progress-milestones)
+- [Next Milestones](#next-milestones)
+- [Completed Milestones](#completed-milestones)
+
 ### Executive Summary
 
 - [1.1 Game Overview](#11-game-overview)
@@ -107,6 +113,34 @@
 - [Appendix D: Credits and Acknowledgments](#appendix-d-credits-and-acknowledgments)
 
 ---
+
+## Milestones
+
+### In Progress Milestones
+
+#### Develop Basic Map Rendering with Z-Level Support
+
+- This will be the basis for both the sector map and combat map.
+- Will test in a pygame window first (ignore PySide6 integration for now)
+
+- **Steps:**
+
+1. Create a grid-based map structure with support for multiple z-levels.
+2. We will only be testing using a single layer initially until isometric rendering is implemented.
+3. Implement rendering logic to display the map from a fixed isometric perspective.
+4. Enable basic rotation of the map view in 90-degree increments.
+5. Add additional z-levels and test rendering with multiple layers.
+6. Place a test object (starship) on the map and verify correct rendering across z-levels.
+7. Implement z-level focus highlighting (fully opaque for current z-level, semi-transparent for others).
+8. Test performance and optimize rendering as needed.
+
+### Next Milestones
+
+- To be determined
+
+### Completed Milestones
+
+- None
 
 ## CRITICAL TODO LIST
 

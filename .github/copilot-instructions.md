@@ -121,6 +121,13 @@ Functions:
 - Update "Date Changed" in file headers
 - Categorize: Added/Changed/Fixed/Removed
 
+**Documentation Standard:**
+- Every `.py` file in `STRR/` has a matching `_doc.md` file in the same directory
+- Naming: `application.py` → `application_doc.md`
+- Content: Comprehensive module documentation (purpose, architecture, usage, examples)
+- General/cross-cutting docs go in `/docs/` root folder
+- See `/docs/DOCUMENTATION_STANDARDS.md` for template and guidelines
+
 ## AI Code Generation Rules
 
 1. **Dependencies:** Standard library first, justify external dependencies
@@ -134,7 +141,7 @@ Functions:
 9. **Framework Separation:** PyGame rendering separate from PySide6 UI
 10. **Confident Design:** Architectural solutions over defensive checks
 11. **Version Aware:** Defer error handling until v1.0.0
-12. **Documentation:** Minimize .md creation, single PROJECT-DOC.md
+12. **Documentation:** Every `.py` file has matching `_doc.md` in same directory
 13. **Testing:** pytest for business logic, AAA pattern
 14. **Versioning:** Update CHANGELOG.md on changes
 15. **Comments:** Inline for significant blocks

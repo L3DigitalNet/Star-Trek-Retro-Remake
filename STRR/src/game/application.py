@@ -115,6 +115,15 @@ class StarTrekRetroRemake:
         # Initialize PyGame for game rendering
         pygame.init()
 
+        # Create PyGame window
+        screen = pygame.display.set_mode((1280, 720))
+
+        # Set up clock for fixed timestep
+        clock = pygame.time.Clock()
+
+        # Application state
+        running = True
+
         # Initialize PySide6 application
         if not QApplication.instance():
             self.qt_app = QApplication(sys.argv)
