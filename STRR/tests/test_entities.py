@@ -113,21 +113,24 @@ class TestStarship:
     def test_starship_creation(self, grid_position):
         """Test that Starship creates with proper systems."""
         # Arrange & Act
-        ship = Starship(grid_position, "Constitution", "Enterprise")
+        ship = Starship(grid_position, "Constitution", "Enterprise", "Federation")
 
         # Assert
         assert ship.ship_class == "Constitution"
         assert ship.name == "Enterprise"
+        assert ship.faction == "Federation"
         assert ship.hull_integrity == 100.0
         assert ship.orientation == 0
         assert len(ship.systems) == 5  # All ship systems
+        assert ship.color == (60, 120, 200)  # Federation blue
+        assert ship.size == 16
 
     def test_starship_get_system(self, test_starship):
         """Test that get_system returns correct systems."""
         # Arrange & Act
-        weapons = test_starship.get_system('weapons')
-        shields = test_starship.get_system('shields')
-        nonexistent = test_starship.get_system('nonexistent')
+        weapons = test_starship.get_system("weapons")
+        shields = test_starship.get_system("shields")
+        nonexistent = test_starship.get_system("nonexistent")
 
         # Assert
         assert weapons is not None
@@ -138,7 +141,7 @@ class TestStarship:
         """Test damage application with shields active."""
         # Arrange
         initial_hull = test_starship.hull_integrity
-        shields = test_starship.get_system('shields')
+        shields = test_starship.get_system("shields")
         initial_shield_strength = shields.shield_strength
 
         # Act
@@ -147,13 +150,16 @@ class TestStarship:
         # Assert
         # Shields should absorb most energy damage
         assert shields.shield_strength < initial_shield_strength
-        assert test_starship.hull_integrity == initial_hull or test_starship.hull_integrity > initial_hull - 20
+        assert (
+            test_starship.hull_integrity == initial_hull
+            or test_starship.hull_integrity > initial_hull - 20
+        )
 
     def test_starship_take_damage_no_shields(self, test_starship):
         """Test damage application with shields down."""
         # Arrange
         initial_hull = test_starship.hull_integrity
-        shields = test_starship.get_system('shields')
+        shields = test_starship.get_system("shields")
         shields.active = False
 
         # Act
@@ -167,7 +173,7 @@ class TestStarship:
         # Arrange
         test_starship.hull_integrity = 10
         # Disable shields so all damage goes to hull
-        shields = test_starship.get_system('shields')
+        shields = test_starship.get_system("shields")
         shields.active = False
 
         # Act
@@ -180,12 +186,12 @@ class TestStarship:
     def test_starship_repair_system(self, test_starship):
         """Test system repair functionality."""
         # Arrange
-        weapons = test_starship.get_system('weapons')
+        weapons = test_starship.get_system("weapons")
         weapons.damage(0.5)  # Damage weapons
         initial_efficiency = weapons.efficiency
 
         # Act
-        result = test_starship.repair_system('weapons', 0.3)
+        result = test_starship.repair_system("weapons", 0.3)
 
         # Assert
         assert result is True
@@ -194,10 +200,36 @@ class TestStarship:
     def test_starship_repair_nonexistent_system(self, test_starship):
         """Test repair of nonexistent system returns False."""
         # Arrange & Act
-        result = test_starship.repair_system('nonexistent', 0.5)
+        result = test_starship.repair_system("nonexistent", 0.5)
 
         # Assert
         assert result is False
+
+    def test_starship_orientation_radians(self, test_starship):
+        """Test orientation conversion to radians."""
+        # Arrange
+        import math
+
+        test_starship.orientation = 90  # East
+
+        # Act
+        radians = test_starship.get_orientation_radians()
+
+        # Assert
+        assert abs(radians - math.pi / 2) < 0.001  # Should be π/2 radians
+
+    def test_starship_faction_colors(self, grid_position):
+        """Test that different factions have different colors."""
+        # Arrange & Act
+        fed_ship = Starship(grid_position, "Constitution", "Enterprise", "Federation")
+        klingon_ship = Starship(grid_position, "Bird-of-Prey", "IKS Korinar", "Klingon")
+        romulan_ship = Starship(grid_position, "Warbird", "IRW Valdore", "Romulan")
+
+        # Assert
+        assert fed_ship.color == (60, 120, 200)  # Blue
+        assert klingon_ship.color == (180, 40, 40)  # Red
+        assert romulan_ship.color == (60, 180, 80)  # Green
+        assert fed_ship.color != klingon_ship.color != romulan_ship.color
 
 
 class TestSpaceStation:

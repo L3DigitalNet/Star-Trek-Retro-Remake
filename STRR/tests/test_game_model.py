@@ -31,7 +31,7 @@ class TestTurnManager:
 
         # Assert
         assert turn_manager.turn_number == 0
-        assert turn_manager.current_phase == "player"
+        assert turn_manager.current_phase == "input"
 
     def test_advance_turn(self):
         """Test that advance_turn increments turn number."""
@@ -56,7 +56,9 @@ class TestTurnManager:
 
         # Assert
         assert info["turn_number"] == 5
-        assert info["current_phase"] == "player"
+        assert info["current_phase"] == "input"
+        assert "active_entity" in info
+        assert "entities_remaining" in info
 
 
 class TestCombatResult:
@@ -116,7 +118,9 @@ class TestGameModel:
         # Arrange
         ship = initialized_game_model.player_ship
         initial_position = ship.position
-        target_position = GridPosition(initial_position.x + 1, initial_position.y, initial_position.z)
+        target_position = GridPosition(
+            initial_position.x + 1, initial_position.y, initial_position.z
+        )
 
         # Act
         result = initialized_game_model.execute_move(ship, target_position)
@@ -141,10 +145,12 @@ class TestGameModel:
         """Test movement with insufficient fuel fails."""
         # Arrange
         ship = initialized_game_model.player_ship
-        engines = ship.get_system('engines')
+        engines = ship.get_system("engines")
         engines.fuel = 0  # No fuel
 
-        target_position = GridPosition(ship.position.x + 1, ship.position.y, ship.position.z)
+        target_position = GridPosition(
+            ship.position.x + 1, ship.position.y, ship.position.z
+        )
 
         # Act
         result = initialized_game_model.execute_move(ship, target_position)
@@ -175,7 +181,7 @@ class TestGameModel:
         enemy_ship = combat_scenario["enemy_ship"]
 
         # Disable weapons
-        weapons = player_ship.get_system('weapons')
+        weapons = player_ship.get_system("weapons")
         weapons.active = False
 
         # Act

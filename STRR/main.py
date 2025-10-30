@@ -15,6 +15,8 @@ Date Created: 10-29-2025
 Date Changed: 10-30-2025
 License: MIT
 
+Version: 0.0.18
+
 Features:
     - Game loop with fixed timestep for consistent physics
     - State machine for main menu, galaxy map, sector map, combat, paused states
@@ -63,7 +65,7 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from src.game.application import StarTrekRetroRemake
 
-__version__: Final[str] = "0.0.11"
+__version__: Final[str] = "0.0.18"
 
 
 def main() -> None:

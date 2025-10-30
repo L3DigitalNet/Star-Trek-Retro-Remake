@@ -6,194 +6,147 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1920</width>
-    <height>1080</height>
+    <width>1600</width>
+    <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Star Trek Retro Remake</string>
   </property>
+  <!-- Central Widget: Main game view area -->
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="centralLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
-     <widget class="QGroupBox" name="controlPanel">
-      <property name="maximumSize">
-       <size>
-        <width>350</width>
-        <height>16777215</height>
-       </size>
-      </property>
+     <!-- Main Game Surface Placeholder -->
+     <widget class="QLabel" name="gameDisplay">
       <property name="minimumSize">
        <size>
-        <width>300</width>
-        <height>0</height>
+        <width>800</width>
+        <height>600</height>
        </size>
       </property>
-      <property name="title">
-       <string>Game Controls</string>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #1a1a2e; border: 2px solid #333;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <!-- Bottom Turn Bar -->
+     <widget class="QWidget" name="turnBar" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #2a2a2a; border-top: 2px solid #444;</string>
+      </property>
+      <layout class="QHBoxLayout" name="turnBarLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>10</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
        <item>
-        <widget class="QLabel" name="titleLabel">
+        <widget class="QPushButton" name="endTurnButton">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;h2 style=&quot;text-align: center; color: #00aaff;&quot;&gt;Star Trek&lt;br/&gt;Retro Remake&lt;/h2&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>End Turn</string>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-         <property name="textFormat">
-          <enum>Qt::RichText</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="shipStatusLabel">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;USS Enterprise&lt;/span&gt;&lt;br/&gt;Status: Active&lt;br/&gt;Hull: 100%&lt;br/&gt;Shields: 100%&lt;br/&gt;Energy: 5000&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">padding: 10px; background-color: #1a1a1a; border: 1px solid #333; border-radius: 5px; color: #ccc;</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="zLevelLabel">
-         <property name="text">
-          <string>Z-Level: 0</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">padding: 8px; background-color: #2a2a2a; border: 1px solid #444; border-radius: 3px; font-weight: bold;</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="newGameButton">
-         <property name="text">
-          <string>New Game</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="saveGameButton">
-         <property name="text">
-          <string>Save Game</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="loadGameButton">
-         <property name="text">
-          <string>Load Game</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="settingsButton">
-         <property name="text">
-          <string>Settings</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="messageLabel">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Messages:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="messageDisplay">
          <property name="minimumSize">
           <size>
-           <width>0</width>
-           <height>100</height>
+           <width>120</width>
+           <height>30</height>
           </size>
          </property>
-         <property name="text">
-          <string>Ready to explore...</string>
-         </property>
          <property name="styleSheet">
-          <string notr="true">padding: 10px; background-color: #0a0a0a; border: 1px solid #333; border-radius: 5px; color: #00ff00; font-family: monospace;</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
+          <string notr="true">background-color: #0066aa; color: white; font-weight: bold; border-radius: 5px;</string>
          </property>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
+        <widget class="QLabel" name="actionPointsLabel">
+         <property name="text">
+          <string>Action Points: 10</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #ffcc00; font-weight: bold; font-size: 14pt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="turnBarSpacer">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Horizontal</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>40</width>
+           <height>20</height>
           </size>
          </property>
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="quitButton">
+        <widget class="QLabel" name="phaseLabel">
          <property name="text">
-          <string>Quit</string>
+          <string>Phase: Planning</string>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-color: #aa0000;</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QWidget" name="gameContainer" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QLabel" name="gameTitle">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;h3 style=&quot;text-align: center;&quot;&gt;Sector Map View&lt;/h3&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <string notr="true">color: #00ff99; font-weight: bold; font-size: 14pt;</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="gameDisplay">
-         <property name="minimumSize">
-          <size>
-           <width>1280</width>
-           <height>900</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>1280</width>
-           <height>900</height>
-          </size>
-         </property>
+        <widget class="QLabel" name="turnNumberLabel">
          <property name="text">
-          <string/>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="instructionsLabel">
-         <property name="text">
-          <string>Controls: PageUp/PageDown (Z-levels) | +/- (Zoom) | Arrow Keys (Pan) | Left Click (Select/Move)</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <string>Turn: 1</string>
          </property>
          <property name="styleSheet">
-          <string notr="true">padding: 5px; background-color: #2a2a2a; color: #ccc;</string>
+          <string notr="true">color: #cccccc; font-size: 14pt;</string>
          </property>
         </widget>
        </item>
@@ -202,7 +155,567 @@
     </item>
    </layout>
   </widget>
+  <!-- Top Toolbar -->
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="windowTitle">
+    <string>Main Toolbar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>32</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionGalaxyMode"/>
+   <addaction name="actionSectorMode"/>
+   <addaction name="actionCombatMode"/>
+   <addaction name="separator"/>
+   <addaction name="actionZoomIn"/>
+   <addaction name="actionZoomOut"/>
+   <addaction name="actionZoomReset"/>
+   <addaction name="separator"/>
+   <addaction name="actionSettings"/>
+  </widget>
+  <!-- Right Dock Widget -->
+  <widget class="QDockWidget" name="rightDock">
+   <property name="features">
+    <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable|QDockWidget::DockWidgetFloatable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>Control Center</string>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>300</width>
+     <height>0</height>
+    </size>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="dockLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QTabWidget" name="controlTabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <!-- Status Tab -->
+       <widget class="QWidget" name="statusTab">
+        <attribute name="title">
+         <string>Status</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="statusTabLayout">
+         <item>
+          <widget class="QGroupBox" name="shipStatusGroup">
+           <property name="title">
+            <string>Ship Status</string>
+           </property>
+           <layout class="QFormLayout" name="shipStatusFormLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="shipNameLabelText">
+              <property name="text">
+               <string>Ship:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="shipNameLabel">
+              <property name="text">
+               <string>USS Enterprise</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font-weight: bold; color: #00aaff;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="hullLabelText">
+              <property name="text">
+               <string>Hull:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QProgressBar" name="hullProgressBar">
+              <property name="value">
+               <number>100</number>
+              </property>
+              <property name="textVisible">
+               <bool>true</bool>
+              </property>
+              <property name="format">
+               <string>%p%</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QProgressBar::chunk { background-color: #00aa00; }</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="shieldsLabelText">
+              <property name="text">
+               <string>Shields:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QProgressBar" name="shieldsProgressBar">
+              <property name="value">
+               <number>100</number>
+              </property>
+              <property name="textVisible">
+               <bool>true</bool>
+              </property>
+              <property name="format">
+               <string>%p%</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QProgressBar::chunk { background-color: #0088ff; }</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="energyLabelText">
+              <property name="text">
+               <string>Energy:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QProgressBar" name="energyProgressBar">
+              <property name="value">
+               <number>100</number>
+              </property>
+              <property name="maximum">
+               <number>5000</number>
+              </property>
+              <property name="textVisible">
+               <bool>true</bool>
+              </property>
+              <property name="format">
+               <string>%v / %m</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QProgressBar::chunk { background-color: #ffcc00; }</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="positionGroup">
+           <property name="title">
+            <string>Position</string>
+           </property>
+           <layout class="QFormLayout" name="positionFormLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="coordinatesLabelText">
+              <property name="text">
+               <string>Coordinates:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="coordinatesLabel">
+              <property name="text">
+               <string>X: 10, Y: 10, Z: 2</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="sectorLabelText">
+              <property name="text">
+               <string>Sector:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="sectorLabel">
+              <property name="text">
+               <string>Sol System</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="statusTabSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+       <!-- Actions Tab -->
+       <widget class="QWidget" name="actionsTab">
+        <attribute name="title">
+         <string>Actions</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="actionsTabLayout">
+         <item>
+          <widget class="QGroupBox" name="movementGroup">
+           <property name="title">
+            <string>Movement</string>
+           </property>
+           <layout class="QVBoxLayout" name="movementLayout">
+            <item>
+             <widget class="QPushButton" name="moveButton">
+              <property name="text">
+               <string>Move Ship</string>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="rotateButton">
+              <property name="text">
+               <string>Rotate</string>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="combatGroup">
+           <property name="title">
+            <string>Combat</string>
+           </property>
+           <layout class="QVBoxLayout" name="combatLayout">
+            <item>
+             <widget class="QPushButton" name="fireButton">
+              <property name="text">
+               <string>Fire Weapons</string>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="scanButton">
+              <property name="text">
+               <string>Scan Target</string>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="evasiveButton">
+              <property name="text">
+               <string>Evasive Maneuvers</string>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="utilityGroup">
+           <property name="title">
+            <string>Utilities</string>
+           </property>
+           <layout class="QVBoxLayout" name="utilityLayout">
+            <item>
+             <widget class="QPushButton" name="dockButton">
+              <property name="text">
+               <string>Dock at Station</string>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="hailButton">
+              <property name="text">
+               <string>Hail Ship</string>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="actionsTabSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+       <!-- Map Tab -->
+       <widget class="QWidget" name="mapTab">
+        <attribute name="title">
+         <string>Map</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="mapTabLayout">
+         <item>
+          <widget class="QLabel" name="minimapLabel">
+           <property name="text">
+            <string>Mini-Map</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>250</width>
+             <height>250</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: #1a1a2e; border: 2px solid #444; color: #888;</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="legendGroup">
+           <property name="title">
+            <string>Legend</string>
+           </property>
+           <layout class="QVBoxLayout" name="legendLayout">
+            <item>
+             <widget class="QLabel" name="legendText">
+              <property name="text">
+               <string>&lt;html&gt;&lt;body&gt;
+&lt;p&gt;&lt;span style='color:#00aaff;'&gt;■&lt;/span&gt; Player Ship&lt;/p&gt;
+&lt;p&gt;&lt;span style='color:#ff0000;'&gt;■&lt;/span&gt; Enemy Ship&lt;/p&gt;
+&lt;p&gt;&lt;span style='color:#ffaa00;'&gt;■&lt;/span&gt; Station&lt;/p&gt;
+&lt;p&gt;&lt;span style='color:#888888;'&gt;■&lt;/span&gt; Asteroid&lt;/p&gt;
+&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::RichText</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="mapTabSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <!-- Menu Bar -->
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1600</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNewGame"/>
+    <addaction name="actionSaveGame"/>
+    <addaction name="actionLoadGame"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionToggleRightDock"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuView"/>
+  </widget>
+  <!-- Actions -->
+  <action name="actionGalaxyMode">
+   <property name="text">
+    <string>Galaxy</string>
+   </property>
+   <property name="toolTip">
+    <string>Switch to Galaxy Map Mode</string>
+   </property>
+  </action>
+  <action name="actionSectorMode">
+   <property name="text">
+    <string>Sector</string>
+   </property>
+   <property name="toolTip">
+    <string>Switch to Sector Map Mode</string>
+   </property>
+  </action>
+  <action name="actionCombatMode">
+   <property name="text">
+    <string>Combat</string>
+   </property>
+   <property name="toolTip">
+    <string>Switch to Combat Mode</string>
+   </property>
+  </action>
+  <action name="actionZoomIn">
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom in on the map</string>
+   </property>
+  </action>
+  <action name="actionZoomOut">
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom out on the map</string>
+   </property>
+  </action>
+  <action name="actionZoomReset">
+   <property name="text">
+    <string>Reset Zoom</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset zoom to 100%</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Settings Dialog</string>
+   </property>
+  </action>
+  <action name="actionNewGame">
+   <property name="text">
+    <string>New Game</string>
+   </property>
+  </action>
+  <action name="actionSaveGame">
+   <property name="text">
+    <string>Save Game</string>
+   </property>
+  </action>
+  <action name="actionLoadGame">
+   <property name="text">
+    <string>Load Game</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionToggleRightDock">
+   <property name="text">
+    <string>Toggle Control Center</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionToggleRightDock</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>rightDock</receiver>
+   <slot>setVisible(bool)</slot>
+  </connection>
+ </connections>
 </ui>

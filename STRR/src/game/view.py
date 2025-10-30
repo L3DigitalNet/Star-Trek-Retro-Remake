@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 10-30-2025 (v0.0.18 - Turn-based system)
 License: MIT
 
 Features:
@@ -46,9 +46,11 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QGroupBox,
+    QProgressBar,
+    QDockWidget,
 )
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QImage, QPixmap, QMouseEvent, QKeyEvent
+from PySide6.QtGui import QImage, QPixmap, QMouseEvent, QKeyEvent, QAction
 from PySide6.QtUiTools import QUiLoader
 
 # Import isometric grid renderer
@@ -58,7 +60,7 @@ if TYPE_CHECKING:
     from game.controller import GameController
     from game.entities.base import GridPosition
 
-__version__: Final[str] = "0.0.10"
+__version__: Final[str] = "0.0.18"
 
 logger = logging.getLogger(__name__)
 
@@ -343,23 +345,29 @@ class GameView:
         """
         logger.info("Ship Status: %s - Hull: %.1f%%", ship.name, ship.hull_integrity)
 
-        # Update ship status label in UI
-        if hasattr(self, "ship_status_label"):
-            status_text = (
-                f"<b>{ship.name}</b><br>"
-                f"Status: Active<br>"
-                f"Hull: {ship.hull_integrity:.1f}%<br>"
-            )
+        # Update ship name
+        if hasattr(self, "ship_name_label") and self.ship_name_label:
+            self.ship_name_label.setText(ship.name)
 
-            # Add shields if ship has them
-            if hasattr(ship, "shields"):
-                status_text += f"Shields: {ship.shields:.1f}%<br>"
+        # Update hull progress bar
+        if hasattr(self, "hull_progress") and self.hull_progress:
+            self.hull_progress.setValue(int(ship.hull_integrity))
 
-            # Add energy if ship has it
-            if hasattr(ship, "energy"):
-                status_text += f"Energy: {ship.energy:.0f}"
+        # Update shields if ship has them
+        if hasattr(ship, "shields") and hasattr(self, "shields_progress"):
+            if self.shields_progress:
+                self.shields_progress.setValue(int(ship.shields))
 
-            self.ship_status_label.setText(status_text)
+        # Update energy if ship has it
+        if hasattr(ship, "energy") and hasattr(self, "energy_progress"):
+            if self.energy_progress:
+                self.energy_progress.setValue(int(ship.energy))
+
+        # Update position if available
+        if hasattr(ship, "position") and hasattr(self, "coordinates_label"):
+            if self.coordinates_label:
+                pos = ship.position
+                self.coordinates_label.setText(f"X: {pos.x}, Y: {pos.y}, Z: {pos.z}")
 
     def show_message(self, message: str) -> None:
         """
@@ -369,8 +377,7 @@ class GameView:
             message: Message to display
         """
         logger.info("Message: %s", message)
-        if hasattr(self, "message_display"):
-            self.message_display.setText(message)
+        # Message display removed in new layout - use status bar or dialogs
 
     def _load_ui(self) -> None:
         """Load UI from Qt Designer .ui file."""
@@ -382,33 +389,87 @@ class GameView:
             logger.error(f"UI file not found: {ui_file}")
             raise FileNotFoundError(f"UI file not found: {ui_file}")
 
-        # Load the UI file
+        # Load the UI file - QUiLoader.load() expects a file path string or QIODevice
         loader = QUiLoader()
-        ui_file_obj = ui_file.open("r")
-        self.main_window = loader.load(ui_file_obj)
-        ui_file_obj.close()
+        self.main_window = loader.load(str(ui_file))
 
-        # Store references to UI elements
-        self.ship_status_label = self.main_window.findChild(QLabel, "shipStatusLabel")
-        self.z_level_label = self.main_window.findChild(QLabel, "zLevelLabel")
-        self.message_display = self.main_window.findChild(QLabel, "messageDisplay")
+        # Store references to status UI elements in right dock
+        self.ship_name_label = self.main_window.findChild(QLabel, "shipNameLabel")
+        self.hull_progress = self.main_window.findChild(QProgressBar, "hullProgressBar")
+        self.shields_progress = self.main_window.findChild(
+            QProgressBar, "shieldsProgressBar"
+        )
+        self.energy_progress = self.main_window.findChild(
+            QProgressBar, "energyProgressBar"
+        )
+        self.coordinates_label = self.main_window.findChild(QLabel, "coordinatesLabel")
+        self.sector_label = self.main_window.findChild(QLabel, "sectorLabel")
 
-        # Store references to buttons
-        self.new_game_btn = self.main_window.findChild(QPushButton, "newGameButton")
-        self.save_game_btn = self.main_window.findChild(QPushButton, "saveGameButton")
-        self.load_game_btn = self.main_window.findChild(QPushButton, "loadGameButton")
-        self.settings_btn = self.main_window.findChild(QPushButton, "settingsButton")
-        self.quit_btn = self.main_window.findChild(QPushButton, "quitButton")
+        # Store references to turn bar elements
+        self.end_turn_btn = self.main_window.findChild(QPushButton, "endTurnButton")
+        self.action_points_label = self.main_window.findChild(
+            QLabel, "actionPointsLabel"
+        )
+        self.phase_label = self.main_window.findChild(QLabel, "phaseLabel")
+        self.turn_number_label = self.main_window.findChild(QLabel, "turnNumberLabel")
+
+        # Store references to action buttons
+        self.move_btn = self.main_window.findChild(QPushButton, "moveButton")
+        self.rotate_btn = self.main_window.findChild(QPushButton, "rotateButton")
+        self.fire_btn = self.main_window.findChild(QPushButton, "fireButton")
+        self.scan_btn = self.main_window.findChild(QPushButton, "scanButton")
+        self.evasive_btn = self.main_window.findChild(QPushButton, "evasiveButton")
+        self.dock_btn = self.main_window.findChild(QPushButton, "dockButton")
+        self.hail_btn = self.main_window.findChild(QPushButton, "hailButton")
+
+        # Store references to toolbar actions
+        self.action_galaxy = self.main_window.findChild(QAction, "actionGalaxyMode")
+        self.action_sector = self.main_window.findChild(QAction, "actionSectorMode")
+        self.action_combat = self.main_window.findChild(QAction, "actionCombatMode")
+        self.action_zoom_in = self.main_window.findChild(QAction, "actionZoomIn")
+        self.action_zoom_out = self.main_window.findChild(QAction, "actionZoomOut")
+        self.action_zoom_reset = self.main_window.findChild(QAction, "actionZoomReset")
+
+        # Store references to menu actions
+        self.action_new_game = self.main_window.findChild(QAction, "actionNewGame")
+        self.action_save_game = self.main_window.findChild(QAction, "actionSaveGame")
+        self.action_load_game = self.main_window.findChild(QAction, "actionLoadGame")
+        self.action_quit = self.main_window.findChild(QAction, "actionQuit")
+
+        # Store reference to right dock
+        self.right_dock = self.main_window.findChild(QDockWidget, "rightDock")
 
         logger.info(f"UI loaded from: {ui_file}")
 
     def _connect_signals(self) -> None:
         """Connect UI signals to slots."""
-        self.new_game_btn.clicked.connect(self._on_new_game)
-        self.save_game_btn.clicked.connect(self._on_save_game)
-        self.load_game_btn.clicked.connect(self._on_load_game)
-        self.settings_btn.clicked.connect(self._on_settings)
-        self.quit_btn.clicked.connect(self._on_quit)
+        # Menu actions
+        self.action_new_game.triggered.connect(self._on_new_game)
+        self.action_save_game.triggered.connect(self._on_save_game)
+        self.action_load_game.triggered.connect(self._on_load_game)
+        self.action_quit.triggered.connect(self._on_quit)
+
+        # Toolbar mode actions
+        self.action_galaxy.triggered.connect(self._on_galaxy_mode)
+        self.action_sector.triggered.connect(self._on_sector_mode)
+        self.action_combat.triggered.connect(self._on_combat_mode)
+
+        # Toolbar zoom actions
+        self.action_zoom_in.triggered.connect(self._on_zoom_in)
+        self.action_zoom_out.triggered.connect(self._on_zoom_out)
+        self.action_zoom_reset.triggered.connect(self._on_zoom_reset)
+
+        # Turn bar
+        self.end_turn_btn.clicked.connect(self._on_end_turn)
+
+        # Action buttons
+        self.move_btn.clicked.connect(self._on_move)
+        self.rotate_btn.clicked.connect(self._on_rotate)
+        self.fire_btn.clicked.connect(self._on_fire)
+        self.scan_btn.clicked.connect(self._on_scan)
+        self.evasive_btn.clicked.connect(self._on_evasive)
+        self.dock_btn.clicked.connect(self._on_dock)
+        self.hail_btn.clicked.connect(self._on_hail)
 
     def _setup_game_display(self) -> None:
         """Replace the placeholder game display with custom GameDisplay widget."""
@@ -451,26 +512,92 @@ class GameView:
         logger.info("Custom game display widget installed")
 
     def _on_new_game(self) -> None:
-        """Handle New Game button click."""
+        """Handle New Game action."""
         if self.controller:
             self.controller.start_new_game()
-            self.show_message("New game started!")
+        logger.info("New game started")
 
     def _on_save_game(self) -> None:
-        """Handle Save Game button click."""
-        self.show_message("Save game functionality coming soon...")
+        """Handle Save Game action."""
+        logger.info("Save game functionality coming soon...")
 
     def _on_load_game(self) -> None:
-        """Handle Load Game button click."""
-        self.show_message("Load game functionality coming soon...")
-
-    def _on_settings(self) -> None:
-        """Handle Settings button click."""
-        self.show_message("Settings dialog coming soon...")
+        """Handle Load Game action."""
+        logger.info("Load game functionality coming soon...")
 
     def _on_quit(self) -> None:
-        """Handle Quit button click."""
+        """Handle Quit action."""
         self.main_window.close()
+
+    def _on_galaxy_mode(self) -> None:
+        """Handle Galaxy Mode action."""
+        logger.info("Switching to Galaxy Map mode")
+        # State machine integration deferred
+
+    def _on_sector_mode(self) -> None:
+        """Handle Sector Mode action."""
+        logger.info("Switching to Sector Map mode")
+        # State machine integration deferred
+
+    def _on_combat_mode(self) -> None:
+        """Handle Combat Mode action."""
+        logger.info("Switching to Combat mode")
+        # State machine integration deferred
+
+    def _on_zoom_in(self) -> None:
+        """Handle Zoom In action."""
+        if hasattr(self.grid_renderer, "zoom"):
+            current_zoom = self.grid_renderer.zoom
+            new_zoom = min(4.0, current_zoom * 1.2)
+            self.grid_renderer.zoom = new_zoom
+            logger.info(f"Zoom in: {new_zoom:.2f}x")
+
+    def _on_zoom_out(self) -> None:
+        """Handle Zoom Out action."""
+        if hasattr(self.grid_renderer, "zoom"):
+            current_zoom = self.grid_renderer.zoom
+            new_zoom = max(0.5, current_zoom / 1.2)
+            self.grid_renderer.zoom = new_zoom
+            logger.info(f"Zoom out: {new_zoom:.2f}x")
+
+    def _on_zoom_reset(self) -> None:
+        """Handle Zoom Reset action."""
+        if hasattr(self.grid_renderer, "zoom"):
+            self.grid_renderer.zoom = 1.0
+            logger.info("Zoom reset: 1.0x")
+
+    def _on_end_turn(self) -> None:
+        """Handle End Turn button click."""
+        logger.info("End turn requested")
+        self.controller.end_turn()
+
+    def _on_move(self) -> None:
+        """Handle Move button click."""
+        logger.info("Move action selected")
+
+    def _on_rotate(self) -> None:
+        """Handle Rotate button click."""
+        logger.info("Rotate action selected")
+
+    def _on_fire(self) -> None:
+        """Handle Fire button click."""
+        logger.info("Fire action selected")
+
+    def _on_scan(self) -> None:
+        """Handle Scan button click."""
+        logger.info("Scan action selected")
+
+    def _on_evasive(self) -> None:
+        """Handle Evasive button click."""
+        logger.info("Evasive maneuvers selected")
+
+    def _on_dock(self) -> None:
+        """Handle Dock button click."""
+        logger.info("Dock action selected")
+
+    def _on_hail(self) -> None:
+        """Handle Hail button click."""
+        logger.info("Hail action selected")
 
     def _update_display(self) -> None:
         """Update the display regularly."""
@@ -522,9 +649,27 @@ class GameView:
         if z_level != self.current_z_level:
             self.current_z_level = z_level
             logger.info("Z-level changed to: %d", z_level)
-            # Update UI label
-            if hasattr(self, "z_level_label"):
-                self.z_level_label.setText(f"Z-Level: {z_level}")
+            # Z-level display removed in new layout - could add to status bar
+
+    def update_turn_info(
+        self, turn_number: int, phase: str, action_points: int
+    ) -> None:
+        """
+        Update turn information display.
+
+        Args:
+            turn_number: Current turn number
+            phase: Current phase name
+            action_points: Remaining action points
+        """
+        if hasattr(self, "turn_number_label") and self.turn_number_label:
+            self.turn_number_label.setText(f"Turn: {turn_number}")
+
+        if hasattr(self, "phase_label") and self.phase_label:
+            self.phase_label.setText(f"Phase: {phase}")
+
+        if hasattr(self, "action_points_label") and self.action_points_label:
+            self.action_points_label.setText(f"AP: {action_points}")
 
     def set_selected_cell(self, position: "GridPosition") -> None:
         """
@@ -556,34 +701,53 @@ class GameView:
         Render a single game object.
 
         Only renders objects on visible z-levels (current ±1).
+        Uses GridRenderer.render_entity for starships with orientation indicators.
 
         Args:
             obj: Game object to render
         """
-        # Get object position and convert to screen coordinates
-        if hasattr(obj, "position"):
-            # Only render objects on adjacent z-levels to prevent visual clutter
-            min_z = max(0, self.current_z_level - 1)
-            max_z = min(self.grid_renderer.max_z_levels - 1, self.current_z_level + 1)
+        # Get object position
+        if not hasattr(obj, "position"):
+            return
 
-            if not (min_z <= obj.position.z <= max_z):
-                return  # Skip rendering objects on invisible z-levels
+        # Only render objects on adjacent z-levels to prevent visual clutter
+        min_z = max(0, self.current_z_level - 1)
+        max_z = min(self.grid_renderer.max_z_levels - 1, self.current_z_level + 1)
 
+        if not (min_z <= obj.position.z <= max_z):
+            return  # Skip rendering objects on invisible z-levels
+
+        # Check if this is a starship with rendering attributes
+        if hasattr(obj, "color") and hasattr(obj, "size"):
+            # This is a starship - use full entity rendering
+            orientation = (
+                obj.get_orientation_radians()
+                if hasattr(obj, "get_orientation_radians")
+                else 0.0
+            )
+            name = obj.name if hasattr(obj, "name") else ""
+
+            self.grid_renderer.render_entity(
+                self.game_surface,
+                obj.position,
+                obj.color,
+                obj.size,
+                orientation,
+                name,
+                self.current_z_level,  # Pass current z-level for reference lines
+            )
+        else:
+            # Fallback rendering for other objects (stations, etc.)
             screen_pos = self.grid_renderer.world_to_screen(obj.position)
 
-            # Draw a placeholder circle for the object
-            # Color varies based on object type
+            # Draw a placeholder shape
             color = (255, 255, 0)  # Yellow default
-
-            if hasattr(obj, "name") and "Enterprise" in obj.name:
-                color = (0, 255, 255)  # Cyan for player ship
 
             # Draw circle at screen position
             pygame.draw.circle(self.game_surface, color, screen_pos, 8)
 
             # Draw name label if available
             if hasattr(obj, "name") and obj.name:
-                # Use cached font to prevent creating fonts every frame
                 font = self._fonts[18]
                 text = font.render(obj.name, True, (255, 255, 255))
                 text_rect = text.get_rect(center=(screen_pos[0], screen_pos[1] - 15))

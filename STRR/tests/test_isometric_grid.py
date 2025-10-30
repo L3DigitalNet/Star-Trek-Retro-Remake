@@ -394,8 +394,9 @@ class TestFactoryFunctions:
         """Test creating sector grid configuration."""
         renderer = create_sector_grid()
         assert isinstance(renderer, GridRenderer)
-        assert renderer.tile_width == 32
-        assert renderer.tile_height == 16
+        # After zoom 2.0, tile dimensions are doubled
+        assert renderer.tile_width == 64  # 32 * 2.0
+        assert renderer.tile_height == 32  # 16 * 2.0
         assert renderer.grid_width == 20  # Fixed to match SectorMap dimensions
         assert renderer.grid_height == 20  # Fixed to match SectorMap dimensions
         assert renderer.max_z_levels == 5

@@ -118,29 +118,174 @@
 
 ### In Progress Milestones
 
-#### Develop Basic Map Rendering with Z-Level Support
+#### Implement Turn-Based Game Loop
 
-- This will be the basis for both the sector map and combat map.
-- Will test in a pygame-ce window first (ignore PySide6 integration for now)
-
-- **Steps:**
-
-1. Create a grid-based map structure with support for multiple z-levels.
-2. We will only be testing using a single layer initially until isometric rendering is implemented.
-3. Implement rendering logic to display the map from a fixed isometric perspective.
-4. Enable basic rotation of the map view in 90-degree increments.
-5. Add additional z-levels and test rendering with multiple layers.
-6. Place a test object (starship) on the map and verify correct rendering across z-levels.
-7. Implement z-level focus highlighting (fully opaque for current z-level, semi-transparent for others).
-8. Test performance and optimize rendering as needed.
+- Fixed timestep game loop with input → update → render phases
+- Turn counter and action point system
+- Initiative system for multiple entities
+- State persistence between turns
 
 ### Next Milestones
 
-- To be determined
+#### Connect UI to Game Logic (High Priority)
+
+- Wire UI action buttons to controller methods for ship commands
+- Implement real-time UI updates from game state (hull, shields, energy, position)
+- Add status panel updates when game state changes
+- Connect movement actions to ship movement on grid
+- Connect zoom controls to isometric grid view
+- Implement mode switching between Galaxy/Sector/Combat states
+
+#### Implement Basic Combat System
+
+- Weapon firing mechanics (phasers and torpedoes)
+  - Line of sight and firing arc calculations based on orientation
+  - Weapon range and accuracy calculations
+  - Visual feedback for weapon effects on grid
+- Shield and damage calculations
+  - Shield facing system (forward, aft, port, starboard)
+  - Damage penetration and hull damage
+  - Shield recharge mechanics
+- Combat resolution with positioning and orientation factors
+  - Range modifiers for weapons
+  - Cover and obstruction mechanics
+  - Critical hit system
+- Basic AI for enemy ship behavior (patrol, attack, flee)
+  - Simple state machine for AI decision-making
+  - Target selection and threat assessment
+  - Movement and firing patterns
+
+#### Implement Resource Management System
+
+- Energy allocation system
+  - Power distribution sliders for shields, weapons, engines, sensors
+  - Energy consumption per action
+  - Energy regeneration from impulse/warp engines
+- Supplies tracking (fuel, medical supplies, spare parts)
+  - Consumption rates based on activity
+  - Resupply at starbases
+  - Mission impact of low supplies
+- Crew morale and efficiency systems
+  - Morale affected by combat success/failure, casualties, mission duration
+  - Efficiency bonuses/penalties for ship systems
+  - Rest and shore leave mechanics at starbases
+- Ship system condition and maintenance
+  - Damage accumulation and repair mechanics
+  - System efficiency degradation
+  - Repair costs and time requirements
+
+#### Implement Sector Map Enhancements
+
+- Add space stations (starbases) to sector maps
+  - Docking and undocking mechanics
+  - Repair and resupply services
+  - Mission briefing and assignment
+- Add environmental objects
+  - Asteroids (providing cover, collision damage)
+  - Nebulae (sensor interference, movement penalties)
+  - Debris fields (navigation hazards)
+- Implement sensor system
+  - Short-range and long-range sensor modes
+  - Detection of ships and objects
+  - Sensor interference from environment
+
+#### Implement Dialog and Menu Systems
+
+- Mission briefing dialogs
+  - Display mission objectives and parameters
+  - Accept/decline mission options
+  - Mission reward information
+- Ship status dialogs
+  - Detailed system status reports
+  - Crew roster and assignment
+  - Damage reports and repair priorities
+- Settings dialog window
+  - Display configuration options
+  - Apply and save settings changes
+  - Key binding customization
+- Save/load game functionality through File menu
+  - Game state serialization to TOML
+  - Load saved games with state restoration
+  - Multiple save slot management
+
+#### Implement Galaxy Map Mode
+
+- Galaxy map grid rendering (10x10 sectors)
+- Sector navigation and selection
+- Federation, Neutral, and Hostile zone visualization
+- Sector information display (name, control, threat level)
+- Travel time and random encounter system
+- Transition from Galaxy to Sector map states
 
 ### Completed Milestones
 
-- None
+#### Basic Map Rendering with Z-Level Support
+
+- Implemented grid-based isometric rendering with multi-layer z-level support
+- Features include:
+  - Isometric projection with 3D coordinates (x, y, z)
+  - Multiple z-level visualization with transparency
+  - Grid line rendering with dashed patterns based on z-level distance
+  - Camera offset and zoom capabilities (0.25x to 4.0x)
+  - Cell highlighting and selection
+  - Grid bounds checking and validation
+  - Mouse click-to-select and click-to-move functionality
+  - Z-level switching via PageUp/PageDown keys
+  - Camera panning with arrow keys
+
+#### Basic Starship Entities
+
+- Created foundational game objects that can be placed and rendered on the isometric grid
+- **Completed Steps:**
+  1. ✅ GameObject base class with position and active state
+  2. ✅ Starship class with basic attributes (hull, shields, orientation)
+  3. ✅ Component pattern for ship systems (WeaponSystems, ShieldSystems, EngineSystems, SensorSystems)
+  4. ✅ Visual representation for starships on the isometric grid
+  5. ✅ Starship placement at specific grid coordinates and z-levels
+  6. ✅ Orientation indicators (facing direction visualization with arrow)
+  7. ✅ Multiple starships rendered simultaneously on the map
+  8. ✅ Faction-based color coding (Federation blue, Klingon red, Romulan green, etc.)
+
+#### Z-Level Visualization Enhancements
+
+- **Z-Level Reference Lines** (v0.0.13):
+  - Vertical dashed lines from ships to their projected position on the active layer
+  - Lines use ship's faction color (semi-transparent)
+  - Small circle marker at projection point
+  - Helps understand spatial relationships between z-levels
+
+- **Z-Level Distance Indicators** (v0.0.15):
+  - Numeric display showing distance from active z-level
+  - Format: `+N` (above) or `-N` (below)
+  - Positioned in upper-right corner of ship entity
+  - Yellow text with semi-transparent background
+  - Provides quick positional context
+
+#### Integrated PySide6 with pygame-ce
+
+- ✅ Embed pygame-ce rendering surface within PySide6 main window (v0.0.10)
+- ✅ Implement MVC separation (game logic independent of UI)
+- ✅ Create comprehensive UI layout with Right-Rail Tactical design (v0.0.16):
+  - Central game display area (1280x900) with expanding size policy
+  - Right dock panel with three tabs (Status, Actions, Map)
+  - Bottom turn bar with End Turn button and game state indicators
+  - Top toolbar with mode switcher (Galaxy/Sector/Combat) and zoom controls
+  - Menu bar with File and View menus
+- ✅ Add status panels showing ship hull, shields, energy, position
+- ✅ Add organized action buttons (Movement, Combat, Utilities groups)
+- ✅ Implement mini-map placeholder and legend for future navigation
+- ✅ Connect UI signals to placeholder handler methods
+- ✅ Professional windowed interface with proper Qt widgets
+
+#### Basic Starship Movement System
+
+- ✅ Enable starships to move across the grid with turn-based mechanics
+- ✅ Vector-based movement system with orientation tracking
+- ✅ Orientation indicators showing starship facing direction
+- ✅ 45-degree orientation system for X, Y, and Z axes
+- ✅ Diagonal movement support (up-right, down-left, etc.)
+- ✅ Movement cost calculations based on the Pythagorean theorem
+- ✅ Distance-based and environment-aware movement costs
 
 ## CRITICAL TODO LIST
 
@@ -504,11 +649,181 @@ Inspired by UI's windowed desktop games largely around the mid-1990s era. An exa
 
 ### 6.2 Interface Layout
 
+**Core Layout Principles:**
+
 - The main game will be contained within a PySide6 application window
 - Much of the interaction will be through widgets such as menus, dialogs, and buttons
 - The main game view (map) will be rendered using pygame-ce embedded within the PySide6 application
 - The map will be centered in the application window with UI elements surrounding it
 - Pop-up dialogs will be used for mission briefings, ship status, and other information
+
+#### 6.2.1 Layout Option 1: "Twin Docks + Splitter" (Power-User)
+
+**Use Case:** Persistent Status on the left and Controls/Log on the right
+
+**Layout Sketch:**
+
+```text
++---------------------------------------------------------------+
+| Toolbar                                                       |
++-------------+---------------------------+---------------------+
+| Left Dock   |        CENTRAL MAP        | Right Dock          |
+| (Status)    |      (QSplitter center)   | (Controls/Log tabs) |
++-------------+---------------------------+---------------------+
+| Bottom Dock: Message Log / Event Feed                         |
++---------------------------------------------------------------+
+```
+
+**Designer Components:**
+
+- **Left QDockWidget (StatusDock):** QVBoxLayout with:
+  - Ship portrait/icon
+  - QProgressBars (Hull/Shields/Energy)
+  - Resource meters
+- **Right QDockWidget (ControlDock):** QTabWidget with:
+  - Actions (buttons + grouped QGroupBox)
+  - Sensors (range sliders, toggles)
+  - Systems (tree or table view)
+- **Bottom QDockWidget (LogDock):** QPlainTextEdit (read-only) for combat log/events
+- **Center:** QWidget with a vertical QSplitter or stacked center holding the map placeholder
+- All three docks closable, floatable, movable; save/restore geometry
+
+**Pros:** Highly flexible, great for complex sessions
+**Cons:** Requires tuning for sensible defaults
+
+#### 6.2.2 Layout Option 2: "Right-Rail Tactical" (Simple, Focused)
+
+**Use Case:** Early prototypes; Sector/Combat with a single info/control stack
+
+**Layout Sketch:**
+
+```text
++--------------------------------------------------------+
+|  Toolbar / Menubar                                     |
++------------------------------+-------------------------+
+|          CENTRAL MAP         |  Status / Actions       |
+|      (pygame surface)        |  (tabs: Status,         |
+|                              |   Actions, Minimap)     |
++------------------------------+-------------------------+
+|  Turn/phase bar (bottom)                               |
++--------------------------------------------------------+
+```
+
+**Designer Components:**
+
+- **Base:** QMainWindow
+- **Central:** QWidget → QVBoxLayout → placeholder QWidget named GameSurface (later used to host pygame surface) + a bottom QWidget (TurnBar) with QHBoxLayout for "End Turn", AP, phase indicator
+- **Right Rail:** QDockWidget (dock right, allowed areas: Left|Right). Inside: QTabWidget with tabs:
+  - StatusTab (QFormLayout): hull/shields/energy bars (use QProgressBar)
+  - ActionsTab (QVBoxLayout): buttons ("Move", "Fire", "Scan", "Evasive")
+  - MapTab (QVBoxLayout): mini-map QLabel (future pixmap) + legend
+- **Toolbars:** Top QToolBar with mode buttons (Galaxy/Sector/Combat), separator, zoom in/out
+- **Resizing:** Set central layout stretch (map=1) and give right dock a Fixed minimum width (e.g., 300 px). Map placeholder QSizePolicy = Expanding, Expanding
+
+**Pros:** Fast to build, great for smaller screens
+**Cons:** Single column can get tall; tabs hide info
+
+#### 6.2.3 Layout Option 3: "Dashboard HUD" (Panel Ring)
+
+**Use Case:** Zero hidden info; everything visible at once on big monitors
+
+**Layout Sketch:**
+
+```text
++---------------------------------------------------------------+
+| Toolbar                                                       |
++---------+---------------------------------------+-------------+
+| Status  |               CENTRAL MAP             | Actions     |
+| (left)  |                                       | (right)     |
++---------+---------------------------------------+-------------+
+|                 Bottom: Log + Turn Bar                        |
++---------------------------------------------------------------+
+```
+
+**Designer Components:**
+
+- **Left Dock (StatusDock):** Compact QGridLayout HUD (bars + icons)
+- **Right Dock (ActionDock):** Grouped controls:
+  - Movement (arrows/rotate)
+  - Weapons (phasers/torps)
+  - Utilities (scan, tractor)
+- **Bottom:** QSplitter horizontal with Log (QPlainTextEdit) and TurnBar (QHBoxLayout)
+- **Center:** Map placeholder with strong "expanding" policy; side docks min width ~260–300 px
+
+**Pros:** No tab-hunting; ideal for Combat mode
+**Cons:** Needs space; can feel busy on laptops
+
+#### 6.2.4 Layout Option 4: "Mode-Stacked Center" (Mode-Aware)
+
+**Use Case:** Switch content per Galaxy/Sector/Combat while keeping the chrome
+
+**Layout Sketch:**
+
+```text
++---------------------------------------------------------------+
+| Menus/Toolbar                                                 |
++-----------------------+---------------------------------------+
+| Left/Right Docks      |  QStackedWidget (center):             |
+| (shared)              |  [GalaxyView | SectorView | CombatView]|
++-----------------------+---------------------------------------+
+| Bottom Dock: Log / Turn Bar                                   |
++---------------------------------------------------------------+
+```
+
+**Designer Components:**
+
+- **Center:** QStackedWidget named ModeStack with three pages:
+  - GalaxyPage: simple QGridLayout (galaxy map + filters)
+  - SectorPage: main map placeholder + small QFrame overlay host (optional)
+  - CombatPage: map + target panel strip (mini right rail) via inner QHBoxLayout
+- Use toolbar's mode buttons to switch ModeStack->setCurrentIndex(...)
+- Surrounding docks (Status/Actions/Log) stay mounted across modes
+
+**Pros:** Clean separation by mode; test each page in isolation
+**Cons:** Slightly more Designer wiring
+
+#### 6.2.5 Layout Option 5: "Notebook Right-Side" (Tabbed Control Center)
+
+**Use Case:** Single, predictable place for all non-map UI
+
+**Layout Sketch:**
+
+```text
++---------------------------------------------------------------+
+| Toolbar                                                       |
++------------------------------+--------------------------------+
+|          CENTRAL MAP         |  QTabWidget:                   |
+|                              |  [ Status | Actions | Intel ]  |
+|                              |  [ Minimap | Systems | Cargo ] |
++------------------------------+--------------------------------+
+| Bottom: Turn Bar + Log                                        |
++---------------------------------------------------------------+
+```
+
+**Designer Components:**
+
+- **Right:** QDockWidget → QTabWidget with 4–6 tabs. Each tab uses QFormLayout/QGridLayout
+- Add QToolButtons in the tab bar's corner (Designer: tabBarCornerWidget) for quick actions (End Turn, Center on Player)
+- Central + Bottom as in Option 1
+
+**Pros:** Very predictable; tidy .ui
+**Cons:** Tab switching during combat can be a little slower
+
+#### 6.2.6 Layout Decision
+
+**Selected Layout:** Layout Option 2 ("Right-Rail Tactical")
+
+**Rationale:**
+
+- Simplicity and focus on essential information
+- Fast to build for initial development
+- Great for smaller screens
+- Suitable for early prototypes
+
+**Future Consideration:**
+
+- Final layout will be determined based on playtesting and user feedback during development
+- May transition to other layouts for specific game modes
 
 ### 6.3 Input Controls
 

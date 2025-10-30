@@ -12,7 +12,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-30-2025
-Date Changed: 10-30-2025 (v0.0.11 - Import fixes)
+Date Changed: 10-30-2025 (v0.0.15 - Added z-level distance indicators)
 License: MIT
 
 Features:
@@ -55,7 +55,7 @@ import pygame
 # Import GridPosition from the game entities module
 from src.game.entities.base import GridPosition
 
-__version__: Final[str] = "0.0.11"
+__version__: Final[str] = "0.0.15"
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +89,7 @@ class GridRenderer:
         render_grid: Draw the isometric grid
         render_cell_highlight: Highlight a specific grid cell
         render_z_level: Render a specific z-level
+        render_entity: Draw an entity (starship/station) with orientation and z-reference
         is_in_bounds: Check if position is within grid bounds
         set_camera_offset: Update camera position
 
@@ -96,6 +97,8 @@ class GridRenderer:
         _draw_grid_lines: Draw the grid lines for a z-level
         _draw_diamond: Draw a diamond shape for a grid cell
         _calculate_cell_corners: Get screen coordinates for cell corners
+        _render_z_reference_line: Draw vertical reference line to active layer
+        _draw_dashed_line: Draw a dashed line between two points
     """
 
     # Default colors - Using distinct hues for better z-level differentiation
@@ -304,6 +307,152 @@ class GridRenderer:
 
         # Draw outline for clarity
         pygame.draw.polygon(surface, (255, 255, 255), corners, 2)
+
+    def render_entity(
+        self,
+        surface: pygame.Surface,
+        position: GridPosition,
+        color: ColorTuple,
+        size: int = 16,
+        orientation: float = 0.0,
+        name: str = "",
+        current_z_level: int | None = None,
+    ) -> None:
+        """
+        Render an entity (starship, station) on the grid.
+
+        Draws a colored circle/shape at the entity's position with an
+        orientation indicator showing facing direction. If the entity is
+        on a different z-level than current_z_level, draws a vertical
+        reference line to the active layer and displays the z-distance.
+
+        Args:
+            surface: pygame Surface to render on
+            position: Entity's 3D grid position
+            color: RGB color for the entity
+            size: Entity size in pixels
+            orientation: Facing direction in radians (0 = east)
+            name: Entity name to display
+            current_z_level: Current active z-level (None = no reference line)
+        """
+        import math
+
+        if not self.is_in_bounds(position):
+            return
+
+        # Convert world position to screen position
+        screen_x, screen_y = self.world_to_screen(position)
+
+        # Draw vertical reference line if entity is on different z-level
+        if current_z_level is not None and position.z != current_z_level:
+            self._render_z_reference_line(
+                surface, position, current_z_level, color, screen_x, screen_y
+            )
+
+        # Draw entity body (circle)
+        pygame.draw.circle(surface, color, (screen_x, screen_y), size // 2)
+        # Draw white outline for visibility
+        pygame.draw.circle(surface, (255, 255, 255), (screen_x, screen_y), size // 2, 2)
+
+        # Draw orientation indicator (triangle/arrow pointing in facing direction)
+        arrow_length = size * 0.8
+        arrow_width = size * 0.4
+
+        # Calculate arrow tip position
+        tip_x = screen_x + int(math.cos(orientation) * arrow_length)
+        tip_y = screen_y + int(math.sin(orientation) * arrow_length)
+
+        # Calculate arrow base corners (perpendicular to facing)
+        perp_angle = orientation + math.pi / 2
+        base1_x = screen_x + int(math.cos(perp_angle) * arrow_width / 2)
+        base1_y = screen_y + int(math.sin(perp_angle) * arrow_width / 2)
+        base2_x = screen_x - int(math.cos(perp_angle) * arrow_width / 2)
+        base2_y = screen_y - int(math.sin(perp_angle) * arrow_width / 2)
+
+        # Draw orientation arrow
+        arrow_points = [(tip_x, tip_y), (base1_x, base1_y), (base2_x, base2_y)]
+        pygame.draw.polygon(surface, (255, 255, 255), arrow_points)
+        pygame.draw.polygon(surface, (0, 0, 0), arrow_points, 1)  # Black outline
+
+        # Draw z-level distance indicator if on different level
+        if current_z_level is not None and position.z != current_z_level:
+            z_distance = position.z - current_z_level
+            # Format: +N (above) or -N (below)
+            z_text = f"{z_distance:+d}"
+
+            # Small font for z-distance indicator
+            z_font = pygame.font.Font(None, 18)
+            z_label = z_font.render(z_text, True, (255, 255, 100))  # Yellow-ish
+
+            # Position: upper-right of entity circle
+            z_label_x = screen_x + size // 2 + 2
+            z_label_y = screen_y - size // 2 - 2
+            z_label_rect = z_label.get_rect(topleft=(z_label_x, z_label_y))
+
+            # Draw semi-transparent background for visibility
+            z_bg_rect = z_label_rect.inflate(2, 1)
+            pygame.draw.rect(surface, (0, 0, 0, 200), z_bg_rect)
+            pygame.draw.rect(surface, (100, 100, 100), z_bg_rect, 1)  # Border
+            surface.blit(z_label, z_label_rect)
+
+        # Draw entity name label
+        if name:
+            font = pygame.font.Font(None, 20)
+            text = font.render(name, True, (255, 255, 255))
+            text_rect = text.get_rect(center=(screen_x, screen_y - size))
+            # Draw background for text visibility
+            bg_rect = text_rect.inflate(4, 2)
+            pygame.draw.rect(surface, (0, 0, 0, 180), bg_rect)
+            surface.blit(text, text_rect)
+
+    def _render_z_reference_line(
+        self,
+        surface: pygame.Surface,
+        entity_position: GridPosition,
+        current_z_level: int,
+        entity_color: ColorTuple,
+        entity_screen_x: int,
+        entity_screen_y: int,
+    ) -> None:
+        """
+        Render a vertical reference line from entity to active layer.
+
+        Draws a dashed line from the entity's position down to where it
+        would appear on the current z-level, making it easier to see
+        spatial relationships.
+
+        Args:
+            surface: pygame Surface to render on
+            entity_position: Entity's 3D grid position
+            current_z_level: The active z-level to project to
+            entity_color: Color of the entity (used for line color)
+            entity_screen_x: Entity's screen X coordinate
+            entity_screen_y: Entity's screen Y coordinate
+        """
+        # Calculate the position on the current z-level (same x, y)
+        target_position = GridPosition(
+            entity_position.x, entity_position.y, current_z_level
+        )
+        target_screen_x, target_screen_y = self.world_to_screen(target_position)
+
+        # Use entity color but make it semi-transparent
+        line_color = (*entity_color[:3], 128)  # Ensure RGB format with alpha
+
+        # Draw dashed line from entity to target position
+        self._draw_dashed_line(
+            surface,
+            (entity_screen_x, entity_screen_y),
+            (target_screen_x, target_screen_y),
+            line_color,
+            dash_length=8,
+            gap_length=4,
+        )
+
+        # Draw a small circle at the target position to show where it projects
+        pygame.draw.circle(surface, entity_color, (target_screen_x, target_screen_y), 4)
+        pygame.draw.circle(
+            surface, (255, 255, 255), (target_screen_x, target_screen_y), 4, 1
+        )
 
     def is_in_bounds(self, position: GridPosition) -> bool:
         """
@@ -576,15 +725,20 @@ def create_sector_grid() -> GridRenderer:
         GridRenderer instance configured for sector map
     """
     # Grid dimensions match SectorMap: 20x20 grid with 5 z-levels
-    # Center the grid in a 1920x1080 window
-    # Grid center is at (10, 10), window center is (960, 540)
-    # Isometric center point: (10-10) * 16 = 0, (10+10) * 8 = 160
-    # Camera offset: window_center - iso_center = (960, 540 - 160) = (960, 380)
-    return GridRenderer(
+    # Center the grid in a 1280x900 window
+    # Grid center is at (10, 10), window center is (640, 450)
+    # Base tile size: 32x16 at zoom 1.0
+    # Zoom 2.0 gives: 64x32 tiles for closer view
+    # Isometric center point at zoom 2.0: (10-10) * 32 = 0, (10+10) * 16 = 320
+    # Camera offset: window_center - iso_center = (640, 450 - 320) = (640, 130)
+    grid = GridRenderer(
         tile_width=32,
         tile_height=16,
         grid_width=20,  # Match SectorMap.grid_size[0]
         grid_height=20,  # Match SectorMap.grid_size[1]
         max_z_levels=5,  # Match SectorMap.grid_size[2]
-        camera_offset=(960, 380),
+        camera_offset=(640, 130),
     )
+    # Set zoom to 2.0 for closer view (testing purposes)
+    grid.set_zoom(2.0)
+    return grid

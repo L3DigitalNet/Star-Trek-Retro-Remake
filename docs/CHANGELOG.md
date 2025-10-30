@@ -7,6 +7,355 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.18] - 2025-10-30
+
+### Added
+
+- **Turn-Based Game Loop System**: Complete implementation of fixed timestep game loop with turn management
+  - Initiative-based turn ordering system where entities with higher initiative act first
+  - Action point system for all game entities (GameObject base class)
+  - `TurnManager` class with comprehensive turn tracking and entity registration
+  - Turn phases: input → action → resolution
+  - Automatic action point restoration at start of each turn
+  - Entity registration/unregistration for combat tracking
+  - Turn history and action tracking
+
+- **GameObject Turn Attributes**: Extended base GameObject class with turn-based mechanics
+  - `initiative`: Initiative value for turn order (higher acts first)
+  - `action_points`: Current available action points
+  - `max_action_points`: Maximum action points per turn (default 3)
+  - `reset_action_points()`: Restore action points to maximum
+  - `spend_action_points(cost)`: Consume action points for actions
+  - `has_action_points(cost)`: Check if entity can perform action
+
+- **Enhanced TurnManager**: Comprehensive turn management system
+  - Initiative-based entity sorting (highest initiative acts first)
+  - Current entity tracking with `get_current_entity()`
+  - Turn advancement with `next_entity()` and `advance_turn()`
+  - Turn phase management (input, action, resolution)
+  - Entity registration system for combat/turn participation
+  - Action history tracking for turn replay
+  - Get turn info with entity count and remaining actions
+
+- **GameModel Turn Integration**: Turn system integrated into core game logic
+  - Player ship gets initiative 10 and 5 action points (acts first, more actions)
+  - NPC ships get initiative 6-9 and 3 action points per turn
+  - Entity registration with turn manager on game initialization
+  - Movement actions now consume action points (1 AP per grid cell minimum)
+  - Automatic turn advancement when entity runs out of action points
+  - `end_current_turn()`: Manually end current entity's turn
+  - `get_turn_status()`: Get comprehensive turn status information
+
+- **Controller Turn Management**: Controller methods for turn handling
+  - `end_turn()`: End current entity's turn and advance to next
+  - `_update_turn_display()`: Update view with current turn information
+  - Turn information updates after movement and turn changes
+  - Connected "End Turn" button to controller.end_turn()
+
+- **View Turn Display Updates**: UI integration for turn information
+  - Connected End Turn button to controller (was placeholder)
+  - `update_turn_info()`: Updates turn number, phase, and action points in UI
+  - Turn display updates automatically on game start, load, and turn changes
+  - Action points display shows "AP: X" format in turn bar
+
+### Changed
+
+- **Movement System**: Movement now integrated with action point system
+  - Movement costs action points (1 AP per grid cell, minimum 1)
+  - Movement checks action point availability before execution
+  - Movement automatically advances to next entity when action points depleted
+  - Failed movements still visible through existing validation
+
+- **Game Initialization**: Turn system activated on new game
+  - Player ship registered with turn manager
+  - All test ships registered with turn manager with varied initiative
+  - First turn automatically started after initialization
+  - Turn display updated on game start
+
+### Technical Details
+
+- **File Updates**:
+  - `base.py` (v0.0.18): Added turn-based attributes and methods to GameObject
+  - `model.py` (v0.0.18): Enhanced TurnManager and integrated turn system
+  - `controller.py` (v0.0.18): Added turn management methods
+  - `view.py` (v0.0.18): Connected End Turn button and turn display
+  - `main.py` (v0.0.18): Version bump
+  - `pyproject.toml`: Version bump to 0.0.18
+
+- **Architecture Pattern**: Turn-based system follows MVC separation
+  - Model: Pure turn logic and state management
+  - View: Turn information display and user input
+  - Controller: Coordination between model and view
+
+- **Action Point Costs** (Initial Implementation):
+  - Movement: 1 AP per grid cell distance (minimum 1 AP)
+  - Other actions: To be defined in future milestones
+
+### Milestone Progress
+
+**Completed: "Implement Turn-Based Game Loop"**
+
+- ✅ Fixed timestep game loop with input → update → render phases
+- ✅ Turn counter and action point system
+- ✅ Initiative system for multiple entities
+- ✅ State persistence between turns
+- ✅ Entity registration and turn order management
+- ✅ Action point restoration and consumption
+- ✅ UI integration with turn display and End Turn button
+
+## [0.0.17] - 2025-10-30
+
+### Changed
+
+- **Updated Development Milestones**: Reorganized milestone tracking in DESIGN.md to reflect current progress
+  - Moved "Integrate PySide6 with pygame-ce" from Next to Completed milestones
+  - Added comprehensive completion details for PySide6 integration (v0.0.10 and v0.0.16 work)
+  - Moved "Turn-Based Game Loop" to In Progress milestones (currently being implemented)
+  - Added new "Connect UI to Game Logic" milestone to Next milestones
+  - Updated completed milestone descriptions with version numbers and specific features
+  - Improved milestone organization to better track development progress
+
+### Documentation
+
+- Updated DESIGN.md milestone sections for accuracy
+- Added detailed completion notes for UI integration work
+- Reorganized milestone priorities based on current development state
+
+## [0.0.16] - 2025-10-30
+
+### Added
+
+- **Right-Rail Tactical UI Layout**: Implemented comprehensive Qt application window based on Layout Option 2 from DESIGN.md
+  - Central game display area with expanding size policy
+  - Right dock panel with three tabs (Status, Actions, Map)
+  - Bottom turn bar with End Turn button, action points display, phase indicator, and turn counter
+  - Top toolbar with mode switcher buttons (Galaxy/Sector/Combat) and zoom controls
+  - Menu bar with File and View menus
+
+- **Status Tab**: Complete ship status monitoring interface
+  - Ship name display with styled formatting
+  - Hull, shields, and energy progress bars with color coding
+  - Position display showing X, Y, Z coordinates
+  - Sector name display
+
+- **Actions Tab**: Organized action buttons by category
+  - Movement group: Move Ship, Rotate buttons
+  - Combat group: Fire Weapons, Scan Target, Evasive Maneuvers buttons
+  - Utilities group: Dock at Station, Hail Ship buttons
+
+- **Map Tab**: Mini-map and legend placeholder
+  - Mini-map display area (250x250) for future implementation
+  - Color-coded legend showing player ships, enemy ships, stations, and asteroids
+
+- **Turn Management UI**: Bottom bar for turn-based gameplay
+  - End Turn button with styled appearance
+  - Action points counter with yellow highlight
+  - Current phase indicator with green highlight
+  - Turn number display
+
+### Changed
+
+- **Main Window Layout**: Completely redesigned from left-sidebar to right-dock layout
+  - Changed from QHBoxLayout with fixed left panel to QVBoxLayout with QDockWidget
+  - Game display now uses central widget with expanding size policy
+  - Removed old control panel groupbox in favor of dockable tabs
+
+- **GameView Class**: Updated to support new UI structure
+  - Added references to all new UI elements (progress bars, toolbar actions, tab widgets)
+  - Connected signals for mode switcher, zoom controls, and action buttons
+  - Implemented placeholder handlers for all new UI actions
+  - Updated `show_ship_status()` to use progress bars instead of text labels
+  - Added `update_turn_info()` method for turn bar updates
+  - Removed message display in favor of future status bar/dialogs
+
+- **UI Signal Handling**: Expanded signal/slot connections
+  - Menu actions: New Game, Save Game, Load Game, Quit
+  - Toolbar mode actions: Galaxy, Sector, Combat mode switchers
+  - Toolbar zoom actions: Zoom in, out, reset with grid renderer integration
+  - Turn action: End Turn button
+  - Ship actions: Move, Rotate, Fire, Scan, Evasive, Dock, Hail buttons
+
+### Technical Details
+
+- **File Updates**:
+  - `main_window.ui` (new design): Complete UI redesign with right dock, tabs, toolbar, turn bar
+  - `view.py` (v0.0.16): Integrated new UI components, added signal handlers
+  - `pyproject.toml`: Version bump to 0.0.16
+
+- **UI Components**:
+  - QDockWidget for right panel (closable, movable, floatable)
+  - QTabWidget with three tabs for organized information display
+  - QProgressBar widgets for visual status indicators
+  - QToolBar with mode and zoom actions
+  - QFormLayout for clean label/value pairs in status display
+
+- **Design Pattern**: Maintains MVC separation
+  - View handles UI updates and user input
+  - Controller methods called for game logic
+  - State machine integration deferred for future implementation
+
+## [0.0.15] - 2025-10-30
+
+### Added
+
+- **Z-Level Distance Indicators**: Added numeric z-level distance display next to ships
+  - Ships on different z-levels now show a small number indicating their distance from the active z-level
+  - Format: `+N` for ships above active level, `-N` for ships below
+  - Positioned in the upper-right corner of the ship entity
+  - Yellow-ish text color with semi-transparent black background for visibility
+  - Bordered box for clear distinction from other UI elements
+  - Provides quick positional context without cluttering the view
+
+### Changed
+
+- **GridRenderer.render_entity()**: Updated to draw z-level distance indicator
+  - Automatically displays distance when entity is on a different z-level
+  - Uses small font (18pt) to minimize visual clutter
+  - Works in conjunction with existing z-level reference lines
+
+### Technical Details
+
+- **File Updates**:
+  - `isometric_grid.py` (v0.0.15): Enhanced entity rendering with z-distance display
+  - `main.py` (v0.0.15): Version bump
+  - `pyproject.toml`: Version bump to 0.0.15
+
+## [0.0.14] - 2025-10-30
+
+### Changed
+
+- **Zoom and Map Centering**: Adjusted initial view for testing purposes
+  - Default zoom increased to 2.0x for closer view of the sector map
+  - Camera offset recalculated to center the 20x20 grid in 1280x900 pygame window
+  - Grid now properly centered at (640, 130) for optimal viewing
+  - Map calculates center based on grid dimensions and tile size at zoom level
+
+### Technical Details
+
+- **File Updates**:
+  - `isometric_grid.py` (v0.0.14): Updated `create_sector_grid()` function
+    - Changed camera_offset from (960, 380) to (640, 130) for 1280x900 window
+    - Added `grid.set_zoom(2.0)` call for closer initial view
+    - Updated docstring to reflect new centering calculations
+  - `main.py` (v0.0.14): Version bump
+  - `pyproject.toml`: Version bump to 0.0.14
+
+### Notes
+
+These changes are temporary for testing purposes. The zoom level and camera positioning will be adjusted based on gameplay requirements as development progresses.
+
+## [0.0.13] - 2025-10-30
+
+### Added
+
+- **Z-Level Reference Lines**: Visual aids for ships on non-current z-levels
+  - Added vertical dashed lines from ships to their projected position on the active layer
+  - Lines use the ship's faction color (semi-transparent) for easy identification
+  - Small circle marker at the projection point on the active layer
+  - Makes it much easier to understand spatial relationships between z-levels
+  - Automatically enabled when ship is on a different z-level than the active layer
+
+### Changed
+
+- **GridRenderer.render_entity()**: Added optional `current_z_level` parameter
+  - When provided, automatically draws reference line if entity is on different z-level
+  - Maintains backward compatibility (parameter is optional, default None = no line)
+
+- **GameView**: Updated to pass current z-level when rendering entities
+  - Reference lines now automatically appear for all ships on non-active layers
+
+### Technical Details
+
+- **New Methods**:
+  - `GridRenderer._render_z_reference_line()`: Draws dashed line from entity to active layer
+  - Uses existing `_draw_dashed_line()` helper for consistent line rendering
+  - Creates GridPosition at entity's x,y but current z-level for projection calculation
+
+- **File Updates**:
+  - `isometric_grid.py` (v0.0.13): Added reference line rendering
+  - `view.py` (v0.0.13): Pass current_z_level to render_entity
+  - `main.py` (v0.0.13): Version bump
+  - `pyproject.toml`: Version bump to 0.0.13
+
+- **Test Results**: All 77 tests pass (no regressions)
+
+### User Experience Improvement
+
+This feature significantly improves spatial awareness when viewing ships at different z-levels. Previously, it was difficult to tell where a ship on z-level 2 was in relation to the current z-level 1 grid. Now, a clear reference line shows exactly where that ship would project down to the active layer, making tactical decisions much easier.
+
+## [0.0.12] - 2025-10-30
+
+### Added
+
+- **Starship Visual Representation**: Complete entity rendering system on isometric grid
+  - Added `color` and `size` attributes to Starship class for visual differentiation
+  - Faction-based color coding: Federation (blue), Klingon (red), Romulan (green), etc.
+  - Added `get_orientation_radians()` method for rendering calculations
+  - Created `_get_faction_color()` helper method with 7 faction color mappings
+
+- **Orientation Visualization**: Directional indicators showing ship facing
+  - White arrow overlay showing ship orientation (0-359 degrees)
+  - Arrow dynamically rotates based on ship's facing direction
+  - Clear visual distinction between body and orientation indicator
+
+- **GridRenderer Entity Rendering**: New `render_entity()` method
+  - Renders entities (starships, stations) at 3D grid positions
+  - Draws colored circle body with white outline for visibility
+  - Adds orientation arrow (triangle) pointing in facing direction
+  - Displays entity name label above with semi-transparent background
+  - Proper isometric projection and z-level positioning
+
+- **GameView Entity Integration**: Updated rendering pipeline
+  - `_render_game_object()` now uses GridRenderer.render_entity for starships
+  - Detects starships by `color` and `size` attributes
+  - Fallback rendering for other entity types (stations, etc.)
+  - Only renders entities on visible z-levels (current ±1)
+
+- **Test Starships**: Demonstration scenario with multiple ships
+  - Added `_add_test_ships()` method to GameModel
+  - Creates 4 test ships at different positions and z-levels:
+    - IKS Korinar (Klingon) at (8,8,1) facing 45°
+    - IRW Valdore (Romulan) at (12,6,2) facing 135°
+    - IKS Amar (Klingon) at (10,10,0) facing 270°
+    - USS Reliant (Federation) at (7,12,1) facing 180°
+  - Demonstrates visual differentiation and orientation indicators
+
+### Changed
+
+- **Starship Constructor**: Added optional `faction` parameter
+  - Default faction: "Federation"
+  - Updated `_create_player_ship()` to specify Federation faction
+  - All ship instantiations now include faction for proper coloring
+
+### Fixed
+
+- Updated all test fixtures to include faction parameter
+- Added tests for new functionality:
+  - `test_starship_orientation_radians()` - Orientation conversion
+  - `test_starship_faction_colors()` - Faction color differentiation
+
+### Technical Details
+
+- **File Updates**:
+  - `starship.py` (v0.0.12): Added visual attributes and faction colors
+  - `isometric_grid.py` (v0.0.12): Added render_entity() method
+  - `view.py` (v0.0.12): Integrated entity rendering
+  - `model.py` (v0.0.12): Added test ships and updated player ship creation
+  - `main.py` (v0.0.12): Version bump
+  - `pyproject.toml`: Version bump to 0.0.12
+
+- **Test Results**: 77 tests pass (2 new tests added)
+
+### Milestone Progress
+
+**Completed: "Implement Basic Starship Entities"**
+
+- ✅ Create foundational game objects that can be placed and rendered on the isometric grid
+- ✅ Create visual representation for starships on the isometric grid
+- ✅ Implement starship placement at specific grid coordinates and z-levels
+- ✅ Add orientation indicators (facing direction visualization)
+- ✅ Test rendering multiple starships on the map simultaneously
+
 ## [0.0.11] - 2025-10-30
 
 ### Changed

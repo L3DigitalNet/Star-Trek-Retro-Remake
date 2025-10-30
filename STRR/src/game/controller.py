@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025 (v0.0.9 - Bug fixes)
+Date Changed: 10-30-2025 (v0.0.18 - Turn-based system)
 License: MIT
 
 Features:
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from .view import GameView
     from .entities.starship import Starship
 
-__version__: Final[str] = "0.0.10"
+__version__: Final[str] = "0.0.18"
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +171,8 @@ class GameController:
             self.view.render_sector_map(
                 self.model.current_sector, self.model.game_objects
             )
+            # Update turn information display
+            self._update_turn_display()
 
     def save_game(self, filepath: str) -> bool:
         """
@@ -201,8 +203,24 @@ class GameController:
             self.view.render_sector_map(
                 self.model.current_sector, self.model.game_objects
             )
+            self._update_turn_display()
 
         return success
+
+    def end_turn(self) -> None:
+        """
+        End the current entity's turn and advance to next.
+
+        Updates the view to reflect new turn state.
+        """
+        self.model.end_current_turn()
+
+        # Update view with new turn information
+        if self.view:
+            self.view.render_sector_map(
+                self.model.current_sector, self.model.game_objects
+            )
+            self._update_turn_display()
 
     def _setup_states(self) -> None:
         """Initialize game states."""
@@ -320,3 +338,18 @@ class GameController:
         """
         # Update current state
         self.state_manager.update(dt)
+
+    def _update_turn_display(self) -> None:
+        """Update the view's turn information display."""
+        if not self.view:
+            return
+
+        # Get current turn status from model
+        turn_info = self.model.get_turn_status()
+
+        # Update turn bar in view
+        self.view.update_turn_info(
+            turn_number=turn_info["turn_number"],
+            action_points=turn_info["action_points"],
+            phase=turn_info["current_phase"],
+        )

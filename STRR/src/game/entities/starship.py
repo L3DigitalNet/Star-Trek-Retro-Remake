@@ -44,7 +44,7 @@ from ..components.ship_systems import (
     LifeSupportSystems,
 )
 
-__version__: Final[str] = "0.0.10"
+__version__: Final[str] = "0.0.12"
 
 
 class Starship(GameObject):
@@ -56,22 +56,32 @@ class Starship(GameObject):
 
     Attributes:
         ship_class: Class designation of the starship
+        faction: Faction affiliation
         systems: Dictionary of ship subsystems
         crew: Crew roster management
         resources: Resource management system
         hull_integrity: Current hull integrity percentage
         orientation: Current facing direction (0-359 degrees)
+        color: RGB color tuple for rendering
+        size: Base size in pixels for rendering
 
     Public methods:
         get_system: Retrieve a specific ship system
         take_damage: Apply damage to ship systems and hull
         repair_system: Repair a damaged ship system
+        get_orientation_radians: Get orientation in radians for rendering
 
     Private methods:
-        _initialize_systems: Set up ship systems based on class
+        _get_faction_color: Determine color based on faction
     """
 
-    def __init__(self, position: GridPosition, ship_class: str, name: str = ""):
+    def __init__(
+        self,
+        position: GridPosition,
+        ship_class: str,
+        name: str = "",
+        faction: str = "Federation",
+    ):
         """
         Initialize a new starship.
 
@@ -79,9 +89,11 @@ class Starship(GameObject):
             position: Initial 3D grid position
             ship_class: Ship class designation
             name: Ship name
+            faction: Faction affiliation (Federation, Klingon, Romulan, etc.)
         """
         super().__init__(position, name)
         self.ship_class = ship_class
+        self.faction = faction
 
         # Initialize ship systems using component composition
         self.systems: dict[str, ShipSystem] = {
@@ -99,6 +111,32 @@ class Starship(GameObject):
         # Ship state
         self.hull_integrity: float = 100.0
         self.orientation: int = 0  # 0-359 degrees
+
+        # Visual representation attributes
+        self.color = self._get_faction_color(faction)
+        self.size = 16  # Base size in pixels for rendering
+
+    def _get_faction_color(self, faction: str) -> tuple[int, int, int]:
+        """
+        Get the display color for a ship based on faction.
+
+        Args:
+            faction: Faction name
+
+        Returns:
+            RGB color tuple for rendering
+        """
+        # Faction color mapping
+        faction_colors: dict[str, tuple[int, int, int]] = {
+            "Federation": (60, 120, 200),  # Blue
+            "Klingon": (180, 40, 40),  # Red
+            "Romulan": (60, 180, 80),  # Green
+            "Gorn": (200, 160, 40),  # Yellow
+            "Tholian": (180, 100, 200),  # Purple
+            "Orion": (40, 200, 160),  # Cyan
+            "Neutral": (140, 140, 140),  # Gray
+        }
+        return faction_colors.get(faction, (200, 200, 200))  # White default
 
     def get_system(self, system_name: str) -> ShipSystem | None:
         """
@@ -147,6 +185,17 @@ class Starship(GameObject):
             system.repair(repair_amount)
             return True
         return False
+
+    def get_orientation_radians(self) -> float:
+        """
+        Get ship orientation in radians for rendering.
+
+        Returns:
+            Orientation angle in radians (0 to 2π)
+        """
+        import math
+
+        return math.radians(self.orientation)
 
 
 class SpaceStation(GameObject):

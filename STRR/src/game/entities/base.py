@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 10-30-2025 (v0.0.18 - Turn-based system)
 License: MIT
 
 Features:
@@ -36,7 +36,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Final
 
-__version__: Final[str] = "0.0.10"
+__version__: Final[str] = "0.0.18"
 
 
 @dataclass(frozen=True)
@@ -96,10 +96,16 @@ class GameObject:
         name: Display name for the entity
         active: Whether the entity is active in the game
         faction: Faction affiliation (if applicable)
+        initiative: Initiative value for turn order (higher acts first)
+        action_points: Available action points this turn
+        max_action_points: Maximum action points per turn
 
     Public methods:
         update: Update entity logic each game tick
         destroy: Mark entity for removal from the game
+        reset_action_points: Restore action points at turn start
+        spend_action_points: Consume action points for action
+        has_action_points: Check if entity can perform action
 
     Private methods:
         _generate_id: Generate unique entity identifier
@@ -119,6 +125,11 @@ class GameObject:
         self.active = True
         self.faction: str | None = None
 
+        # Turn-based system attributes
+        self.initiative: int = 0  # Base initiative (can be modified by ship class)
+        self.action_points: int = 0  # Current available action points
+        self.max_action_points: int = 3  # Maximum action points per turn
+
     def update(self, dt: float) -> None:
         """
         Update entity logic.
@@ -132,6 +143,37 @@ class GameObject:
     def destroy(self) -> None:
         """Mark entity for removal from the game."""
         self.active = False
+
+    def reset_action_points(self) -> None:
+        """Restore action points to maximum at start of turn."""
+        self.action_points = self.max_action_points
+
+    def spend_action_points(self, cost: int) -> bool:
+        """
+        Consume action points for an action.
+
+        Args:
+            cost: Number of action points to spend
+
+        Returns:
+            True if action points were spent, False if insufficient
+        """
+        if self.action_points >= cost:
+            self.action_points -= cost
+            return True
+        return False
+
+    def has_action_points(self, cost: int) -> bool:
+        """
+        Check if entity has enough action points.
+
+        Args:
+            cost: Required action points
+
+        Returns:
+            True if entity has enough action points
+        """
+        return self.action_points >= cost
 
     @staticmethod
     def _generate_id() -> str:

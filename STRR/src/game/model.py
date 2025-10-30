@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025 (v0.0.9 - Bug fixes)
+Date Changed: 10-30-2025 (v0.0.18 - Turn-based system)
 License: MIT
 
 Features:
@@ -43,7 +43,7 @@ from .entities.base import GridPosition, GameObject
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.10"
+__version__: Final[str] = "0.0.18"
 
 
 @dataclass
@@ -66,36 +66,165 @@ class TurnManager:
     """
     Manages turn-based gameplay mechanics.
 
+    Implements initiative-based turn ordering where entities with higher
+    initiative act first. Handles action point restoration and turn phases.
+
     Attributes:
         turn_number: Current turn number
-        current_phase: Current phase of the turn
+        current_phase: Current phase of the turn (input, action, resolution)
+        active_entities: List of entities participating in combat/turns
+        turn_order: Initiative-sorted list of entities
+        current_entity_index: Index of entity currently acting
+        action_history: Record of actions taken this turn
 
     Public methods:
         advance_turn: Advance to the next turn
         get_turn_info: Get current turn information
+        register_entity: Add entity to turn tracking
+        unregister_entity: Remove entity from turn tracking
+        get_current_entity: Get entity whose turn it is
+        next_entity: Advance to next entity in turn order
+        start_turn_phase: Begin a new turn phase
+        end_turn_phase: Complete current turn phase
 
     Private methods:
         _process_ai_turns: Process AI entity turns
+        _sort_by_initiative: Sort entities by initiative
+        _restore_action_points: Restore all entities' action points
     """
 
     def __init__(self):
         """Initialize the turn manager."""
         self.turn_number: int = 0
-        self.current_phase: str = "player"
+        self.current_phase: str = "input"  # input, action, resolution
+
+        # Entity tracking for turn-based combat
+        self.active_entities: list[GameObject] = []
+        self.turn_order: list[GameObject] = []
+        self.current_entity_index: int = 0
+
+        # Action tracking
+        self.action_history: list[dict[str, str | int]] = []
 
     def advance_turn(self) -> None:
-        """Advance to the next turn and process AI actions."""
+        """Advance to the next turn and reset entity states."""
         self.turn_number += 1
+        self.current_entity_index = 0
+        self.action_history.clear()
+
+        # Restore action points for all entities
+        self._restore_action_points()
+
+        # Recalculate turn order based on initiative
+        self._sort_by_initiative()
+
+        # Start with input phase
+        self.current_phase = "input"
+
+        # Process AI entity turns
         self._process_ai_turns()
 
     def get_turn_info(self) -> dict[str, int | str]:
-        """Get current turn information."""
-        return {"turn_number": self.turn_number, "current_phase": self.current_phase}
+        """
+        Get current turn information.
+
+        Returns:
+            Dictionary with turn number, phase, and active entity
+        """
+        current_entity = self.get_current_entity()
+        return {
+            "turn_number": self.turn_number,
+            "current_phase": self.current_phase,
+            "active_entity": current_entity.name if current_entity else "None",
+            "entities_remaining": len(self.turn_order) - self.current_entity_index,
+        }
+
+    def register_entity(self, entity: GameObject) -> None:
+        """
+        Add entity to turn tracking.
+
+        Args:
+            entity: Game object to track for turns
+        """
+        if entity not in self.active_entities and entity.active:
+            self.active_entities.append(entity)
+            self._sort_by_initiative()
+
+    def unregister_entity(self, entity: GameObject) -> None:
+        """
+        Remove entity from turn tracking.
+
+        Args:
+            entity: Game object to remove from tracking
+        """
+        if entity in self.active_entities:
+            self.active_entities.remove(entity)
+            self._sort_by_initiative()
+
+    def get_current_entity(self) -> GameObject | None:
+        """
+        Get entity whose turn it is.
+
+        Returns:
+            Currently active entity or None if no entities
+        """
+        if 0 <= self.current_entity_index < len(self.turn_order):
+            return self.turn_order[self.current_entity_index]
+        return None
+
+    def next_entity(self) -> GameObject | None:
+        """
+        Advance to next entity in turn order.
+
+        Returns:
+            Next entity in turn order or None if turn complete
+        """
+        self.current_entity_index += 1
+        if self.current_entity_index >= len(self.turn_order):
+            # All entities have acted, advance turn
+            self.advance_turn()
+            return None
+        return self.get_current_entity()
+
+    def start_turn_phase(self, phase: str) -> None:
+        """
+        Begin a new turn phase.
+
+        Args:
+            phase: Phase name (input, action, resolution)
+        """
+        self.current_phase = phase
+
+    def end_turn_phase(self) -> None:
+        """Complete current turn phase and advance to next."""
+        phase_order = ["input", "action", "resolution"]
+        current_index = phase_order.index(self.current_phase)
+
+        if current_index < len(phase_order) - 1:
+            self.current_phase = phase_order[current_index + 1]
+        else:
+            # Completed all phases, advance to next entity or turn
+            self.next_entity()
 
     def _process_ai_turns(self) -> None:
         """Process AI entity turns and actions."""
-        # AI processing logic will be implemented here
+        # AI processing logic will be implemented in future milestone
+        # For now, AI entities will skip their turn
         pass
+
+    def _sort_by_initiative(self) -> None:
+        """Sort active entities by initiative (highest first)."""
+        self.turn_order = sorted(
+            [e for e in self.active_entities if e.active],
+            key=lambda entity: entity.initiative,
+            reverse=True,  # Higher initiative acts first
+        )
+
+    def _restore_action_points(self) -> None:
+        """Restore action points for all active entities."""
+        for entity in self.active_entities:
+            if entity.active:
+                entity.reset_action_points()
 
 
 class GameModel:
@@ -152,12 +281,26 @@ class GameModel:
         start_position = GridPosition(5, 5, 1)
         self.player_ship = self._create_player_ship(start_position)
 
+        # Set player ship initiative and action points
+        self.player_ship.initiative = 10  # Player acts first
+        self.player_ship.max_action_points = 5  # Player gets more actions
+        self.player_ship.reset_action_points()
+
         # Add player ship to game objects
         self.game_objects.append(self.player_ship)
 
         # Register ship in sector entities dictionary
         if not self.current_sector.place_entity(self.player_ship, start_position):
             raise RuntimeError(f"Failed to place player ship at {start_position}")
+
+        # Register player ship with turn manager
+        self.turn_manager.register_entity(self.player_ship)
+
+        # Add test ships for milestone demonstration
+        self._add_test_ships()
+
+        # Start first turn
+        self.turn_manager.advance_turn()
 
     def execute_move(self, ship: Starship, destination: GridPosition) -> bool:
         """
@@ -174,6 +317,14 @@ class GameModel:
         if not self.current_sector:
             return False
 
+        # Calculate movement cost in action points (1 AP per grid cell)
+        distance = int(ship.position.distance_to(destination))
+        action_cost = max(1, distance)  # Minimum 1 AP per move
+
+        # Check if ship has enough action points
+        if not ship.has_action_points(action_cost):
+            return False
+
         # Validate movement
         if not self._is_valid_move(ship, destination):
             return False
@@ -183,8 +334,7 @@ class GameModel:
         if not engines:
             return False
 
-        # Calculate movement cost
-        distance = int(ship.position.distance_to(destination))
+        # Calculate fuel cost
         fuel_cost = engines.calculate_movement_cost(distance)
 
         # Check fuel availability
@@ -204,11 +354,15 @@ class GameModel:
             ship.position = old_position
             return False
 
-        # Deduct fuel and advance turn
+        # Deduct resources
         engines.fuel -= fuel_cost
-        self.turn_manager.advance_turn()
+        ship.spend_action_points(action_cost)
 
-        # Cleanup inactive objects after turn
+        # Check if ship has actions remaining, otherwise end turn
+        if ship.action_points <= 0:
+            self.turn_manager.next_entity()
+
+        # Cleanup inactive objects after action
         self._cleanup_inactive_objects()
 
         return True
@@ -305,7 +459,75 @@ class GameModel:
         Returns:
             Configured player starship
         """
-        return Starship(position, "Constitution", "Enterprise")
+        return Starship(position, "Constitution", "Enterprise", "Federation")
+
+    def _add_test_ships(self) -> None:
+        """
+        Add test starships for milestone demonstration.
+
+        Creates multiple ships at different positions, z-levels, and orientations
+        to demonstrate entity rendering with visual differentiation.
+        """
+        if not self.current_sector:
+            return
+
+        # Test ship configurations: (position, ship_class, name, faction, orientation, initiative)
+        test_ships = [
+            (
+                GridPosition(8, 8, 1),
+                "Bird-of-Prey",
+                "IKS Korinar",
+                "Klingon",
+                45,
+                8,
+            ),
+            (GridPosition(12, 6, 2), "Warbird", "IRW Valdore", "Romulan", 135, 7),
+            (GridPosition(10, 10, 0), "D7 Cruiser", "IKS Amar", "Klingon", 270, 6),
+            (GridPosition(7, 12, 1), "Scout", "USS Reliant", "Federation", 180, 9),
+        ]
+
+        # Create and place each test ship
+        for position, ship_class, name, faction, orientation, initiative in test_ships:
+            ship = Starship(position, ship_class, name, faction)
+            ship.orientation = orientation  # Set facing direction
+            ship.initiative = initiative  # Set turn order priority
+            ship.max_action_points = 3  # NPC ships get 3 actions per turn
+            ship.reset_action_points()
+
+            self.game_objects.append(ship)
+            self.current_sector.place_entity(ship, position)
+
+            # Register ship with turn manager for combat
+            self.turn_manager.register_entity(ship)
+
+    def end_current_turn(self) -> None:
+        """
+        Manually end the current entity's turn.
+
+        Advances to the next entity in turn order or starts a new turn
+        if all entities have acted.
+        """
+        self.turn_manager.next_entity()
+
+    def get_turn_status(self) -> dict[str, int | str]:
+        """
+        Get current turn status information.
+
+        Returns:
+            Dictionary with turn number, phase, active entity, and action points
+        """
+        info = self.turn_manager.get_turn_info()
+
+        # Add action point information for current entity
+        current_entity = self.turn_manager.get_current_entity()
+        if current_entity:
+            info["action_points"] = current_entity.action_points
+            info["max_action_points"] = current_entity.max_action_points
+        else:
+            info["action_points"] = 0
+            info["max_action_points"] = 0
+
+        return info
 
     def _cleanup_inactive_objects(self) -> None:
         """
