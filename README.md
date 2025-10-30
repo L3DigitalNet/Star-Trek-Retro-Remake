@@ -233,11 +233,26 @@ This is currently a solo indie project for personal enjoyment. While not activel
 
 ### Development Guidelines
 
-- Follow the project's **Python 3.14+** modern syntax standards
-- Use **type hints everywhere** for better code clarity
-- Write **pytest tests** for all new functionality
-- Follow **PEP 8** style guidelines strictly
-- Document all functions and classes with proper docstrings
+#### Code Standards
+
+- **Linux-Only**: All code targets Linux exclusively (no Windows support)
+- **Python 3.14+**: Use latest language features and modern syntax
+- **Type Hints**: Comprehensive typing for all functions, variables, constants, collections
+- **PEP 8**: Strict adherence to Python style guidelines
+- **F-strings Only**: No .format() or % string formatting
+
+#### Documentation Requirements
+
+- **File Headers**: All Python files must have proper shebang, encoding, and complete docstrings
+- **Per-File Docs**: Every `.py` file in `STRR/` has matching `_doc.md` file
+- **Inline Comments**: Document significant code blocks, complex logic, and design decisions
+- **No Types in Docstrings**: Rely on type hints instead
+- See [Documentation Standards](docs/DOCUMENTATION_STANDARDS.md) for complete guidelines
+
+#### Testing & Quality
+
+- Write **pytest tests** for all new functionality (AAA pattern)
+- 80%+ coverage for critical paths
 - Design UI in **Qt Designer** - see [Qt Designer Workflow](docs/QT_DESIGNER_WORKFLOW.md)
 
 ## 📄 Documentation

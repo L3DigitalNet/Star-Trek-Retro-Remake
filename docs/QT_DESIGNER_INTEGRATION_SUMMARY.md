@@ -87,7 +87,7 @@ python scripts/compile_ui.py main_window
 
 - `/STRR/src/game/view_doc.md` - Added Qt Designer integration details
 - `/README.md` - Added Qt Designer to dependencies and documentation
-- `/STRR/docs/CHANGELOG.md` - Documented changes
+- `/docs/CHANGELOG.md` - Documented changes
 
 ## Benefits
 

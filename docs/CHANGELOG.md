@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.11] - 2025-10-30
+
+### Changed
+
+- **TOML-Only Configuration**: Removed JSON fallback support from `config_manager.py`
+  - Simplified configuration loading to use TOML exclusively
+  - All configuration files now use `.toml` format
+  - JSON files moved to `backup/json_config_files/` directory
+- Updated documentation to reflect TOML-only approach
+  - Modified `STRR/assets/data/README.md` to reference TOML format
+  - Updated `config_manager_doc.md` to remove JSON fallback information
+- Removed `migrate_json_to_toml()` method and `_load_json()` helper from ConfigManager
+- Removed `json` import from config_manager.py (no longer needed)
+
+### Fixed
+
+- Configuration system now cleaner and more maintainable without dual format support
+
+## [Unreleased - Previous]
+
 ### Added
 
 - Qt Designer integration for UI design workflow
@@ -126,7 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Files Modified
 
 - `STRR/src/game/view.py` - Enhanced UI layout
-- `STRR/docs/CHANGELOG.md` - This file
+- `/docs/CHANGELOG.md` - This file
 - Date Changed fields updated in modified files
 
 ### Integration Benefits
