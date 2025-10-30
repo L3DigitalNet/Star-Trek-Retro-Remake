@@ -14,9 +14,9 @@ License: MIT
 
 from typing import Final
 
-from game.model import GameModel, TurnManager, CombatResult
-from game.entities.base import GridPosition
-from game.entities.starship import Starship
+from src.game.model import GameModel, TurnManager, CombatResult
+from src.game.entities.base import GridPosition
+from src.game.entities.starship import Starship
 
 __version__: Final[str] = "0.0.1"
 

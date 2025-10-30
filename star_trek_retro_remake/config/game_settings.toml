@@ -1,0 +1,42 @@
+# Star Trek Retro Remake - Game Settings Configuration
+#
+# This file contains all game configuration settings including display,
+# gameplay, audio, controls, and graphics options.
+#
+# Author: Star Trek Retro Remake Development Team
+# Date Created: 10-29-2025
+# License: Open Source
+
+[display]
+window_width = 1024     # Default window width in pixels
+window_height = 768     # Default window height in pixels
+fullscreen = false      # Start in windowed mode by default
+vsync = true           # Enable vertical sync to prevent screen tearing
+fps_limit = 60         # Target framerate (0 = unlimited)
+
+[game]
+difficulty = "normal"           # Game difficulty: easy, normal, hard, expert
+auto_save = true               # Automatically save game progress
+auto_save_interval = 300       # Auto-save interval in seconds (5 minutes)
+turn_timer = 30                # Turn time limit in seconds (0 = unlimited)
+
+[game.grid_size]
+galaxy = [10, 10]              # Galaxy map dimensions [width, height]
+sector = [20, 20, 5]           # Sector map dimensions [width, height, z-levels]
+
+[audio]
+master_volume = 0.8            # Master audio volume (0.0 - 1.0)
+music_volume = 0.6             # Background music volume
+sfx_volume = 0.7               # Sound effects volume
+ui_volume = 0.5                # UI interaction sounds volume
+
+[controls]
+mouse_sensitivity = 1.0         # Mouse sensitivity multiplier
+keyboard_repeat_delay = 250     # Key repeat delay in milliseconds
+keyboard_repeat_rate = 30       # Key repeat rate in Hz
+
+[graphics]
+grid_lines = true              # Show sector grid lines
+show_coordinates = true        # Display grid coordinates
+animation_speed = 1.0          # Animation speed multiplier (0.5 = slower, 2.0 = faster)
+particle_effects = true        # Enable particle effects for weapons/explosions

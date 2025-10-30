@@ -38,11 +38,11 @@ from pathlib import Path
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
-from game.model import GameModel
-from game.entities.base import GridPosition
-from game.entities.starship import Starship
-from game.maps.galaxy import GalaxyMap
-from game.maps.sector import SectorMap
+from src.game.model import GameModel
+from src.game.entities.base import GridPosition
+from src.game.entities.starship import Starship
+from src.game.maps.galaxy import GalaxyMap
+from src.game.maps.sector import SectorMap
 
 __version__: Final[str] = "0.0.1"
 

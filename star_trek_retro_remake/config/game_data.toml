@@ -1,0 +1,108 @@
+# Star Trek Retro Remake - Game Data Configuration
+#
+# This file contains all static game data including ship classes,
+# factions, mission types, and other game content definitions.
+#
+# Author: Star Trek Retro Remake Development Team
+# Date Created: 10-29-2025
+# License: Open Source
+
+# ============================================================================
+# SHIP CLASSES
+# ============================================================================
+
+[ship_classes.constitution]
+name = "Constitution Class"
+hull_integrity = 100
+crew_capacity = 430
+
+[ship_classes.constitution.systems.weapons]
+phaser_arrays = 4
+torpedo_tubes = 2
+torpedo_capacity = 12
+
+[ship_classes.constitution.systems.shields]
+max_strength = 100
+recharge_rate = 5.0
+
+[ship_classes.constitution.systems.engines]
+max_warp = 8
+impulse_power = 1.0
+fuel_capacity = 100
+
+[ship_classes.constitution.systems.sensors]
+short_range = 3
+long_range = 10
+
+# ----------------------------------------------------------------------------
+
+[ship_classes.miranda]
+name = "Miranda Class"
+hull_integrity = 80
+crew_capacity = 220
+
+[ship_classes.miranda.systems.weapons]
+phaser_arrays = 3
+torpedo_tubes = 1
+torpedo_capacity = 8
+
+[ship_classes.miranda.systems.shields]
+max_strength = 80
+recharge_rate = 4.0
+
+[ship_classes.miranda.systems.engines]
+max_warp = 6
+impulse_power = 0.8
+fuel_capacity = 80
+
+[ship_classes.miranda.systems.sensors]
+short_range = 2
+long_range = 8
+
+# ============================================================================
+# FACTIONS
+# ============================================================================
+
+[factions.federation]
+name = "United Federation of Planets"
+color = [0, 100, 200]          # RGB color values
+relationship = "allied"
+
+[factions.klingon]
+name = "Klingon Empire"
+color = [200, 0, 0]
+relationship = "hostile"
+
+[factions.romulan]
+name = "Romulan Star Empire"
+color = [0, 200, 0]
+relationship = "neutral"
+
+[factions.gorn]
+name = "Gorn Hegemony"
+color = [150, 150, 0]
+relationship = "neutral"
+
+# ============================================================================
+# MISSION TYPES
+# ============================================================================
+
+[mission_types.exploration]
+name = "Exploration Mission"
+description = "Explore uncharted regions of space"
+reward_types = ["reputation", "data"]
+
+[mission_types.combat]
+name = "Combat Mission"
+description = "Engage hostile forces"
+reward_types = ["reputation", "salvage"]
+
+[mission_types.diplomacy]
+name = "Diplomatic Mission"
+description = "Conduct negotiations with alien species"
+reward_types = ["reputation", "resources"]
+
+[mission_types.rescue]
+name = "Rescue Mission"
+description = "Assist vessels in distress"
+reward_types = ["reputation", "crew"]

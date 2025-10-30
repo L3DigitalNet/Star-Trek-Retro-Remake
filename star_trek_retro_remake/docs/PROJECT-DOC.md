@@ -39,7 +39,7 @@ Project Structure:
     - /src/components/: Ship systems and modular components
     - /src/states/: State machine implementation
     - /src/maps/: Galaxy, sector, and combat map systems
-    - /config/: JSON configuration files
+    - /config/: TOML configuration files (settings, bindings, data)
     - /assets/: Graphics, audio, and data files
     - /tests/: Comprehensive pytest test suite
     - /docs/: Project documentation and guides
@@ -449,46 +449,89 @@ class MainWindow(QMainWindow):
 
 ### Configuration System
 
-#### JSON Configuration Structure
+#### TOML Configuration Structure
 
-```json
-{
-    "display": {
-        "resolution": [1024, 768],
-        "fullscreen": false,
-        "vsync": true,
-        "fps_limit": 60
-    },
-    "audio": {
-        "master_volume": 0.8,
-        "effects_volume": 0.7,
-        "music_volume": 0.6
-    },
-    "gameplay": {
-        "difficulty": "normal",
-        "turn_timer": 30,
-        "auto_save": true
-    }
-}
+The project uses **TOML** format for all configuration files, providing improved readability and maintainability:
+
+**Game Settings (`config/game_settings.toml`):**
+
+```toml
+[display]
+window_width = 1024     # Default window width in pixels
+window_height = 768     # Default window height in pixels
+fullscreen = false      # Start in windowed mode
+vsync = true           # Enable vertical sync to prevent screen tearing
+
+[audio]
+master_volume = 0.8     # Master audio volume (0.0 - 1.0)
+music_volume = 0.6      # Background music volume
+sfx_volume = 0.7        # Sound effects volume
+
+[game]
+difficulty = "normal"           # Game difficulty: easy, normal, hard, expert
+auto_save = true               # Automatically save game progress
+turn_timer = 30                # Turn time limit in seconds (0 = unlimited)
+
+[game.grid_size]
+galaxy = [10, 10]              # Galaxy map dimensions [width, height]
+sector = [20, 20, 5]           # Sector map dimensions [width, height, z-levels]
+```
+
+**Key Bindings (`config/key_bindings.toml`):**
+
+```toml
+[keyboard.movement]
+move_up = "w"              # Move ship/cursor up
+move_down = "s"            # Move ship/cursor down
+move_left = "a"            # Move ship/cursor left
+move_right = "d"           # Move ship/cursor right
+move_up_z = "q"            # Move up in z-level (space layer)
+move_down_z = "e"          # Move down in z-level (space layer)
+
+[keyboard.combat]
+fire_phasers = "space"     # Fire phaser arrays
+fire_torpedoes = "t"       # Launch photon torpedoes
+shields_toggle = "shift"   # Raise/lower shields
+```
+
+**Ship Classes (`config/game_data.toml`):**
+
+```toml
+[ship_classes.constitution]
+name = "Constitution Class"
+hull_integrity = 100
+crew_capacity = 430
+
+[ship_classes.constitution.systems.weapons]
+phaser_arrays = 4
+torpedo_tubes = 2
+torpedo_capacity = 12
+
+[ship_classes.constitution.systems.shields]
+max_strength = 100
+recharge_rate = 5.0
 ```
 
 #### Configuration Management
 
 ```python
-class ConfigManager:
-    """Centralized configuration management."""
+from star_trek_retro_remake.src.engine.config_manager import (
+    initialize_config_manager, load_config, get_config_value
+)
 
-    def __init__(self, config_path: Path):
-        self.config_path = config_path
-        self.config = self.load_config()
+# Initialize configuration system
+config_manager = initialize_config_manager("config/")
 
-    def get(self, key: str, default=None):
-        """Get configuration value with dot notation."""
-        keys = key.split('.')
-        value = self.config
-        for k in keys:
-            value = value.get(k, default)
-        return value
+# Load complete configuration files
+settings = load_config("game_settings")
+ship_data = load_config("game_data")
+
+# Access specific values with dot notation
+window_width = get_config_value("game_settings", "display.window_width", 1024)
+phaser_count = get_config_value("game_data", "ship_classes.constitution.systems.weapons.phaser_arrays")
+
+# Save configuration changes
+set_config_value("game_settings", "display.fullscreen", True)
 ```
 
 ## Testing Strategy

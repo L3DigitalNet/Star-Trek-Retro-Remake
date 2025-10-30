@@ -33,6 +33,7 @@ Functions:
     - None
 """
 
+import logging
 from typing import Final, TYPE_CHECKING
 
 import pygame
@@ -43,6 +44,8 @@ if TYPE_CHECKING:
     from .controller import GameController
 
 __version__: Final[str] = "0.0.1"
+
+logger = logging.getLogger(__name__)
 
 
 class GameView:
@@ -134,7 +137,7 @@ class GameView:
             result: Combat result data to display
         """
         # Placeholder for combat dialog
-        print(f"Combat Result: {result.message}")
+        logger.info("Combat Result: %s", result.message)
 
     def show_ship_status(self, ship) -> None:
         """
@@ -144,7 +147,7 @@ class GameView:
             ship: Starship to display status for
         """
         # Placeholder for ship status display
-        print(f"Ship Status: {ship.name} - Hull: {ship.hull_integrity}%")
+        logger.info("Ship Status: %s - Hull: %.1f%%", ship.name, ship.hull_integrity)
 
     def show_message(self, message: str) -> None:
         """
@@ -154,7 +157,7 @@ class GameView:
             message: Message to display
         """
         # Placeholder for message display
-        print(f"Message: {message}")
+        logger.info("Message: %s", message)
 
     def _setup_ui(self) -> None:
         """Initialize the user interface."""

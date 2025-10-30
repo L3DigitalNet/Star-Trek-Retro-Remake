@@ -38,10 +38,10 @@ Functions:
 from typing import Final, Optional
 from dataclasses import dataclass
 
-from entities.starship import Starship
-from entities.base import GridPosition
-from maps.galaxy import GalaxyMap
-from maps.sector import SectorMap
+from .entities.starship import Starship
+from .entities.base import GridPosition
+from .maps.galaxy import GalaxyMap
+from .maps.sector import SectorMap
 
 __version__: Final[str] = "0.0.1"
 

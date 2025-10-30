@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Added (Planned Features)
 
 - PySide6 UI integration with embedded PyGame rendering
 - Advanced AI behavior system for enemy ships
@@ -27,6 +27,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - TBD
 
+## [0.0.2] - 2025-10-29
+
+### Added
+
+- TOML configuration system for improved readability and maintainability
+- Configuration manager utility with JSON fallback support during migration
+- JSON to TOML migration script for future configuration file conversions
+- Comprehensive TOML examples with comments and proper organization
+
+### Changed
+
+- **BREAKING**: Migrated all configuration files from JSON to TOML format
+  - `game_settings.json` → `game_settings.toml` with improved structure and comments
+  - `game_data.json` → `game_data.toml` with cleaner ship class definitions
+  - `key_bindings.json` → `key_bindings.toml` with better organization
+  - `sol_system.json` → `sol_system.toml` using array of tables for objects
+- Updated documentation to reflect TOML usage (ARCHITECTURE.md, DESIGN.md, PROJECT-DOC.md)
+- Enhanced configuration system with dot notation access and type safety
+
 ## [0.0.1] - 2024-12-15
 
 ### Added
@@ -39,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Grid-based positioning system with 3D coordinate support (GridPosition with x, y, z levels)
 - Turn-based game model with TurnManager and combat resolution system
 - Resource management system for ship energy, fuel, crew morale, and supplies
-- Comprehensive configuration system with JSON files for game settings, key bindings, and ship classes
+- Comprehensive configuration system with JSON files for game settings, key bindings, and ship classes (later migrated to TOML in v0.0.2)
 - Asset management structure with organized directories for graphics, audio, and data
 - Comprehensive pytest testing framework with fixtures and AAA pattern testing
 - Object pooling foundation for efficient memory management

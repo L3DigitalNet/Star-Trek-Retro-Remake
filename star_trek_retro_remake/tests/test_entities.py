@@ -14,8 +14,8 @@ License: MIT
 
 from typing import Final
 
-from game.entities.base import GridPosition, GameObject
-from game.entities.starship import Starship, SpaceStation
+from src.game.entities.base import GridPosition, GameObject
+from src.game.entities.starship import Starship, SpaceStation
 
 __version__: Final[str] = "0.0.1"
 
@@ -166,6 +166,9 @@ class TestStarship:
         """Test that ship is destroyed when hull reaches zero."""
         # Arrange
         test_starship.hull_integrity = 10
+        # Disable shields so all damage goes to hull
+        shields = test_starship.get_system('shields')
+        shields.active = False
 
         # Act
         test_starship.take_damage(15)

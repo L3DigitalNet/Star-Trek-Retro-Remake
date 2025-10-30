@@ -766,8 +766,104 @@ This hybrid architecture provides:
 
 ### 9.4 Data Management
 
-- Game data (e.g., player progress, settings) will be stored in local files using a structured format (e.g., JSON, XML)
-- Save and load functionality will be implemented to allow players to manage their game progress
+#### Configuration System
+
+The game uses **TOML** format for all configuration files, providing:
+
+- **Human-Readable Format**: Clean syntax with extensive comment support
+- **Type Safety**: Better type inference and validation than JSON
+- **Nested Structures**: Clear hierarchical organization for complex settings
+- **Standard Library Support**: Python 3.14+ `tomllib` for reading, `tomli_w` for writing
+
+#### Configuration Files Structure
+
+```text
+star_trek_retro_remake/config/
+├── game_settings.toml    # Display, audio, controls, graphics options
+├── game_data.toml        # Ship classes, factions, mission definitions
+└── key_bindings.toml     # Keyboard, mouse, gamepad mappings
+
+star_trek_retro_remake/assets/data/
+├── sectors/
+│   └── sol_system.toml   # Sector definitions with object arrays
+└── missions/
+    └── [mission_files.toml]
+```
+
+#### TOML Configuration Examples
+
+**Game Settings (`game_settings.toml`):**
+
+```toml
+[display]
+window_width = 1024     # Default window width in pixels
+window_height = 768     # Default window height in pixels
+fullscreen = false      # Start in windowed mode
+vsync = true           # Enable vertical sync
+
+[game.grid_size]
+galaxy = [10, 10]              # Galaxy map dimensions
+sector = [20, 20, 5]           # Sector map with z-levels
+```
+
+**Ship Data (`game_data.toml`):**
+
+```toml
+[ship_classes.constitution]
+name = "Constitution Class"
+hull_integrity = 100
+crew_capacity = 430
+
+[ship_classes.constitution.systems.weapons]
+phaser_arrays = 4
+torpedo_tubes = 2
+torpedo_capacity = 12
+```
+
+**Sector Data (`sol_system.toml`):**
+
+```toml
+sector_id = "sol_system"
+name = "Sol System"
+grid_size = [20, 20, 5]
+
+[[objects]]
+type = "starbase"
+name = "Earth Spacedock"
+position = [10, 10, 2]
+services = ["repair", "resupply", "training"]
+
+[[objects]]
+type = "planet"
+name = "Earth"
+position = [10, 10, 1]
+```
+
+#### Configuration Management
+
+```python
+from star_trek_retro_remake.src.engine.config_manager import (
+    initialize_config_manager, load_config, get_config_value
+)
+
+# Initialize system
+config_manager = initialize_config_manager("config/")
+
+# Load complete files
+settings = load_config("game_settings")
+ship_data = load_config("game_data")
+
+# Access specific values with dot notation
+window_width = get_config_value("game_settings", "display.window_width", 1024)
+phaser_count = get_config_value("game_data", "ship_classes.constitution.systems.weapons.phaser_arrays")
+```
+
+#### Save Data Management
+
+- Game data (player progress, settings) will be stored in local TOML files
+- Save and load functionality will be implemented for game progress
+- Configuration changes persist automatically
+- JSON fallback support during development transition
 
 ### 9.5 Localization
 

@@ -673,6 +673,55 @@ class TurnManager:
 
 This architecture provides a solid foundation for the Star Trek Retro Remake while maintaining flexibility for future expansion.
 
+## Configuration Management
+
+### TOML Configuration System
+
+The game uses **TOML** format for all configuration files, providing:
+
+1. **Human-Readable Format**: Clean syntax with comment support
+2. **Type Safety**: Better type inference than JSON
+3. **Nested Structures**: Clear hierarchical organization
+4. **Standard Library Support**: Uses Python 3.14+ `tomllib` for reading
+
+### Configuration Files
+
+```text
+star_trek_retro_remake/config/
+├── game_settings.toml    # Display, audio, controls, graphics
+├── game_data.toml        # Ship classes, factions, missions
+└── key_bindings.toml     # Keyboard, mouse, gamepad controls
+
+star_trek_retro_remake/assets/data/sectors/
+└── sol_system.toml       # Sector definitions with objects
+```
+
+### Configuration Loading
+
+```python
+from star_trek_retro_remake.src.engine.config_manager import (
+    initialize_config_manager, load_config, get_config_value
+)
+
+# Initialize configuration system
+config_manager = initialize_config_manager("config/")
+
+# Load complete configuration file
+settings = load_config("game_settings")
+
+# Get specific values with dot notation
+window_width = get_config_value("game_settings", "display.window_width", 1024)
+phaser_arrays = get_config_value("game_data", "ship_classes.constitution.systems.weapons.phaser_arrays")
+```
+
+### Migration Support
+
+The configuration manager provides JSON fallback during transition:
+
+1. **Automatic Detection**: Loads TOML first, falls back to JSON
+2. **Migration Utility**: Convert existing JSON files to TOML
+3. **Backward Compatibility**: Supports both formats during development
+
 ## Performance Guidelines
 
 ### Memory Management
