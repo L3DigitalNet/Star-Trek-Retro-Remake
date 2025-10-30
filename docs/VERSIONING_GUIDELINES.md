@@ -28,7 +28,7 @@ Triggered via `/version-update` prompt commands:
 
 #### Specific Version Update
 
-```
+```bash
 /version-update [filename] [version]
 ```
 
@@ -39,7 +39,7 @@ Examples:
 
 #### Increment Version
 
-```
+```bash
 /version-update [filename] increment
 ```
 

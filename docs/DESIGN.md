@@ -466,7 +466,7 @@ Players must manage ship resources:
 
 Inspired by UI's windowed desktop games largely around the mid-1990s era. An example would be a MUD/MUSH/MOO desktop client such as zMUD and MUSHclient. A more modern example is Mudlet. However, typing commands will not be an interaction method in this game. The UI will be entirely mouse-driven with keyboard shortcuts for common actions.
 
-[A desktop application aesthetic (MUSHclient)](UI%20Example%20(MUSHclient).png)
+[A desktop application aesthetic (MUSHclient)](UI%20./Images/Example%20(MUSHclient).png)
 
 ### 6.2 Interface Layout
 

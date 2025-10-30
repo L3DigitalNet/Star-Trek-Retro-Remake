@@ -1,9 +1,11 @@
 # Star Trek Retro Remake - Development Instructions
 
 ## Overview
+
 Turn-based strategy game set in Kirk-era Star Trek universe. Features grid-based space exploration with 3D z-levels, tactical combat, and starship management.
 
 **Key References:**
+
 - Architecture details: `/docs/ARCHITECTURE.md`
 - Game design: `/GDD/DESIGN.md`
 - Python 3.14+ stdlib: https://docs.python.org/3.14/
@@ -45,6 +47,7 @@ Turn-based strategy game set in Kirk-era Star Trek universe. Features grid-based
 - Focus: clean architecture, core game logic, state transitions
 
 ## File Structure
+
 ```python
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -145,6 +148,7 @@ Functions:
 1. Python stdlib → 2. Existing code → 3. Generalize → 4. External dependency
 
 **Avoid:**
+
 - Duplicate logic, hardcoded values, functions >20 lines
 - Missing type hints (functions, variables, constants, collections)
 - External libraries when stdlib works
