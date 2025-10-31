@@ -1,5 +1,21 @@
 # Star Trek Retro Remake - Development Instructions
 
+## ⚠️ CRITICAL: BRANCH PROTECTION POLICY ⚠️
+
+**STRICTLY ENFORCED RULE - NO EXCEPTIONS:**
+
+- **NEVER make code changes to the `main` branch**
+- **ALL code changes MUST be made to the `testing` branch**
+- Before making ANY code modifications, verify the current branch
+- If on `main` branch, **STOP** and inform the user that changes cannot be made
+- Only documentation-only changes (e.g., README updates) may be considered for `main` after explicit user approval
+- This rule applies to ALL AI agents and ALL code modifications
+
+**Verification Required:**
+- Check current branch before every code change
+- If current branch is `main`: HALT and request user switch to `testing`
+- Only proceed with code changes when on `testing` branch
+
 ## Overview
 
 Turn-based strategy game set in Kirk-era Star Trek universe. Features grid-based space exploration with 3D z-levels, tactical combat, and starship management.
@@ -167,26 +183,27 @@ Functions:
 
 ## AI Code Generation Rules
 
-1. **Dependencies:** Standard library first, justify external dependencies
-2. **Reuse:** Check existing codebase, consolidate duplicates
-3. **Quality:** Complete examples, type hints for ALL elements, proper headers with complete docstrings
-4. **Architecture:** Follow Hybrid State Machine + Game Object + Component + MVC, SOLID principles
-5. **Game Systems:** Ship systems as components (WeaponSystems, ShieldSystems) not full ECS
-6. **State Machine:** Use specific modes (GALAXY_MAP, SECTOR_MAP, COMBAT) not generic states
-7. **Grid Logic:** 3D positioning (x, y, z) for all spatial calculations
-8. **Turn-Based:** All actions advance turn counter, support initiative
-9. **Framework Separation:** pygame-ce rendering separate from PySide6 UI
-10. **Confident Design:** Architectural solutions over defensive checks
-11. **Version Aware:** Defer error handling until v1.0.0
-12. **Documentation:** Every `.py` file has matching `_doc.md` in same directory with comprehensive module docs
-13. **Testing:** pytest for business logic, AAA pattern
-14. **Versioning:** Increment by 0.0.1 for changes, update pyproject.toml, __version__, Date Changed, CHANGELOG.md
-15. **Comments:** Inline for significant blocks, explain complex logic and design decisions
-16. **Type Safety:** Runtime matches annotations, no types in docstrings (use type hints)
-17. **Separation:** Clear component boundaries
-18. **Pooling:** Reuse projectiles, effects, temporary objects
-19. **Linux-Only:** All code, docs, and examples must target Linux exclusively
-20. **Header Compliance:** All files have proper shebang, encoding, and complete docstring headers
+1. **Branch Protection:** NEVER make code changes to `main` branch - ALL code changes go to `testing` branch ONLY
+2. **Dependencies:** Standard library first, justify external dependencies
+3. **Reuse:** Check existing codebase, consolidate duplicates
+4. **Quality:** Complete examples, type hints for ALL elements, proper headers with complete docstrings
+5. **Architecture:** Follow Hybrid State Machine + Game Object + Component + MVC, SOLID principles
+6. **Game Systems:** Ship systems as components (WeaponSystems, ShieldSystems) not full ECS
+7. **State Machine:** Use specific modes (GALAXY_MAP, SECTOR_MAP, COMBAT) not generic states
+8. **Grid Logic:** 3D positioning (x, y, z) for all spatial calculations
+9. **Turn-Based:** All actions advance turn counter, support initiative
+10. **Framework Separation:** pygame-ce rendering separate from PySide6 UI
+11. **Confident Design:** Architectural solutions over defensive checks
+12. **Version Aware:** Defer error handling until v1.0.0
+13. **Documentation:** Every `.py` file has matching `_doc.md` in same directory with comprehensive module docs
+14. **Testing:** pytest for business logic, AAA pattern
+15. **Versioning:** Increment by 0.0.1 for changes, update pyproject.toml, __version__, Date Changed, CHANGELOG.md
+16. **Comments:** Inline for significant blocks, explain complex logic and design decisions
+17. **Type Safety:** Runtime matches annotations, no types in docstrings (use type hints)
+18. **Separation:** Clear component boundaries
+19. **Pooling:** Reuse projectiles, effects, temporary objects
+20. **Linux-Only:** All code, docs, and examples must target Linux exclusively
+21. **Header Compliance:** All files have proper shebang, encoding, and complete docstring headers
 
 ## Decision Framework
 
