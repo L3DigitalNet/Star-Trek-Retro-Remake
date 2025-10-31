@@ -13,6 +13,7 @@ For the repository, create a Python virtual environment in the project root dire
 3. **Activate Virtual Environment**: Provide instructions on how to activate the virtual environment.
 4. **Install Dependencies**: Install all dependencies listed in `requirements.txt` into the virtual environment.
 5. **Verification**: Verify that the dependencies have been installed correctly.
+6. **Initialize the Virtual Environment**: Perform the initialization commands to initialize and activate the virtual environment.
 
 ## Guidelines
 - **MANDATORY**: Remove old virtual environment folders if they exist before creating a new one.

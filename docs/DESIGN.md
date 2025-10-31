@@ -844,64 +844,365 @@ Combat occurs on a 15x15 grid with 5 or 7 z-levels, procedurally generated from 
 
 ### 5.1 Starships
 
-- Player is the captain of a starship
-- The starship is represented on the sector map by a sprite/icon
-- The representation will indicate the starship's orientation (facing direction)
-- Starships have attributes:
-  - Hull integrity
-  - Shield strength
-  - Weapon systems
-    - Phaser arrays
-    - Photon torpedoes
-  - Engine power
-  - Sensor range
-  - Sensor modes
-  - Deflector dish
-  - Crew efficiency
-  - Crew morale
-  - Transporters
-  - Shuttles
-- Starships can move between cells on the sector map
-  - Movement cost may vary based on:
-    - Ship capabilities
-    - Distance
-    - Engine power
-    - Environmental factors (e.g., nebulae, asteroid fields)
-  - Starships have a vector-based movement system allowing movement in all directions
-  - At the end of a turn the starship's orientation will determine its facing for the next turn
-  - Starship orientation will affect weapon firing arcs, shield coverage, and sensor range
-- Starships can engage in combat with enemy ships
-- Starships can dock at space stations for repairs and resupply
+#### Core Starship Representation
+
+**Visual Representation:**
+
+- Starships appear as sprites/icons on the isometric sector map
+- Orientation indicated by visual arrow or engine glow
+- Faction-specific color coding (Federation blue, Klingon red, Romulan green)
+- Sprite size: 32x32 to 64x64 pixels depending on ship class
+- Z-level indicators show vertical position relative to active layer
+
+#### Starship Attributes
+
+**Primary Systems:**
+
+- **Hull Integrity**: Total structural damage capacity (varies by ship class)
+- **Shield Systems**: Four directional facings (forward, aft, port, starboard) - 25 points each
+- **Weapon Systems**:
+  - Phaser arrays (270° forward firing arc, 1 AP cost)
+  - Photon torpedoes (270° forward arc, 2 AP cost)
+- **Engine Systems**:
+  - Impulse drive (sector map movement)
+  - Warp drive (galaxy map travel)
+  - Maneuvering thrusters (turning and evasion)
+- **Sensor Systems**:
+  - Short-range sensors (tactical scanning)
+  - Long-range sensors (strategic detection)
+
+**Secondary Systems:**
+
+- Deflector dish (environmental protection)
+- Transporters (crew/cargo transfer)
+- Shuttles (away missions)
+- Life support (crew capacity)
+- Communications array (hailing and diplomacy)
+
+**Crew Attributes:**
+
+- Crew efficiency (affects all system performance)
+- Crew morale (influences efficiency and combat effectiveness)
+- Individual crew member levels and specializations
+
+#### Movement System
+
+**Movement Mechanics:**
+
+- Vector-based movement allowing all directions on grid
+- Movement cost: 1 AP per grid cell
+- Distance calculations use Pythagorean theorem for diagonal movement
+- Can move between z-levels with increased AP costs
+- Ship orientation updates based on movement direction
+
+**Movement Modifiers:**
+
+- Ship capabilities (engine power, thruster efficiency)
+- Environmental factors:
+  - Nebulae: -1 AP per move, reduced speed
+  - Asteroid fields: increased AP cost, navigation hazards
+  - Debris fields: minor navigation penalties
+  - Open space: standard movement costs
+- Engine power allocation affects maximum movement range
+- Damaged engines reduce movement capability
+
+**Orientation and Facing:**
+
+- Facing determines firing arcs (270° forward cone)
+- Affects shield coverage (automatic facing detection based on attacker position)
+- Influences sensor effectiveness (forward sensors more effective)
+- Updates automatically at end of turn based on final movement vector
+
+#### Combat Capabilities
+
+- Engage enemy ships within weapon range and firing arc
+- Line of sight checking for valid targeting
+- Range-based accuracy and damage calculations
+- Critical hit system (10% chance, 1.5x damage)
+- Action point costs per weapon type
+
+#### Docking and Services
+
+- Dock at starbases and space stations (1 AP action)
+- Access repairs, resupply, upgrades, and mission briefings
+- Free repairs and full resupply at friendly Federation starbases
+- Crew rest and morale restoration during docking
 
 ### 5.2 Combat System
 
-- Turn-based combat system
-- Combat is initiated on the sector map when the player's starship encounters enemy ships or dynamic combat missions are initiated.
-- Each starship has a set number of actions per turn based on ship capabilities, Captain experience, crew efficiency, crew stats, etc.
-- Actions include:
-  - Movement (thrust in any direction, rotate)
-  - Firing weapons (phasers, torpedoes)
-  - Activating shields
-  - Using special abilities (e.g., evasive maneuvers, sensor jamming)
-- Combat resolution will consider factors such as:
-  - Weapon accuracy and damage
-  - Shield strength and hull integrity
-  - Starship positioning and orientation
-  - Crew efficiency and morale
-  - Environmental factors (e.g., nebulae, asteroid fields)
-  - Starship systems status (e.g., damaged weapons, depleted shields)
-- Successful combat will reward the player with resources, reputation, and progression
-- Options to resolve combat through diplomacy or retreat may be available in certain situations
+#### Combat Initiation
+
+Combat occurs on the sector map when:
+
+- Player ship encounters hostile NPC ships
+- Mission objectives require engagement
+- Player initiates combat action (hailing, firing)
+- Ambush scenarios trigger from random events
+
+Combat uses the existing sector map grid (15x15 with z-levels) rather than transitioning to a separate combat map.
+
+#### Turn Structure and Initiative
+
+**Initiative System:**
+
+- All entities assigned initiative values at combat start
+- Player ship: Initiative 10
+- NPC ships: Initiative 6-9 (varies by ship class and crew)
+- Higher initiative acts first each turn
+- Turn order remains fixed throughout combat
+
+**Action Points:**
+
+- Player ship: 5 AP per turn (base, can be modified by upgrades/crew)
+- NPC ships: 3 AP per turn
+- Action points fully restore at start of each turn
+- Unused AP does not carry over to next turn
+
+#### Combat Actions
+
+**Movement Actions:**
+
+- Cost: 1 AP per grid cell
+- Can move in any direction including z-level changes
+- Movement updates ship orientation automatically
+- Environmental modifiers apply (nebulae, asteroids)
+
+**Weapon Actions:**
+
+- Phasers: 1 AP, 10-15 damage, 0.5s cooldown, 85% base accuracy
+  - 270° forward firing arc
+  - Range modifiers: +15% damage (short), 0% (medium), -20% (long)
+  - High effectiveness vs shields, lower vs hull
+- Torpedoes: 2 AP, 25-35 damage, 1.0s cooldown, 75% base accuracy
+  - 270° forward firing arc
+  - Range affects hit chance: +10% (short), 0% (medium), -15% (long)
+  - High effectiveness vs hull, lower vs shields
+
+**Tactical Actions:**
+
+- Scan: 1 AP, reveals enemy ship status and weaknesses
+- Evasive Maneuvers: 2 AP, +10% dodge chance for remainder of turn
+- Shield Redistribution: 1 AP, reallocate shield power between facings
+- Emergency Repairs: 2 AP (requires Chief Engineer Level 5+)
+
+**Special Abilities:**
+
+- Varies by crew skills, ship class, and unlocked abilities
+- Examples: Sensor jamming, emergency power, tactical analysis
+- Costs vary: 2-3 AP depending on ability
+
+#### Combat Resolution
+
+**Attack Resolution:**
+
+1. Check line of sight between attacker and target
+2. Verify target within firing arc (270° forward cone)
+3. Calculate base accuracy with range modifiers
+4. Apply environmental modifiers (nebulae -10%, asteroid cover +20% defense)
+5. Roll for hit/miss (critical hit: 10% chance, 1.5x damage)
+6. Determine which shield facing is hit based on attacker position
+7. Apply damage to shields first, then hull
+8. Apply system damage if hull integrity drops below thresholds
+
+**Damage Calculations:**
+
+- Shield absorption: 85% for energy weapons, 65% for kinetic
+- Shields reduced first, then hull takes remaining damage
+- Critical hits bypass partial shield absorption
+- System damage occurs at 75%, 50%, and 25% hull integrity
+- Destroyed systems reduce ship effectiveness
+
+**Combat Resolution Factors:**
+
+- Weapon accuracy and damage values
+- Shield strength and hull integrity
+- Ship positioning and orientation (firing arcs, shield facings)
+- Crew efficiency and morale bonuses
+- Environmental effects (nebulae sensor interference, asteroid cover)
+- System status (damaged weapons, depleted shields, engine malfunctions)
+
+#### AI Behavior
+
+**AI State Machine:**
+
+- **PATROL**: Default state, moves on patrol route, scans for targets
+- **ATTACK**: Engages targets, uses weapons, maintains optimal range
+- **FLEE**: Retreats when hull drops below 30%, prioritizes survival
+
+**AI Decision Making:**
+
+- Target selection based on threat level and distance
+- Weapon choice based on range and shield status
+- Automatic AI processing at end of player turn
+- Simple tactical decisions (closing distance, using cover)
+
+#### Combat End Conditions
+
+**Victory Conditions:**
+
+- All enemy ships destroyed or fled
+- Mission objectives completed (protect target, survive duration)
+- Enemy surrender (rare, based on faction and circumstances)
+
+**Failure Conditions:**
+
+- Player ship destroyed (mission failure, respawn at starbase)
+- Protected target destroyed
+- Unable to complete time-sensitive objectives
+
+**Post-Combat:**
+
+- Experience points awarded based on performance
+- Salvage opportunities from destroyed enemy ships
+- Reputation adjustments (victory/defeat, casualties, tactics)
+- Ship damage persists, requires repairs at starbase
+- Crew morale affected by combat outcome
+
+#### Alternative Resolution
+
+**Diplomatic Options:**
+
+- Hail enemy ship before combat (requires Communications officer)
+- Negotiate surrender or retreat (Diplomacy skill check)
+- Available for certain factions and mission types
+- May result in reputation gains or peaceful resolution
+
+**Retreat Option:**
+
+- Player can attempt to flee combat (success chance based on relative speed)
+- Costs 2 AP to initiate retreat
+- May result in reputation loss or mission failure
+- Enemy may pursue or break off
 
 ### 5.3 Resource Management
 
-Players must manage ship resources:
+#### Primary Resources
 
-- Energy allocation (shields, weapons, engines)
-- Sensor modes (long-range, short-range, passive)
-- Supplies (fuel, food, medical supplies)
-- Crew morale (affected by mission success, encounters, and ship conditions)
-- Condition and upkeep of ship systems (weapons, shields, engines)
+**Energy System:**
+
+- **Total Capacity**: Varies by ship class and reactor upgrades
+- **Regeneration**: 10 units per turn (passive from impulse/warp reactors)
+- **Allocation**:
+  - Shields (continuous power draw per active shield facing)
+  - Weapons (energy per shot for phasers, torpedo launch systems)
+  - Engines (movement and warp drive power)
+  - Sensors (active scanning consumes energy)
+- **Management**: Power distribution sliders in UI for dynamic allocation
+- **Depletion**: Zero energy disables systems until regeneration occurs
+
+**Supplies:**
+
+- **Types**:
+  - Fuel (dilithium for warp drive, deuterium for impulse)
+  - Medical supplies (treatment of crew injuries)
+  - Spare parts (ship repairs and maintenance)
+  - Food and consumables (crew sustainment)
+- **Consumption Rates**:
+  - 1 unit per turn during normal travel
+  - 3 units per turn during combat
+  - Additional consumption for repairs and medical treatment
+- **Resupply**: Available at friendly starbases (free) or through trading
+- **Mission Impact**: Low supplies reduce crew morale and limit repair capability
+
+**Crew Morale:**
+
+- **Range**: 0-100 (100 = maximum morale)
+- **Factors Affecting Morale**:
+  - Combat success: +5 morale
+  - Combat failure: -10 morale
+  - Casualties: -15 morale
+  - Shore leave at starbase: +20 morale (temporary boost)
+  - Time since last starbase visit: -2 morale per week
+  - Ship damage and poor conditions: -5 morale
+  - Successful mission completion: +10 morale
+- **Effects on Gameplay**:
+  - High morale (75-100): +10% crew efficiency bonus
+  - Normal morale (50-74): Standard performance
+  - Low morale (25-49): -10% crew efficiency penalty
+  - Critical morale (0-24): -25% efficiency, risk of crew issues
+- **Management**: Shore leave, successful missions, maintaining ship systems
+
+**Ship System Condition:**
+
+- **Integrity Tracking**: Each system has condition rating (0-100%)
+- **Degradation Causes**:
+  - Combat damage (immediate integrity loss)
+  - Normal wear over time (1% per 10 turns active use)
+  - Environmental damage (nebulae, ion storms)
+- **Effects of Damage**:
+  - 75-100%: Full functionality
+  - 50-74%: -15% effectiveness
+  - 25-49%: -35% effectiveness, increased failure chance
+  - 0-24%: System critical, 50% chance of failure per use
+  - 0%: System offline until repaired
+- **Repair Mechanics**:
+  - Automatic repairs: 5% per turn at starbase
+  - Emergency repairs: Chief Engineer ability (2 AP, +10% immediate)
+  - Full repairs: Dock at starbase (free at Federation bases)
+  - Repair costs: Time, supplies, and crew efficiency affected
+
+#### Resource Interdependencies
+
+**Energy and Ship Performance:**
+
+- Low energy (<25%) disables non-essential systems
+- Cannot fire weapons without sufficient energy reserve
+- Reduced movement range when engine power low
+- Shields collapse if energy depleted during combat
+
+**Supplies and Operations:**
+
+- Insufficient supplies prevent repairs
+- Medical emergencies require medical supplies
+- Cannot maintain crew morale without adequate supplies
+- Running out of supplies triggers emergency protocols
+
+**Crew Morale and Efficiency:**
+
+- High morale improves all ship system effectiveness
+- Low morale reduces repair speed and combat effectiveness
+- Critical morale may trigger crew events (sick bay overflow, discipline issues)
+- Morale directly affects crew skill application
+
+**System Condition and Combat:**
+
+- Damaged weapons reduce accuracy and damage output
+- Compromised shields have reduced capacity and regeneration
+- Engine damage limits movement and evasive capabilities
+- Sensor damage reduces detection range and targeting accuracy
+
+#### Resource UI Elements
+
+**Status Panel Display:**
+
+- Energy bar (current/maximum)
+- Supplies count with type breakdown
+- Crew morale percentage with color coding
+- System condition indicators for all major systems
+
+**Management Interface:**
+
+- Power allocation sliders for shields/weapons/engines/sensors
+- Supply consumption tracking and alerts
+- Crew roster with morale status
+- System damage report with repair priorities
+
+#### Resource Strategy
+
+**Optimal Resource Management:**
+
+- Balance energy allocation between offense and defense
+- Maintain supply reserves for extended missions
+- Visit starbases regularly to restore crew morale
+- Repair critical systems before non-essential ones
+- Plan mission routes based on resource availability
+
+**Emergency Situations:**
+
+- Energy crisis: Disable non-essential systems, retreat to starbase
+- Supply shortage: Trade with merchants, salvage from combat
+- Morale collapse: Immediate shore leave, abort non-critical missions
+- System failures: Emergency repairs, tactical retreat
 
 ### 5.4 Mission System
 
@@ -1030,9 +1331,131 @@ Players must manage ship resources:
 
 ### 5.6 AI and NPCs
 
-- Basic AI for enemy starships
-- NPC starships will have simple behaviors (patrolling, attacking, fleeing)
-- Future plans may include more advanced AI behaviors and interactions
+#### NPC Starship AI
+
+**AI State Machine:**
+
+NPC ships operate using a simple state machine with three core states:
+
+**PATROL State:**
+
+- Default behavior when no threats detected
+- Follows predefined patrol routes within sector
+- Scans for targets periodically (uses sensor range)
+- Transitions to ATTACK when hostile ship detected
+- Low energy consumption, standard movement speed
+
+**ATTACK State:**
+
+- Actively engages detected hostile targets
+- Target selection based on:
+  - Threat assessment (distance, ship class, hull integrity)
+  - Mission objectives (protect specific targets)
+  - Tactical advantage (positioning, shield status)
+- Weapon selection:
+  - Phasers at short-medium range
+  - Torpedoes at medium-long range when shields detected
+- Movement tactics:
+  - Close to optimal weapon range
+  - Maintain firing arc on target
+  - Use environmental cover when available (asteroids)
+- Transitions to FLEE when hull drops below 30%
+
+**FLEE State:**
+
+- Activated when hull integrity critical (below 30%)
+- Movement priorities:
+  - Maximize distance from threats
+  - Move toward friendly starbases if in sector
+  - Use environmental hazards to block pursuit
+- Energy conservation (minimal weapon use)
+- Returns to PATROL if threats eliminated or escape successful
+- Some factions never flee (Klingons - honor-bound)
+
+#### AI Decision Making
+
+**Target Acquisition:**
+
+- Sensor sweep each turn to detect ships
+- Priority scoring system:
+  - Distance factor (closer = higher priority)
+  - Hull integrity (weaker = higher priority)
+  - Ship class (player ship = highest priority)
+  - Faction relations (hostile factions = higher priority)
+- Switches targets if current target destroyed or higher priority appears
+
+**Tactical Decisions:**
+
+- Range management: Attempts to maintain optimal weapon range
+- Shield facing: Rotates to protect damaged shield facings
+- Action point allocation: Balances movement and weapons each turn
+- Environmental awareness: Uses asteroid cover, avoids nebulae when possible
+- Evasive actions: 20% chance to use evasive maneuvers when shields below 50%
+
+**Turn Processing:**
+
+- AI processes actions during NPC phase (after player input phase)
+- All NPC ships act in initiative order
+- Complete action sequence: assess situation → move → attack → end turn
+- Automatic AI processing without player input required
+
+#### Faction-Specific Behaviors
+
+| Faction | Aggression | Tactics | Flee Threshold | Special Behavior |
+|---------|------------|---------|----------------|------------------|
+| **Klingon** | Very High | Direct assault, close range | Never flees | Prioritizes honor, frontal attacks |
+| **Romulan** | High | Flanking, ambush tactics | 25% hull | Uses stealth positioning, strategic |
+| **Gorn** | Medium | Defensive, heavy weapons | 20% hull | Holds position, focuses on durability |
+| **Orion** | Low | Opportunistic, hit-and-run | 50% hull | Targets weak ships, flees early |
+| **Tholian** | Medium | Precision strikes, exotic weapons | 30% hull | Alien logic, unpredictable patterns |
+
+#### NPC Interaction Types
+
+**Combat Encounters:**
+
+- Hostile NPCs attack on sight
+- Neutral NPCs may defend if provoked
+- Friendly NPCs assist in combat
+
+**Diplomatic Interactions:**
+
+- Hailing enemy ships (Communications officer required)
+- Negotiation attempts (Diplomacy skill check)
+- Surrender offers from AI when overwhelmed
+- Distress calls from friendly or neutral ships
+
+**Random Encounters:**
+
+- Patrol ships requesting identification
+- Traders offering goods
+- Distressed vessels requiring assistance
+- Exploration vessels sharing information
+
+**Mission-Specific NPCs:**
+
+- Escort targets following player ship
+- Enemy commanders with scripted behaviors
+- Civilian vessels with specific routes
+- Special encounter ships with unique AI
+
+#### AI Limitations (Current Implementation)
+
+**Current AI Capabilities:**
+
+- Basic state machine (PATROL, ATTACK, FLEE)
+- Simple target selection scoring
+- Automatic turn processing
+- Faction-specific aggression levels
+- Environmental awareness (basic obstacle detection)
+
+**Planned Future Enhancements:**
+
+- Advanced tactical planning (flanking maneuvers, formations)
+- Group coordination for multiple enemy ships
+- Dynamic difficulty adjustment based on player skill
+- Personality system for named enemy commanders
+- Learning AI that adapts to player tactics
+- More complex environmental utilization (nebula hiding, asteroid navigation)
 
 ## 6. User Interface and User Experience
 
@@ -1052,54 +1475,292 @@ Inspired by UI's windowed desktop games largely around the mid-1990s era. An exa
 - The map will be centered in the application window with UI elements surrounding it
 - Pop-up dialogs will be used for mission briefings, ship status, and other information
 
-#### 6.2.1 Selected Layout: "Right-Rail Tactical"
+#### 6.2.1 Implemented Layout: "Right-Rail Tactical"
 
-**Layout Sketch:**
+**Layout Design:**
 
 ```text
 +--------------------------------------------------------+
-|  Toolbar / Menubar                                     |
+|  Menu Bar: File | View                                  |
++--------------------------------------------------------+
+|  Toolbar: [Galaxy] [Sector] [Combat] | [Z↑] [Z↓]      |
++--------------------------------------------------------+
+|                              |                         |
+|       CENTRAL MAP            |    RIGHT DOCK PANEL     |
+|    (pygame-ce surface)       |                         |
+|     1280x900 pixels          |   [Status Tab]          |
+|   Isometric grid view        |   [Actions Tab]         |
+|   with z-level display       |   [Map Tab]             |
+|                              |                         |
+|                              |   Ship: USS Enterprise  |
+|                              |   Hull: [====] 100%     |
+|                              |   Shields: [====] 100%  |
+|                              |   Energy: [====] 100%   |
+|                              |   Position: (10,10,2)   |
+|                              |                         |
 +------------------------------+-------------------------+
-|          CENTRAL MAP         |  Status / Actions       |
-|      (pygame surface)        |  (tabs: Status,         |
-|                              |   Actions, Minimap)     |
-+------------------------------+-------------------------+
-|  Turn/phase bar (bottom)                               |
+|  Turn Bar: Turn: 1 | Phase: Input | AP: 5 | [End Turn] |
 +--------------------------------------------------------+
 ```
 
-**Designer Components:**
+**PySide6 Component Structure:**
 
-- **Base:** QMainWindow
-- **Central:** QWidget → QVBoxLayout → placeholder QWidget named GameSurface (later used to host pygame surface) + a bottom QWidget (TurnBar) with QHBoxLayout for "End Turn", AP, phase indicator
-- **Right Rail:** QDockWidget (dock right, allowed areas: Left|Right). Inside: QTabWidget with tabs:
-  - StatusTab (QFormLayout): hull/shields/energy bars (use QProgressBar)
-  - ActionsTab (QVBoxLayout): buttons ("Move", "Fire", "Scan", "Evasive")
-  - MapTab (QVBoxLayout): mini-map QLabel (future pixmap) + legend
-- **Toolbars:** Top QToolBar with mode buttons (Galaxy/Sector/Combat), separator, zoom in/out
-- **Resizing:** Set central layout stretch (map=1) and give right dock a Fixed minimum width (e.g., 300 px). Map placeholder QSizePolicy = Expanding, Expanding
+**Base Window (QMainWindow):**
 
-**Rationale:**
+- Main application window with menu bar, toolbar, and dock widgets
+- Central widget contains game display and turn bar
+- Dockable panels for flexible layout customization
 
-- Simplicity and focus on essential information
-- Fast to build for initial development
-- Great for smaller screens
-- Suitable for early prototypes
+**Menu Bar:**
 
-**Alternative Layouts Considered:**
+- **File Menu**: New Game, Save Game, Load Game, Exit
+- **View Menu**: Toggle dock visibility, zoom controls, z-level display options
 
-- **Twin Docks + Splitter**: Left status dock, right control dock, bottom log. Highly flexible but requires more tuning.
-- **Dashboard HUD**: Panel ring with all info visible. No tab-hunting, ideal for combat, but needs more screen space.
-- **Mode-Stacked Center**: QStackedWidget switching between Galaxy/Sector/Combat views. Clean separation but more wiring.
-- **Notebook Right-Side**: Single tabbed control center. Predictable but slower tab switching in combat.
+**Top Toolbar (QToolBar):**
 
-Final layout may evolve based on playtesting and user feedback.
+- Mode switcher buttons: [Galaxy Map] [Sector Map] [Combat Mode]
+- Separator
+- Zoom controls: [Zoom In] [Zoom Out] [Reset Zoom]
+- Z-level navigation: [Z↑] [Z↓] (when in Sector/Combat modes)
+
+**Central Widget (QVBoxLayout):**
+
+1. **Game Surface (QWidget)**:
+   - Custom widget embedding pygame-ce rendering surface
+   - Size: 1280x900 pixels (expandable)
+   - Isometric grid display with z-level visualization
+   - Mouse interaction for ship selection and movement
+   - QSizePolicy: Expanding, Expanding (fills available space)
+
+2. **Turn Bar (QWidget with QHBoxLayout)**:
+   - Turn counter: "Turn: [number]"
+   - Current phase: "Phase: Input/Resolution"
+   - Action points: "AP: [remaining]/[maximum]"
+   - [End Turn] button (triggers turn advancement)
+   - Real-time updates after each game action
+
+**Right Dock Panel (QDockWidget):**
+
+- Allowed areas: Left|Right (user can reposition)
+- Default position: Docked right
+- Minimum width: 300 pixels
+- Contains QTabWidget with three tabs:
+
+**Tab 1: Status (QFormLayout)**
+
+- **Ship Name**: Label showing current ship (e.g., "USS Enterprise")
+- **Hull Integrity**: QProgressBar (0-100%, red when critical)
+- **Shield Status**: Four QProgressBar widgets for each facing
+  - Forward shields
+  - Aft shields
+  - Port shields
+  - Starboard shields
+- **Energy Level**: QProgressBar (0-maximum capacity)
+- **Position**: Label showing grid coordinates (x, y, z)
+- **Sector**: Label showing current sector name
+
+**Tab 2: Actions (QVBoxLayout)**
+
+Action buttons organized by category:
+
+- **Movement Group**:
+  - [Move Ship] button (toggles move mode)
+  - [Cancel Move] button (visible when in move mode)
+- **Combat Group**:
+  - [Fire Weapons] button (opens target selection dialog)
+  - [Scan Target] button (placeholder - future implementation)
+  - [Evasive Maneuvers] button (placeholder - future implementation)
+- **Utilities Group**:
+  - [Dock] button (dock at nearby starbase)
+  - [Hail] button (placeholder - future communications)
+
+**Tab 3: Map (QVBoxLayout)**
+
+- **Mini-map**: QLabel placeholder (320x240 pixels)
+  - Future: Display sector overview
+  - Future: Show ship positions and points of interest
+- **Legend**: QTextEdit or QLabel with sector information
+  - Faction control
+  - Environmental features
+  - Nearby objects
+
+**Implementation Details:**
+
+**Resizing Behavior:**
+
+- Central game surface expands/contracts with window size
+- Minimum window size: 1600x1000 pixels
+- Right dock maintains minimum 300px width
+- Turn bar remains fixed height at bottom
+- Toolbars remain fixed at top
+
+**Visual Styling:**
+
+- Dark blue-gray background theme (#1E2A3A)
+- Cyan highlights for active elements (#00FFFF)
+- Progress bars with faction-appropriate colors
+- Consistent button styling across all actions
+- Clear visual feedback for button states (hover, pressed, disabled)
+
+**User Experience:**
+
+- Tab switching for organized action access
+- Status always visible in Status tab
+- Quick action access in Actions tab
+- Future navigation aids in Map tab
+- Dock panel can be hidden via View menu for maximum map space
+- Persistent layout preferences (future: save window configuration)
+
+**Rationale for This Design:**
+
+- ✅ Simplifies development: Single coherent layout implementation
+- ✅ Focuses on essentials: Status, actions, and map clearly separated
+- ✅ Efficient screen usage: Maximizes map visibility while keeping controls accessible
+- ✅ Scalable: Easy to add new buttons, status indicators, or tabs
+- ✅ Familiar pattern: Standard application layout with docks and toolbars
+- ✅ Suitable for turn-based gameplay: No need for split-second UI access
+- ✅ Future-proof: Can expand to additional docks or panels as needed
 
 ### 6.3 Input Controls
 
-- The game will support both keyboard and mouse input
-- Interactions will be primarily handled through mouse clicks, keyboard shortcuts, menu selections, sliders, dialog boxes, etc.
-- Mouse input will be used for interacting with the game world (e.g., clicking on objects directly within the map, selecting objects in the map, etc.)
+#### Primary Input Methods
+
+**Mouse Controls:**
+
+The primary method of interaction with the game.
+
+**Map Interaction:**
+
+- **Left Click on Grid Cell**: Select cell or move ship (when in move mode)
+- **Left Click on Ship**: Select ship for status display
+- **Right Click on Ship**: Context menu for ship actions (future)
+- **Mouse Wheel Scroll**: Zoom in/out on map view
+- **Middle Mouse Drag**: Pan camera (future implementation)
+
+**UI Interaction:**
+
+- **Left Click on Buttons**: Execute actions (Move, Fire, Dock, etc.)
+- **Left Click on Menu Items**: Access file operations and settings
+- **Left Click on Toolbar Buttons**: Switch modes, adjust zoom, change z-levels
+- **Left Click in Tabs**: Switch between Status, Actions, and Map tabs
+
+**Keyboard Controls:**
+
+Secondary input method with shortcuts for common actions.
+
+**Map Navigation:**
+
+- **Arrow Keys**: Pan camera view (future implementation)
+- **PageUp / PageDown**: Move up/down z-levels
+- **Home**: Reset camera to player ship
+- **+ / -**: Zoom in/out
+- **0**: Reset zoom to default
+
+**Game Actions:**
+
+- **M**: Toggle move mode
+- **Escape**: Cancel current action (move mode, targeting, etc.)
+- **Space**: End turn
+- **F**: Open fire weapons dialog
+- **D**: Dock at nearby starbase
+- **S**: Scan target (future)
+- **E**: Evasive maneuvers (future)
+
+**Mode Switching:**
+
+- **F1**: Galaxy Map mode
+- **F2**: Sector Map mode
+- **F3**: Combat mode (when in combat)
+
+**Game Management:**
+
+- **Ctrl+S**: Quick save
+- **Ctrl+L**: Load game
+- **Ctrl+Q**: Quit game
+- **F11**: Toggle fullscreen (future)
+
+**Configuration:**
+
+- All keyboard shortcuts configurable via `key_bindings.toml`
+- Custom key mappings supported
+- Future: In-game keybinding editor in Settings dialog
+
+#### Dialog and Menu Interactions
+
+**File Menu:**
+
+- **New Game**: Start new game session
+- **Save Game**: Save current progress
+- **Load Game**: Load saved game
+- **Exit**: Close application
+
+**View Menu:**
+
+- **Toggle Right Dock**: Show/hide action panel
+- **Toggle Turn Bar**: Show/hide turn information
+- **Reset Layout**: Restore default window layout
+
+**Dialog Boxes:**
+
+**Target Selection Dialog:**
+
+- **Click on Ship in List**: Select target
+- **Double-Click**: Select and confirm target
+- **[Cancel] Button**: Close without selecting
+- **[Fire] Button**: Confirm weapon and target
+
+**Mission Briefing Dialog (Future):**
+
+- **Click [Accept]**: Accept mission and start
+- **Click [Decline]**: Refuse mission
+- **Scroll**: Read full mission details
+
+**Settings Dialog (Future):**
+
+- **Tabs**: Graphics, Audio, Controls, Gameplay
+- **Sliders**: Adjust volume, graphics quality
+- **Checkboxes**: Toggle features
+- **Dropdown Menus**: Select options
+- **[Apply] Button**: Save changes
+- **[Cancel] Button**: Discard changes
+
+#### Input Response and Feedback
+
+**Visual Feedback:**
+
+- Button hover states: Highlight on mouse-over
+- Button pressed states: Visual depression effect
+- Cursor changes: Pointer, hand, crosshair based on context
+- Selected cells: Highlight with cyan border
+- Valid movement cells: Green highlight (in move mode)
+- Invalid movement cells: Red highlight (in move mode)
+
+**Audio Feedback (Future):**
+
+- Button clicks: Subtle LCARS-style beep
+- Action confirmation: Success tone
+- Error actions: Warning sound
+- Turn end: Distinctive notification
+
+**Haptic Feedback:**
+
+- Not planned (no gamepad support in initial release)
+
+#### Accessibility Features
+
+**Current Implementation:**
+
+- Large clickable buttons (minimum 60x30 pixels)
+- High contrast UI elements
+- Clear visual state indicators
+- Keyboard shortcuts for all major actions
+
+**Future Considerations:**
+
+- Colorblind mode with pattern overlays
+- Adjustable UI scaling (1x, 1.5x, 2x)
+- Screen reader support for menus and dialogs
+- Configurable keybindings for accessibility needs
 
 ### 6.4 Accessibility
 
@@ -1562,20 +2223,363 @@ This hybrid architecture provides:
 
 ### 9.2 Platform Requirements
 
-- **Linux Only**: All development targets Linux exclusively
-- No Windows or macOS support planned - code and design are Linux-specific
+#### Target Platform
+
+**Linux Exclusively:**
+
+- All development and testing performed on Linux systems
+- Code uses Linux-specific paths, system calls, and conventions
+- No Windows or macOS support planned or maintained
+- Assumes POSIX-compliant environment
+
+#### System Requirements
+
+**Minimum Requirements:**
+
+- **OS**: Ubuntu 22.04 LTS or equivalent modern Linux distribution
+- **Python**: 3.14 or higher (required for latest language features)
+- **RAM**: 4 GB minimum
+- **Storage**: 500 MB for game and assets
+- **Display**: 1600x1000 resolution minimum
+- **Graphics**: OpenGL 2.0+ capable GPU
+
+**Recommended Requirements:**
+
+- **OS**: Ubuntu 24.04 LTS or latest stable Linux distribution
+- **Python**: Latest Python 3.14+ release
+- **RAM**: 8 GB or more
+- **Storage**: 1 GB for game, saves, and future content
+- **Display**: 1920x1080 or higher resolution
+- **Graphics**: Modern GPU with OpenGL 3.0+ support
+
+#### Dependencies
+
+**Core Libraries:**
+
+- **pygame-ce**: Community Edition for Python 3.14+ compatibility
+  - Handles game rendering, sprite management, surface operations
+  - Required version: Latest stable release
+  - Alternative to standard pygame (lacks Python 3.14+ support)
+- **PySide6**: Qt for Python bindings
+  - UI framework for windows, menus, dialogs, widgets
+  - Required version: 6.5.0 or higher
+  - Provides native-looking Linux UI elements
+
+**Python Standard Library:**
+
+- Primary dependency strategy: Use stdlib whenever possible
+- `tomllib`: Configuration file reading (Python 3.11+)
+- `tomli_w`: TOML file writing (external, minimal dependency)
+- `dataclasses`: Entity and component definitions
+- `typing`: Type hints and annotations
+- `abc`: Abstract base classes for patterns
+
+**Development Tools:**
+
+- **pytest**: Testing framework (8.0+)
+- **pytest-cov**: Code coverage reporting
+- **pytest-mock**: Mocking and fixtures
+- **Git**: Version control
+- **VS Code**: Recommended IDE with Python extensions
+
+#### Linux-Specific Considerations
+
+**File System:**
+
+- Forward slashes for all path operations (`/`)
+- Case-sensitive file names
+- Home directory: `~/` or `$HOME`
+- Configuration location: `~/.config/star_trek_retro_remake/`
+- Save data location: `~/.local/share/star_trek_retro_remake/`
+
+**Display and Window Management:**
+
+- X11 window system support required
+- Wayland support via XWayland compatibility layer
+- Window decorations provided by system window manager
+- Native Linux desktop integration (icons, app launchers)
+
+**Package Management:**
+
+- Distribution via PyPI (future)
+- Installation via pip or uv package manager
+- System package dependencies: `python3-dev`, `libsdl2-dev`, `libqt6-dev`
+
+**Audio System (Future):**
+
+- PulseAudio or PipeWire support
+- ALSA fallback for older systems
+- No proprietary audio drivers required
+
+#### Performance Optimization for Linux
+
+**Graphics:**
+
+- OpenGL rendering pipeline (pygame-ce + Qt)
+- Hardware acceleration when available
+- Software fallback for older systems
+- VSync support for smooth rendering
+
+**Multi-threading:**
+
+- Separate threads for game logic, rendering, UI
+- Efficient resource loading using thread pools
+- GIL-aware design for Python threading
+
+**Memory Management:**
+
+- Object pooling for frequently created/destroyed entities
+- Efficient sprite and texture management
+- Garbage collection tuning for smooth gameplay
+- Memory-mapped file loading for large assets (future)
+
+#### Distribution Format
+
+**Current (Development):**
+
+- Git repository clone
+- Virtual environment setup with uv or pip
+- Manual dependency installation
+- Direct Python execution
+
+**Planned (v1.0):**
+
+- Python wheel package (.whl)
+- PyPI distribution
+- AppImage for universal Linux compatibility
+- Flatpak for sandboxed distribution (future)
+- Native .deb package for Debian/Ubuntu (future)
+
+#### No Cross-Platform Support
+
+**Explicit Non-Support:**
+
+- Windows: Possible future Windows compatibility
+- macOS: No plans for macOS compatibility
+- BSD: May work but unsupported and untested
+- Mobile: No Android/iOS versions planned
+
+**Rationale:**
+
+- Simplified development and testing (single platform)
+- Linux-native tools and conventions throughout
+- No abstraction layers for cross-platform compatibility
+- Developer familiarity and preference for Linux ecosystem
+- Smaller scope appropriate for solo development
 
 ### 9.3 Performance Requirements
 
-- The game should maintain a stable frame rate of 60 FPS during gameplay
-- Load times for game assets should be minimized through efficient resource management
-- The game should be optimized for performance on target platforms
-- Memory usage should be kept within reasonable limits to ensure smooth gameplay
-- Multi-threading is planned with separate threads for:
-  - Game logic
-  - Rendering
-  - User interface
-  - Resource loading
+#### Frame Rate Targets
+
+**UI and Menus:**
+
+- Target: 60 FPS for PySide6 UI elements
+- Minimum acceptable: 30 FPS for complex dialogs
+- Smooth animations for button interactions and panel transitions
+- Immediate response to mouse clicks (<16ms)
+
+**Game View (pygame-ce):**
+
+- Target: 60 FPS for map rendering and sprite display
+- Minimum acceptable: 30 FPS during complex scenes
+- Turn-based nature allows lower FPS without gameplay impact
+- Priority: Consistency over peak performance
+
+**Combat Animations (Future):**
+
+- Weapon effects: 30-60 FPS
+- Explosion animations: 30 FPS minimum
+- Particle effects: 24-30 FPS acceptable
+
+#### Load Time Targets
+
+**Application Startup:**
+
+- Initial launch: <3 seconds from execution to main menu
+- Configuration loading: <500ms
+- Asset preloading: <2 seconds for essential sprites
+
+**Mode Transitions:**
+
+- Sector map loading: <2 seconds
+- Combat initialization: <1 second
+- Galaxy map rendering: <1 second
+- State save/load: <2 seconds
+
+**Asset Loading:**
+
+- Sprite loading on demand: <100ms per sprite sheet
+- Configuration file parsing: <50ms per file
+- Sector data loading: <200ms per sector
+
+#### Memory Usage Limits
+
+**Base Application:**
+
+- Minimum footprint: 50 MB (Python interpreter + core modules)
+- With base assets loaded: <512 MB maximum
+- Entity pool allocation: 10 MB reserved
+- Sprite cache: 100 MB maximum
+
+**During Gameplay:**
+
+- Sector map active: 256 MB typical
+- Combat scenario: 384 MB typical
+- Galaxy map navigation: 128 MB typical
+- Memory growth: <1 MB per hour of gameplay (no memory leaks)
+
+**Object Pooling:**
+
+- Starship pool: 20 pre-allocated entities
+- Projectile pool: 100 pre-allocated entities
+- Visual effect pool: 50 pre-allocated entities
+- Pool expansion: 25% growth when exhausted
+
+#### CPU Utilization
+
+**Turn Processing:**
+
+- Player turn: <50ms for input validation and state update
+- AI turn processing: <200ms per NPC ship
+- Multiple NPCs: <1 second for 10 simultaneous AI ships
+- Turn advancement: <100ms for state transitions
+
+**Rendering Pipeline:**
+
+- Grid rendering: <10ms per frame
+- Entity rendering: <5ms for 20 ships
+- UI update: <5ms per frame
+- Total frame time budget: 16.7ms (60 FPS) or 33.3ms (30 FPS)
+
+**Background Operations:**
+
+- Asset loading: Low priority, 5-10% CPU usage
+- Save game operations: <1 second, non-blocking
+- Configuration updates: Asynchronous, <50ms
+
+#### Multi-threading Strategy
+
+**Thread Architecture:**
+
+1. **Main Thread (UI Thread)**:
+   - PySide6 event loop and UI updates
+   - User input handling
+   - Dialog and widget management
+   - Render command dispatch
+
+2. **Game Logic Thread**:
+   - Turn processing and state updates
+   - AI decision making
+   - Combat calculations
+   - Physics and movement
+   - Thread-safe communication with main thread
+
+3. **Rendering Thread**:
+   - pygame-ce surface rendering
+   - Sprite drawing and transformations
+   - Grid and z-level visualization
+   - Effect animations (future)
+
+4. **Resource Loading Thread**:
+   - Asynchronous asset loading
+   - Configuration file parsing
+   - Save/load operations
+   - Background preparation of next sector
+
+**Thread Synchronization:**
+
+- Queue-based communication between threads
+- Lock-free design where possible for game state access
+- Copy-on-write for shared data structures
+- Event-driven updates from game logic to UI
+
+**Thread Safety:**
+
+- Game model mutations only in game logic thread
+- UI updates only in main thread
+- Rendering reads from stable game state snapshot
+- Atomic operations for critical shared state
+
+#### Optimization Techniques
+
+**Rendering Optimizations:**
+
+- **Dirty Rectangle Tracking**: Only redraw changed portions of screen
+- **Sprite Batching**: Group similar sprites for efficient rendering
+- **Z-level Culling**: Don't render entities far from active z-level
+- **View Frustum Culling**: Skip off-screen entity rendering
+- **Sprite Caching**: Pre-render commonly used sprite combinations
+
+**Data Structure Optimizations:**
+
+- **Spatial Partitioning**: Grid-based spatial indexing for entity lookups
+- **Object Pooling**: Reuse allocated entities instead of creation/destruction
+- **Flyweight Pattern**: Share immutable ship data across instances
+- **Lazy Loading**: Load sector data only when entering sector
+
+**Algorithm Optimizations:**
+
+- **Line of Sight**: Bresenham's algorithm for efficient ray casting
+- **Pathfinding**: A* with early termination for movement validation
+- **AI Decision Making**: Decision trees with early exit conditions
+- **Combat Calculations**: Lookup tables for common computations
+
+#### Performance Monitoring
+
+**Built-in Profiling (Development):**
+
+- FPS counter display (toggle with F12)
+- Frame time graph (min/max/average)
+- Memory usage display
+- Thread activity monitor
+- Event processing time tracking
+
+**Logging and Diagnostics:**
+
+- Performance warnings for slow operations (>100ms)
+- Memory leak detection during development
+- AI processing time per ship
+- Render time breakdown by component
+
+**Benchmarking Suite:**
+
+- Automated performance tests via pytest-benchmark
+- Combat scenario simulations (1v1, 5v5, 10v10)
+- Sector loading benchmarks
+- AI decision-making speed tests
+- Memory usage profiling under load
+
+#### Performance Degradation Handling
+
+**Adaptive Quality:**
+
+- Reduce sprite resolution on low-end systems (future)
+- Disable non-essential animations if FPS drops below 30
+- Simplify particle effects during performance stress
+- Scale back AI complexity if processing too slow
+
+**Graceful Degradation:**
+
+- Never block on rendering (skip frames if necessary)
+- Limit AI processing time with hard cutoffs
+- Warn user if system struggles with performance
+- Provide low-graphics mode option (future)
+
+#### Target Hardware Validation
+
+**Test Configurations:**
+
+- **Minimum Spec**: 4 GB RAM, integrated graphics, dual-core CPU
+- **Recommended Spec**: 8 GB RAM, discrete GPU, quad-core CPU
+- **Development Spec**: 16 GB RAM, modern GPU, multi-core CPU
+
+**Performance Acceptance Criteria:**
+
+- ✅ 60 FPS on recommended spec during typical gameplay
+- ✅ 30 FPS minimum on minimum spec in combat
+- ✅ <2 second sector transitions on all test systems
+- ✅ <512 MB memory usage with 10+ ships in sector
+- ✅ Smooth UI interaction at all times (no lag on clicks)
 
 ### 9.4 Data Management
 
@@ -1873,25 +2877,103 @@ phaser_count = get_config_value("game_data", "ship_classes.constitution.systems.
 
 #### Simulation Mode
 
-- A real-time management mode where the player has to manage ship systems and crew in real-time
-- Complex ship systems that are strongly interconnected:
-  - Fuel consumption affecting engine power and weapon systems
-  - High power usage increases coolant requirements
-  - Increased cooling needs can lead to less resource allocation for other systems
-  - Power distribution affecting shields, weapons, and sensors
+A real-time management mode overlay for existing turn-based gameplay:
+
+**Real-Time System Management:**
+
+- Ship systems operate continuously instead of turn-by-turn
+- Power distribution adjusts in real-time via sliders
+- Crew performs actions with time-based completion
+- Environmental effects apply continuously (nebula interference, radiation)
+- Toggle between turn-based and real-time modes per mission type
+
+**Interconnected Ship Systems:**
+
+- Fuel consumption directly affects engine output and available power
+- High power usage generates heat requiring increased cooling
+- Coolant systems draw power from main reactor
+- Power distribution affects shields, weapons, sensors, and life support
+- System failures cascade to related subsystems
+- Engineering crew can reroute power in emergencies
+
+**Complexity vs Turn-Based Balance:**
+
+- Simulation mode optional for advanced players
+- Turn-based remains primary gameplay mode
+- Simulation mode offers higher rewards and challenges
+- Real-time decisions require faster tactical thinking
+- Pause capability for strategic planning in simulation mode
 
 #### Starship Design and Customization
 
-- Players can customize their starship's capabilities (weapons, shields, engines, etc.) at starbases and shipyards
-- Modular ship components (e.g., engines, weapons, shields) can be upgraded or replaced
-- Players can design their own starship classes with unique attributes and abilities
+**Ship Customization System:**
+
+- Visit starbases and shipyards for ship modifications
+- Modular component replacement:
+  - Weapon systems (phaser types, torpedo launchers)
+  - Shield generators (capacity, regeneration rate, coverage)
+  - Engine modules (impulse, warp, maneuvering)
+  - Sensor arrays (range, resolution, types)
+  - Hull reinforcement (armor plating, structural integrity)
+- Component slots limit total upgrades
+- Trade-offs: Power vs mass vs cost vs crew requirements
+
+**Custom Ship Classes:**
+
+- Design unique ship configurations from base hulls
+- Name custom ship classes
+- Save and share ship designs (future: community designs)
+- Balance stats: Weapons, defense, speed, crew capacity
+- Prototype testing missions required before full deployment
+- Some components require minimum reputation or captain level
+
+**Visual Customization:**
+
+- Faction-specific paint schemes
+- Hull markings and registry numbers
+- Ship lighting and engine glow colors
+- Custom ship icons for sector map
 
 #### Fleet Management
 
-- Players can earn a promotion to Admiral and command a fleet of starships
-- Players can manage multiple starships within their fleet
-- Fleets can be assigned to different missions or tasks
-- Players can issue orders to individual starships or the entire fleet
+**Admiral Promotion System:**
+
+- Promotion to Admiral rank at Captain Level 20 and Reputation Rank 5
+- Unlocks fleet command capabilities
+- Maintain personal ship as flagship
+- Command up to 5 additional ships in fleet (scales with experience)
+
+**Fleet Operations:**
+
+- Assign ships to fleet from available Starfleet vessels
+- Each ship has crew, captain NPC, and status
+- Fleet formations: Line, wedge, defensive screen, patrol spread
+- Issue fleet-wide orders or individual ship commands
+- Coordinate multi-ship tactics in large-scale battles
+
+**Fleet Mission Types:**
+
+- **Patrol Operations**: Multiple sectors simultaneously covered
+- **Task Force Missions**: Combined fleet actions against major threats
+- **Blockade Operations**: Control space lanes and borders
+- **Convoy Escort**: Protect multiple civilian vessels
+- **Fleet Exercises**: Training missions to improve fleet cohesion
+
+**Fleet Management Challenges:**
+
+- Resource allocation across multiple ships
+- Personnel management (assign captains and key crew)
+- Maintenance schedules and staggered repairs
+- Coordinating fleet movements across galaxy map
+- Balancing fleet composition for mission types
+
+**Fleet Benefits:**
+
+- Tackle missions impossible for single ship
+- Control larger territories
+- Increased reputation gains from fleet successes
+- Unlock unique fleet-based missions and storylines
+- Command multiple ship classes with different roles
 
 ## Appendices
 
