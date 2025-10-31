@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.23] - 2025-10-31
+
+### Changed
+
+- **Confident Design Patterns**: Replaced defensive None checks with architectural guarantees across core modules, except where null checks are required for safety (see v0.0.22 bug fixes)
+- **Type Annotations**: Updated `current_sector` from `SectorMap | None` to `SectorMap` in GameModel to reflect actual program constraints
+- **UI Element Access**: Removed `hasattr` checks for UI elements in GameView, replaced with confident access patterns since elements are guaranteed from Qt Designer files
+- **Configuration Management**: Moved magic numbers to TOML configuration (display dimensions, frame rates, UI colors)
+- **Import Optimization**: Simplified TYPE_CHECKING imports where circular dependencies don't exist (moved GridPosition out of TYPE_CHECKING in view.py)
+- **Initialization Patterns**: Implemented confident object creation with proper error handling only during setup phase, not during gameplay
+
+### Fixed
+
+- **Architectural Integrity**: Eliminated scattered defensive checks that indicated architectural problems
+- **Error Handling**: Moved error handling to initialization phase where it belongs, ensuring clean gameplay logic
+
+## [0.0.22] - 2025-10-31
+
+### Fixed
+
+- **Critical Null Reference Bugs**: Added null checks for `player_ship` in `GameController.handle_ship_move_request()` and `handle_combat_action()` methods to prevent crashes when player ship is not initialized
+- **Model Validation Bug**: Added null check for `current_sector` in `GameModel._is_valid_move()` to prevent AttributeError when sector is not loaded
+- **Import Order Violation**: Fixed PEP 8 violation by moving module import to proper location in `main.py`
+- **Encoding Declaration**: Removed unnecessary UTF-8 encoding declaration in `main.py` as it's redundant in Python 3.14+
+- **Test Failures**: Fixed 3 failing tests related to null reference bugs:
+  - `test_handle_ship_move_request_without_player_ship`
+  - `test_handle_combat_action_without_player_ship`
+  - `test_is_valid_move_no_sector`
+
+### Changed
+
+- **Version Management**: Updated version to 0.0.22 across all core modules and pyproject.toml
+- **Error Handling**: Improved defensive programming with proper null checks and early returns
+
 ## [0.0.21] - 2025-01-27
 
 ### Fixed

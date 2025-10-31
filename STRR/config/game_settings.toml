@@ -13,6 +13,11 @@ window_height = 768     # Default window height in pixels
 fullscreen = false      # Start in windowed mode by default
 vsync = true           # Enable vertical sync to prevent screen tearing
 fps_limit = 60         # Target framerate (0 = unlimited)
+update_timer_ms = 16   # UI update timer in milliseconds (~60 FPS)
+
+# Game surface dimensions
+game_surface_width = 1280   # Game rendering surface width
+game_surface_height = 900   # Game rendering surface height
 
 [game]
 difficulty = "normal"           # Game difficulty: easy, normal, hard, expert
@@ -58,3 +63,13 @@ grid_lines = true              # Show sector grid lines
 show_coordinates = true        # Display grid coordinates
 animation_speed = 1.0          # Animation speed multiplier (0.5 = slower, 2.0 = faster)
 particle_effects = true        # Enable particle effects for weapons/explosions
+
+# UI colors (RGB values 0-255)
+selection_highlight_color = [0, 255, 0]     # Green for cell selection
+default_entity_color = [255, 255, 0]        # Yellow for generic entities
+text_color = [255, 255, 255]                # White for text rendering
+current_layer_alpha = 255                   # Full opacity for current z-level
+adjacent_layer_alpha = 80                   # Transparency for adjacent z-levels
+
+# Dialog dimensions
+min_dialog_width = 300         # Minimum width for dialogs in pixels

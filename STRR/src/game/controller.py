@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-31-2025
+Date Changed: 10-31-2025 (v0.0.23 - Confident design patterns, removed defensive checks)
 License: MIT
 
 Features:
@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from .model import GameModel
     from .view import GameView
 
-__version__: Final[str] = "0.0.21"
+__version__: Final[str] = "0.0.23"
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ class GameController:
         _render: Render game display
     """
 
-    def __init__(self, model: "GameModel"):
+    def __init__(self, model: GameModel):
         """
         Initialize the game controller.
 
@@ -90,7 +90,7 @@ class GameController:
             model: Game model reference
         """
         self.model = model
-        self.view: "GameView" | None = None
+        self.view: GameView | None = None
 
         # Initialize game state management
         self.state_manager = GameStateManager()
@@ -100,7 +100,7 @@ class GameController:
         self.running = False
         self.clock = pygame.time.Clock()
 
-    def set_view(self, view: "GameView") -> None:
+    def set_view(self, view: GameView) -> None:
         """
         Set the view reference.
 
@@ -127,8 +127,7 @@ class GameController:
         Args:
             destination: Target position for movement
         """
-        # player_ship is guaranteed to exist after start_new_game()
-        # Execute movement through model
+        # Execute movement through model - player_ship guaranteed to exist during gameplay
         success = self.model.execute_move(self.model.player_ship, destination)
 
         if not success and self.view:
@@ -143,16 +142,15 @@ class GameController:
             # Update turn display
             self._update_turn_display()
 
-    def handle_combat_action(self, target: "Starship", weapon_type: str) -> None:
+    def handle_combat_action(self, target: Starship, weapon_type: str) -> None:
         """
-        Handle combat action request.
+        Handle combat action from player.
 
         Args:
             target: Target starship
             weapon_type: Type of weapon to use (phaser or torpedo)
         """
-        # player_ship is guaranteed to exist after start_new_game()
-        # Resolve combat through model
+        # Resolve combat through model - player_ship guaranteed to exist during gameplay
         result = self.model.resolve_combat(self.model.player_ship, target, weapon_type)
 
         # Display result through view
@@ -168,17 +166,17 @@ class GameController:
             else:
                 self.view.show_message(f"Attack failed: {result.message}")
 
-    def get_available_targets(self, weapon_type: str = "phaser") -> list["Starship"]:
+    def get_available_targets(self, weapon_type: str = "phaser") -> list[Starship]:
         """
-        Get list of available targets for player's current weapon.
+        Get list of valid targets for the player ship.
 
         Args:
-            weapon_type: Type of weapon to consider for targeting
+            weapon_type: Type of weapon to consider for range
 
         Returns:
             List of targetable enemy ships
         """
-        # player_ship is guaranteed to exist after start_new_game()
+        # player_ship guaranteed to exist during gameplay
         return self.model.get_potential_targets(self.model.player_ship, weapon_type)
 
     def start_new_game(self) -> None:
@@ -241,7 +239,6 @@ class GameController:
 
         Processes AI turns for NPCs and updates the view.
         """
-        from .entities.starship import Starship
 
         self.model.end_current_turn()
 
