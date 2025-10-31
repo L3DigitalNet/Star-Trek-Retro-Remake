@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 10-31-2025 (v0.0.23 - Confident UI access, configuration-driven values)
 License: MIT
 
 Features:
@@ -39,18 +39,19 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 import pygame
-from PySide6.QtCore import QTimer, Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction, QImage, QKeyEvent, QMouseEvent, QPixmap
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QPushButton
 
+from ..engine.config_manager import get_config_value
 from ..engine.isometric_grid import create_sector_grid
+from .entities.base import GridPosition
 
 if TYPE_CHECKING:
     from .controller import GameController
-    from .entities.base import GridPosition
 
-__version__: Final[str] = "0.0.21"
+__version__: Final[str] = "0.0.23"
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,7 @@ class GameDisplay(QLabel):
     Captures mouse and keyboard events and forwards them to the controller.
     """
 
-    def __init__(self, view: "GameView"):
+    def __init__(self, view: GameView):
         """
         Initialize the game display widget.
 
@@ -191,7 +192,7 @@ class GameView:
         _update_display: Update the display regularly
     """
 
-    def __init__(self, controller: "GameController"):
+    def __init__(self, controller: GameController):
         """
         Initialize the game view.
 
@@ -206,9 +207,15 @@ class GameView:
         # Override close event to ensure proper cleanup
         self.main_window.closeEvent = self._handle_close_event
 
-        # Initialize pygame-ce surface
+        # Initialize pygame-ce surface using configuration
         pygame.init()
-        self.game_surface = pygame.Surface((1280, 900))
+        game_width = get_config_value(
+            "game_settings.toml", "display.game_surface_width", 1280
+        )
+        game_height = get_config_value(
+            "game_settings.toml", "display.game_surface_height", 900
+        )
+        self.game_surface = pygame.Surface((game_width, game_height))
 
         # Initialize isometric grid renderer
         self.grid_renderer = create_sector_grid()
@@ -237,10 +244,13 @@ class GameView:
         # Clock for managing updates
         self.clock = pygame.time.Clock()
 
-        # Set up update timer
+        # Set up update timer using configuration
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self._update_display)
-        self.update_timer.start(16)  # ~60 FPS
+        update_interval = get_config_value(
+            "game_settings.toml", "display.update_timer_ms", 16
+        )
+        self.update_timer.start(update_interval)
 
         logger.info("GameView initialized with isometric grid renderer")
 
@@ -290,13 +300,17 @@ class GameView:
             # Create a temporary surface for this z-level
             z_surface = pygame.Surface(self.game_surface.get_size(), pygame.SRCALPHA)
 
-            # Simple transparency: white for current, transparent gray for others
+            # Simple transparency: white for current, transparent gray for others using config
             if z == self.current_z_level:
-                # Current level: fully opaque white
-                alpha = 255
+                # Current level: fully opaque
+                alpha = get_config_value(
+                    "game_settings.toml", "graphics.current_layer_alpha", 255
+                )
             else:
-                # Adjacent levels: semi-transparent gray
-                alpha = 80
+                # Adjacent levels: semi-transparent
+                alpha = get_config_value(
+                    "game_settings.toml", "graphics.adjacent_layer_alpha", 80
+                )
 
             # Render this z-level to temporary surface with dashing based on distance
             self.grid_renderer.render_z_level(z_surface, z, self.current_z_level)
@@ -305,12 +319,15 @@ class GameView:
             z_surface.set_alpha(alpha)
             self.game_surface.blit(z_surface, (0, 0))
 
-        # Highlight selected cell if any
+        # Highlight selected cell if any using configuration
         if self.selected_cell:
+            highlight_color = get_config_value(
+                "game_settings.toml", "graphics.selection_highlight_color", [0, 255, 0]
+            )
             self.grid_renderer.render_cell_highlight(
                 self.game_surface,
                 self.selected_cell,
-                color=(0, 255, 0),  # Green highlight
+                color=tuple(highlight_color),
             )
 
         # Render game objects
@@ -336,29 +353,19 @@ class GameView:
         """
         logger.info("Ship Status: %s - Hull: %.1f%%", ship.name, ship.hull_integrity)
 
-        # Update ship name
-        if hasattr(self, "ship_name_label") and self.ship_name_label:
-            self.ship_name_label.setText(ship.name)
+        # Update ship name - UI elements loaded from Designer file are guaranteed to exist
+        self.ship_name_label.setText(ship.name)
 
         # Update hull progress bar
-        if hasattr(self, "hull_progress") and self.hull_progress:
-            self.hull_progress.setValue(int(ship.hull_integrity))
+        self.hull_progress.setValue(int(ship.hull_integrity))
 
-        # Update shields if ship has them
-        if hasattr(ship, "shields") and hasattr(self, "shields_progress"):
-            if self.shields_progress:
-                self.shields_progress.setValue(int(ship.shields))
+        # Update shields and energy with confident access pattern
+        self.shields_progress.setValue(int(ship.shields))
+        self.energy_progress.setValue(int(ship.energy))
 
-        # Update energy if ship has it
-        if hasattr(ship, "energy") and hasattr(self, "energy_progress"):
-            if self.energy_progress:
-                self.energy_progress.setValue(int(ship.energy))
-
-        # Update position if available
-        if hasattr(ship, "position") and hasattr(self, "coordinates_label"):
-            if self.coordinates_label:
-                pos = ship.position
-                self.coordinates_label.setText(f"X: {pos.x}, Y: {pos.y}, Z: {pos.z}")
+        # Update position - all ships have position
+        pos = ship.position
+        self.coordinates_label.setText(f"X: {pos.x}, Y: {pos.y}, Z: {pos.z}")
 
     def show_message(self, message: str) -> None:
         """
@@ -384,53 +391,87 @@ class GameView:
         loader = QUiLoader()
         self.main_window = loader.load(str(ui_file))
 
-        # Store references to status UI elements in right dock
-        self.ship_name_label = self.main_window.findChild(QLabel, "shipNameLabel")
-        self.hull_progress = self.main_window.findChild(QProgressBar, "hullProgressBar")
-        self.shields_progress = self.main_window.findChild(
-            QProgressBar, "shieldsProgressBar"
-        )
-        self.energy_progress = self.main_window.findChild(
-            QProgressBar, "energyProgressBar"
-        )
-        self.coordinates_label = self.main_window.findChild(QLabel, "coordinatesLabel")
-        self.sector_label = self.main_window.findChild(QLabel, "sectorLabel")
-
-        # Store references to turn bar elements
-        self.end_turn_btn = self.main_window.findChild(QPushButton, "endTurnButton")
-        self.action_points_label = self.main_window.findChild(
-            QLabel, "actionPointsLabel"
-        )
-        self.phase_label = self.main_window.findChild(QLabel, "phaseLabel")
-        self.turn_number_label = self.main_window.findChild(QLabel, "turnNumberLabel")
-
-        # Store references to action buttons
-        self.move_btn = self.main_window.findChild(QPushButton, "moveButton")
-        self.rotate_btn = self.main_window.findChild(QPushButton, "rotateButton")
-        self.fire_btn = self.main_window.findChild(QPushButton, "fireButton")
-        self.scan_btn = self.main_window.findChild(QPushButton, "scanButton")
-        self.evasive_btn = self.main_window.findChild(QPushButton, "evasiveButton")
-        self.dock_btn = self.main_window.findChild(QPushButton, "dockButton")
-        self.hail_btn = self.main_window.findChild(QPushButton, "hailButton")
-
-        # Store references to toolbar actions
-        self.action_galaxy = self.main_window.findChild(QAction, "actionGalaxyMode")
-        self.action_sector = self.main_window.findChild(QAction, "actionSectorMode")
-        self.action_combat = self.main_window.findChild(QAction, "actionCombatMode")
-        self.action_zoom_in = self.main_window.findChild(QAction, "actionZoomIn")
-        self.action_zoom_out = self.main_window.findChild(QAction, "actionZoomOut")
-        self.action_zoom_reset = self.main_window.findChild(QAction, "actionZoomReset")
-
-        # Store references to menu actions
-        self.action_new_game = self.main_window.findChild(QAction, "actionNewGame")
-        self.action_save_game = self.main_window.findChild(QAction, "actionSaveGame")
-        self.action_load_game = self.main_window.findChild(QAction, "actionLoadGame")
-        self.action_quit = self.main_window.findChild(QAction, "actionQuit")
-
-        # Store reference to right dock
-        self.right_dock = self.main_window.findChild(QDockWidget, "rightDock")
+        # Initialize all UI elements with confident pattern
+        self._initialize_ui_elements()
 
         logger.info(f"UI loaded from: {ui_file}")
+
+    def _initialize_ui_elements(self) -> None:
+        """Initialize all UI elements with confident access pattern."""
+        # Status UI elements in right dock
+        self.ship_name_label = self._get_required_ui_element(QLabel, "shipNameLabel")
+        self.hull_progress = self._get_required_ui_element(
+            QProgressBar, "hullProgressBar"
+        )
+        self.shields_progress = self._get_required_ui_element(
+            QProgressBar, "shieldsProgressBar"
+        )
+        self.energy_progress = self._get_required_ui_element(
+            QProgressBar, "energyProgressBar"
+        )
+        self.coordinates_label = self._get_required_ui_element(
+            QLabel, "coordinatesLabel"
+        )
+        self.sector_label = self._get_required_ui_element(QLabel, "sectorLabel")
+
+        # Turn bar elements
+        self.end_turn_btn = self._get_required_ui_element(QPushButton, "endTurnButton")
+        self.action_points_label = self._get_required_ui_element(
+            QLabel, "actionPointsLabel"
+        )
+        self.phase_label = self._get_required_ui_element(QLabel, "phaseLabel")
+        self.turn_number_label = self._get_required_ui_element(
+            QLabel, "turnNumberLabel"
+        )
+
+        # Action buttons
+        self.move_btn = self._get_required_ui_element(QPushButton, "moveButton")
+        self.rotate_btn = self._get_required_ui_element(QPushButton, "rotateButton")
+        self.fire_btn = self._get_required_ui_element(QPushButton, "fireButton")
+        self.scan_btn = self._get_required_ui_element(QPushButton, "scanButton")
+        self.evasive_btn = self._get_required_ui_element(QPushButton, "evasiveButton")
+        self.dock_btn = self._get_required_ui_element(QPushButton, "dockButton")
+        self.hail_btn = self._get_required_ui_element(QPushButton, "hailButton")
+
+        # Toolbar actions
+        self.action_galaxy = self._get_required_ui_element(QAction, "actionGalaxyMode")
+        self.action_sector = self._get_required_ui_element(QAction, "actionSectorMode")
+        self.action_combat = self._get_required_ui_element(QAction, "actionCombatMode")
+        self.action_zoom_in = self._get_required_ui_element(QAction, "actionZoomIn")
+        self.action_zoom_out = self._get_required_ui_element(QAction, "actionZoomOut")
+        self.action_zoom_reset = self._get_required_ui_element(
+            QAction, "actionZoomReset"
+        )
+
+        # Menu actions
+        self.action_new_game = self._get_required_ui_element(QAction, "actionNewGame")
+        self.action_save_game = self._get_required_ui_element(QAction, "actionSaveGame")
+        self.action_load_game = self._get_required_ui_element(QAction, "actionLoadGame")
+        self.action_quit = self._get_required_ui_element(QAction, "actionQuit")
+
+        # Right dock
+        self.right_dock = self._get_required_ui_element(QDockWidget, "rightDock")
+
+    def _get_required_ui_element(self, element_type, element_name: str):
+        """
+        Get a required UI element with confident access pattern.
+
+        Args:
+            element_type: Qt widget/action type
+            element_name: Object name in the UI file
+
+        Returns:
+            The UI element
+
+        Raises:
+            RuntimeError: If the element is not found
+        """
+        element = self.main_window.findChild(element_type, element_name)
+        if element is None:
+            raise RuntimeError(
+                f"Critical UI element missing: {element_name} not found in main_window.ui"
+            )
+        return element
 
     def _connect_signals(self) -> None:
         """Connect UI signals to slots."""
@@ -487,10 +528,16 @@ class GameView:
             logger.error("Could not find gameDisplay in parent layout")
             return
 
-        # Create custom game display widget
+        # Create custom game display widget using configuration
         self.game_label = GameDisplay(self)
-        self.game_label.setMinimumSize(1280, 900)
-        self.game_label.setMaximumSize(1280, 900)
+        game_width = get_config_value(
+            "game_settings.toml", "display.game_surface_width", 1280
+        )
+        game_height = get_config_value(
+            "game_settings.toml", "display.game_surface_height", 900
+        )
+        self.game_label.setMinimumSize(game_width, game_height)
+        self.game_label.setMaximumSize(game_width, game_height)
 
         # Replace the old label with the new widget
         parent_layout.removeWidget(old_label)
@@ -615,7 +662,9 @@ class GameView:
 
         dialog = QDialog(self.main_window)
         dialog.setWindowTitle("Select Target")
-        dialog.setMinimumWidth(300)
+        dialog.setMinimumWidth(
+            get_config_value("game_settings.toml", "graphics.min_dialog_width", 300)
+        )
 
         layout = QVBoxLayout()
 
@@ -725,8 +774,9 @@ class GameView:
         # Events are handled by Qt, not pygame
         # pygame.event.pump() removed to prevent event queue conflicts
 
-        # Calculate delta time
-        dt = self.clock.tick(60) / 1000.0
+        # Calculate delta time using configuration
+        fps_limit = get_config_value("game_settings.toml", "display.fps_limit", 60)
+        dt = self.clock.tick(fps_limit) / 1000.0
 
         # Update controller
         self.controller._update(dt)
@@ -735,18 +785,14 @@ class GameView:
         self.game_surface.fill((20, 20, 30))
 
         # Render sector map directly (state machine integration deferred)
-        if (
-            hasattr(self.controller.model, "current_sector")
-            and self.controller.model.current_sector
-        ):
+        # current_sector is guaranteed to exist during gameplay
+        if getattr(self.controller.model, "current_sector", None) is not None:
             self.render_sector_map(
                 self.controller.model.current_sector, self.controller.model.game_objects
             )
 
-        # Convert pygame surface to QPixmap using pre-allocated buffer
-        w, h = self.game_surface.get_size()
-
         # Get surface data and copy into reusable buffer
+        w, h = self.game_surface.get_size()
         surface_data = pygame.image.tobytes(self.game_surface, "RGB")
         self._qimage_buffer[:] = surface_data  # Reuse buffer to reduce GC pressure
 
@@ -783,14 +829,10 @@ class GameView:
             phase: Current phase name
             action_points: Remaining action points
         """
-        if hasattr(self, "turn_number_label") and self.turn_number_label:
-            self.turn_number_label.setText(f"Turn: {turn_number}")
-
-        if hasattr(self, "phase_label") and self.phase_label:
-            self.phase_label.setText(f"Phase: {phase}")
-
-        if hasattr(self, "action_points_label") and self.action_points_label:
-            self.action_points_label.setText(f"AP: {action_points}")
+        # UI elements are guaranteed to exist from confident initialization
+        self.turn_number_label.setText(f"Turn: {turn_number}")
+        self.phase_label.setText(f"Phase: {phase}")
+        self.action_points_label.setText(f"AP: {action_points}")
 
     def update_ui_state(self) -> None:
         """
@@ -802,18 +844,14 @@ class GameView:
         # Update ship status if player ship exists
         if self.controller.model.player_ship:
             self.show_ship_status(self.controller.model.player_ship)
-
-        # Update sector name if available
-        if (
-            self.controller.model.current_sector
-            and hasattr(self, "sector_label")
-            and self.sector_label
-        ):
+        # Update sector name if current_sector exists (defensive check for early UI update)
+        if getattr(self.controller.model, "current_sector", None) is not None:
             coords = self.controller.model.current_sector.coordinates
             sector_name = f"Sector {coords[0]}-{coords[1]}"
             self.sector_label.setText(sector_name)
+        self.sector_label.setText(sector_name)
 
-    def set_selected_cell(self, position: "GridPosition") -> None:
+    def set_selected_cell(self, position: GridPosition) -> None:
         """
         Set the currently selected grid cell.
 
@@ -879,18 +917,24 @@ class GameView:
                 self.current_z_level,  # Pass current z-level for reference lines
             )
         else:
-            # Fallback rendering for other objects (stations, etc.)
+            # Fallback rendering for other objects (stations, etc.) using configuration
             screen_pos = self.grid_renderer.world_to_screen(obj.position)
 
             # Draw a placeholder shape
-            color = (255, 255, 0)  # Yellow default
+            default_color = get_config_value(
+                "game_settings.toml", "graphics.default_entity_color", [255, 255, 0]
+            )
+            color = tuple(default_color)
 
             # Draw circle at screen position
             pygame.draw.circle(self.game_surface, color, screen_pos, 8)
 
-            # Draw name label if available
+            # Draw name label if available using configuration
             if hasattr(obj, "name") and obj.name:
                 font = self._fonts[18]
-                text = font.render(obj.name, True, (255, 255, 255))
+                text_color = get_config_value(
+                    "game_settings.toml", "graphics.text_color", [255, 255, 255]
+                )
+                text = font.render(obj.name, True, tuple(text_color))
                 text_rect = text.get_rect(center=(screen_pos[0], screen_pos[1] - 15))
                 self.game_surface.blit(text, text_rect)

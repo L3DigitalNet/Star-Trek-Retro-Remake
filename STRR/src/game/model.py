@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-31-2025 (v0.0.21 - Bug fixes and configuration)
+Date Changed: 10-31-2025 (v0.0.23 - Confident design patterns, removed defensive None checks)
 License: MIT
 
 Features:
@@ -46,7 +46,7 @@ from .entities.starship import Starship
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.21"
+__version__: Final[str] = "0.0.23"
 
 
 @dataclass
@@ -271,10 +271,11 @@ class GameModel:
         """Initialize the game model with default state."""
         # Map system
         self.galaxy = GalaxyMap()
-        self.current_sector: SectorMap | None = None
+        # Will be initialized in initialize_new_game() - guaranteed to exist during gameplay
+        self.current_sector: SectorMap
 
-        # Player and entities
-        self.player_ship: Starship | None = None
+        # Player and entities - initialized in initialize_new_game()
+        self.player_ship: Starship
         self.game_objects: list[GameObject] = []
 
         # Game systems
@@ -283,12 +284,13 @@ class GameModel:
 
     def initialize_new_game(self) -> None:
         """Set up a new game with default starting conditions."""
-        # Load starting sector FIRST
-        self.current_sector = self.galaxy.get_sector(0, 0)
-
-        # Validate sector was loaded successfully
-        if not self.current_sector:
-            raise RuntimeError("Failed to load starting sector (0, 0)")
+        # Load starting sector - confident initialization ensures it exists
+        sector = self.galaxy.get_sector(0, 0)
+        if sector is None:
+            raise RuntimeError(
+                "Critical error: Starting sector (0, 0) does not exist in galaxy"
+            )
+        self.current_sector = sector
 
         # Create player ship at starting position
         start_position = GridPosition(5, 5, 1)
@@ -329,10 +331,6 @@ class GameModel:
         Returns:
             True if movement was successful, False otherwise
         """
-        # Check for active sector
-        if not self.current_sector:
-            return False
-
         # Calculate movement cost in action points (1 AP per grid cell)
         distance = int(ship.position.distance_to(destination))
         action_cost = max(1, distance)  # Minimum 1 AP per move
@@ -561,7 +559,6 @@ class GameModel:
         Returns:
             True if move is valid, False otherwise
         """
-        # current_sector is guaranteed to exist after initialize_new_game()
         # Check sector bounds
         if not self.current_sector.is_in_bounds(destination):
             return False
@@ -593,9 +590,6 @@ class GameModel:
         Creates multiple ships at different positions, z-levels, and orientations
         to demonstrate entity rendering with visual differentiation.
         """
-        if not self.current_sector:
-            return
-
         # Test ship configurations: (position, ship_class, name, faction, orientation, initiative)
         test_ships = [
             (

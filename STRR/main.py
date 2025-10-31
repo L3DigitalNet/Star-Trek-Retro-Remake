@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Main Entry Point
 
@@ -12,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 10-31-2025
 License: MIT
 
 Features:
@@ -53,17 +52,17 @@ import sys
 from pathlib import Path
 from typing import Final
 
-# Configure logging for application-wide debugging and monitoring
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-
 # Add src directory to Python path to enable module imports from STRR/src/
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from src.game.application import StarTrekRetroRemake
 
-__version__: Final[str] = "0.0.21"
+# Configure logging for application-wide debugging and monitoring
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+__version__: Final[str] = "0.0.23"
 
 
 def main() -> None:
