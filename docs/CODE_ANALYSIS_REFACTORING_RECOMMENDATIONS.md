@@ -180,8 +180,24 @@ class WeaponSystems(ShipSystem):
 
 **Files Modified:**
 - `STRR/src/engine/config_manager.py` - Fixed Final import order
+- `STRR/src/game/components/ship_systems.py` - Migrated to use get_combat_config()
+  - Removed _load_combat_config() method (58 lines eliminated)
+  - Removed _combat_config class variable
+  - Added __future__ annotations import for proper type checking
+  - Updated version to 0.0.29
+- `STRR/src/game/model.py` - Migrated to use get_combat_config()
+  - Replaced WeaponSystems._load_combat_config() call
+  - Updated version to 0.0.29
 
-**Next Step:** Migrate existing code to use ConfigLoader (ship_systems.py, ship_ai.py, etc.)
+**Code Reduction:**
+- ✅ Eliminated ~60 lines of duplicated configuration loading code
+- ✅ Removed manual TOML imports and path calculations
+- ✅ Simplified WeaponSystems and ShieldSystems initialization
+
+**Next Steps:**
+- [ ] Migrate ship_ai.py to use ConfigLoader
+- [ ] Migrate mission_manager.py to use ConfigLoader
+- [ ] Migrate settings_dialog.py to use ConfigLoader
 
 ---
 

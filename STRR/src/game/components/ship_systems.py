@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-31-2025
+Date Changed: 11-01-2025 (v0.0.29 - Refactored to use centralized config loader)
 License: MIT
 
 Features:
@@ -42,16 +42,18 @@ Functions:
     - None
 """
 
-import tomllib
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..entities.base import GameObject, GridPosition
     from ..entities.starship import Starship
 
-__version__ = "0.0.23"
+from ...engine.config_loader import get_combat_config
+
+__version__ = "0.0.29"
 
 
 class ShipSystem(ABC):
@@ -156,17 +158,14 @@ class WeaponSystems(ShipSystem):
     Private methods:
         _calculate_firing_angle: Get angle to target from ship orientation
         _is_in_firing_arc: Check if angle is within weapon arc
-        _load_combat_config: Load combat settings from configuration
     """
-
-    _combat_config: dict[str, float] | None = None  # Class-level config cache
 
     def __init__(self):
         """Initialize weapon systems with default configuration."""
         super().__init__("Weapons", 1.0)
 
-        # Load combat configuration
-        config = self._load_combat_config()
+        # Load combat configuration using centralized config loader
+        config = get_combat_config()
 
         self.phaser_arrays = 4
         self.torpedo_tubes = 2
@@ -177,46 +176,6 @@ class WeaponSystems(ShipSystem):
         self.accuracy_base = config.get("weapon_accuracy_base", 0.85)
         self.cooldown_time = 1.0  # seconds between shots
         self.current_cooldown = 0.0
-
-    @classmethod
-    def _load_combat_config(cls) -> dict[str, float]:
-        """
-        Load combat configuration from game settings.
-
-        Returns:
-            Dictionary of combat configuration values
-        """
-        if cls._combat_config is None:
-            try:
-                import tomllib
-                from pathlib import Path
-
-                # Find config file relative to this module
-                config_path = (
-                    Path(__file__).parent.parent.parent
-                    / "config"
-                    / "game_settings.toml"
-                )
-
-                with open(config_path, "rb") as f:
-                    settings = tomllib.load(f)
-                    cls._combat_config = settings.get("game", {}).get("combat", {})
-            except Exception:
-                # Fallback to defaults if config can't be loaded
-                cls._combat_config = {
-                    "weapon_firing_arc": 270,
-                    "weapon_accuracy_base": 0.85,
-                    "weapon_range_penalty": 0.4,
-                    "critical_hit_chance": 0.1,
-                    "critical_hit_multiplier": 1.5,
-                    "shield_energy_effectiveness": 0.85,
-                    "shield_kinetic_effectiveness": 0.65,
-                    "shield_min_absorption": 0.1,
-                }
-
-        # Combat config is guaranteed to be set by this point
-        assert cls._combat_config is not None
-        return cls._combat_config
 
     def can_target(
         self,
@@ -373,7 +332,7 @@ class WeaponSystems(ShipSystem):
             return 0.1  # Minimum hit chance if weapon has no range
 
         # Get range penalty from config
-        config = self._load_combat_config()
+        config = get_combat_config()
         range_penalty = config.get("weapon_range_penalty", 0.4)
 
         # Base accuracy modified by range
@@ -531,7 +490,7 @@ class ShieldSystems(ShipSystem):
             facing = "forward"
 
         # Load combat configuration
-        config = WeaponSystems._load_combat_config()
+        config = get_combat_config()
 
         # Shield effectiveness based on damage type (from config)
         if damage_type == "energy":
