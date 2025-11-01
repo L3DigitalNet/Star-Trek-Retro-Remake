@@ -219,3 +219,364 @@ Functions:
 - Real-time logic in turn-based game
 - UI dependencies in game logic (MVC violation)
 - 2D positioning (use 3D: x, y, z)
+
+## Code Examples
+
+### Preferred Type Hint Patterns
+
+```python
+# Modern Python 3.14+ syntax - Use this
+from typing import Final, Protocol
+
+def calculate_damage(
+    base_damage: int,
+    multiplier: float,
+    targets: list[str]
+) -> dict[str, int]:
+    """Calculate damage for multiple targets."""
+    return {target: int(base_damage * multiplier) for target in targets}
+
+# Constants with type hints
+MAX_SHIELD_STRENGTH: Final[int] = 100
+SHIP_TYPES: Final[list[str]] = ["cruiser", "destroyer", "frigate"]
+
+# Protocol for component interfaces
+class Component(Protocol):
+    """Protocol defining component interface."""
+    
+    def update(self, delta_time: float) -> None:
+        """Update component state."""
+        ...
+```
+
+### Game Object + Component Pattern
+
+```python
+# Prefer this: Game Object with Component composition
+class Starship:
+    """Starship entity with component-based systems."""
+    
+    def __init__(self, ship_id: str, position: tuple[int, int, int]) -> None:
+        self.id: str = ship_id
+        self.position: tuple[int, int, int] = position  # 3D coordinates (x, y, z)
+        
+        # Components
+        self.weapons: WeaponSystem = WeaponSystem(self)
+        self.shields: ShieldSystem = ShieldSystem(self)
+        self.engines: EngineSystem = EngineSystem(self)
+    
+    def update(self, delta_time: float) -> None:
+        """Update all ship systems."""
+        self.weapons.update(delta_time)
+        self.shields.update(delta_time)
+        self.engines.update(delta_time)
+
+# Component interface
+class WeaponSystem:
+    """Weapon system component."""
+    
+    def __init__(self, ship: Starship) -> None:
+        self.ship: Starship = ship
+        self.energy: int = 100
+    
+    def fire(self, target: tuple[int, int, int]) -> bool:
+        """Fire at target coordinates."""
+        if self.energy < 10:
+            return False
+        self.energy -= 10
+        return True
+    
+    def update(self, delta_time: float) -> None:
+        """Recharge weapons."""
+        self.energy = min(100, self.energy + 1)
+```
+
+### State Machine Pattern
+
+```python
+# State machine for game modes
+from enum import Enum, auto
+
+class GameState(Enum):
+    """Game state enumeration."""
+    MAIN_MENU = auto()
+    GALAXY_MAP = auto()
+    SECTOR_MAP = auto()
+    COMBAT = auto()
+    SETTINGS = auto()
+    PAUSED = auto()
+
+class GameStateMachine:
+    """Manages game state transitions."""
+    
+    def __init__(self) -> None:
+        self.current_state: GameState = GameState.MAIN_MENU
+        self.previous_state: GameState | None = None
+    
+    def transition_to(self, new_state: GameState) -> bool:
+        """Transition to new state with validation."""
+        if not self._is_valid_transition(new_state):
+            return False
+        
+        self.previous_state = self.current_state
+        self.current_state = new_state
+        return True
+    
+    def _is_valid_transition(self, target: GameState) -> bool:
+        """Validate state transition."""
+        # PAUSED and SETTINGS accessible from any state
+        if target in (GameState.PAUSED, GameState.SETTINGS):
+            return True
+        
+        # Define valid transitions
+        valid_transitions: dict[GameState, list[GameState]] = {
+            GameState.MAIN_MENU: [GameState.GALAXY_MAP, GameState.SETTINGS],
+            GameState.GALAXY_MAP: [GameState.SECTOR_MAP, GameState.MAIN_MENU],
+            GameState.SECTOR_MAP: [GameState.COMBAT, GameState.GALAXY_MAP],
+            GameState.COMBAT: [GameState.SECTOR_MAP],
+        }
+        
+        return target in valid_transitions.get(self.current_state, [])
+```
+
+### MVC Separation Pattern
+
+```python
+# Model - Pure game logic (no UI dependencies)
+class CombatModel:
+    """Combat logic model."""
+    
+    def __init__(self) -> None:
+        self.ships: list[Starship] = []
+        self.turn_order: list[str] = []
+        self.current_turn: int = 0
+    
+    def add_ship(self, ship: Starship) -> None:
+        """Add ship to combat."""
+        self.ships.append(ship)
+        self._recalculate_initiative()
+    
+    def execute_turn(self) -> None:
+        """Process one combat turn."""
+        self.current_turn += 1
+        # Pure logic, no rendering
+
+# View - Rendering only (no game logic)
+class CombatView:
+    """Combat rendering view."""
+    
+    def __init__(self, model: CombatModel) -> None:
+        self.model: CombatModel = model
+    
+    def render(self, screen: pygame.Surface) -> None:
+        """Render combat state."""
+        for ship in self.model.ships:
+            self._draw_ship(screen, ship)
+
+# Controller - Coordinates model and view
+class CombatController:
+    """Combat controller."""
+    
+    def __init__(self) -> None:
+        self.model: CombatModel = CombatModel()
+        self.view: CombatView = CombatView(self.model)
+    
+    def handle_input(self, event: pygame.event.Event) -> None:
+        """Process user input."""
+        # Translate input to model operations
+        pass
+```
+
+## Common Pitfalls to Avoid
+
+### ❌ Don't: Mix 2D and 3D positioning
+
+```python
+# Wrong - inconsistent dimensions
+ship.position = (x, y)  # 2D
+enemy.position = (x, y, z)  # 3D
+```
+
+**✅ Do: Always use 3D coordinates**
+
+```python
+# Correct - consistent 3D positioning
+ship.position: tuple[int, int, int] = (x, y, z)
+enemy.position: tuple[int, int, int] = (x, y, z)
+```
+
+### ❌ Don't: Put UI logic in game model
+
+```python
+# Wrong - model depends on rendering
+class Ship:
+    def update(self):
+        pygame.draw.circle(screen, (255, 0, 0), self.position, 5)
+```
+
+**✅ Do: Separate model from view**
+
+```python
+# Correct - model is pure logic
+class Ship:
+    def update(self, delta_time: float) -> None:
+        self.position = self._calculate_new_position(delta_time)
+
+# View handles rendering
+class ShipView:
+    def render(self, ship: Ship, screen: pygame.Surface) -> None:
+        pygame.draw.circle(screen, (255, 0, 0), ship.position[:2], 5)
+```
+
+### ❌ Don't: Use string formatting other than f-strings
+
+```python
+# Wrong - old style
+message = "Ship %s at position %d, %d" % (ship.name, x, y)
+message = "Ship {} at position {}".format(ship.name, x)
+```
+
+**✅ Do: Use f-strings exclusively**
+
+```python
+# Correct - f-string
+message: str = f"Ship {ship.name} at position {x}, {y}, {z}"
+```
+
+### ❌ Don't: Miss type hints
+
+```python
+# Wrong - no type hints
+def calculate_damage(base, modifier):
+    return base * modifier
+
+ships = []
+damage = None
+```
+
+**✅ Do: Type hints everywhere**
+
+```python
+# Correct - complete type hints
+def calculate_damage(base: int, modifier: float) -> int:
+    return int(base * modifier)
+
+ships: list[Starship] = []
+damage: int | None = None
+```
+
+### ❌ Don't: Create functions longer than 20 lines
+
+```python
+# Wrong - too long, too complex
+def process_combat_turn(ships, enemies, effects, ...):
+    # 50+ lines of complex logic
+    # Multiple responsibilities
+    # Hard to test
+    pass
+```
+
+**✅ Do: Break into smaller functions**
+
+```python
+# Correct - focused, testable functions
+def process_combat_turn(combat_state: CombatState) -> None:
+    """Process one combat turn."""
+    _resolve_initiative(combat_state)
+    _execute_actions(combat_state)
+    _apply_effects(combat_state)
+    _update_turn_counter(combat_state)
+
+def _resolve_initiative(combat_state: CombatState) -> None:
+    """Calculate turn order based on initiative."""
+    combat_state.turn_order = sorted(
+        combat_state.ships,
+        key=lambda s: s.initiative,
+        reverse=True
+    )
+```
+
+## Quick Reference
+
+### Common Tasks
+
+| Task | Command/Location |
+|------|------------------|
+| Run tests | `pytest tests/ -v` or `make test` |
+| Run with coverage | `pytest tests/ --cov=src --cov-report=term-missing` |
+| Lint code | `make lint` |
+| Format code | `make format` |
+| Run all checks | `make check` |
+| Update version | Update `pyproject.toml`, `__version__`, CHANGELOG.md |
+| View architecture | `/docs/ARCHITECTURE.md` |
+| View game design | `/docs/DESIGN.md` |
+| Check doc standards | `/docs/DOCUMENTATION_STANDARDS.md` |
+
+### Version Update Checklist
+
+When making changes:
+- [ ] Update `pyproject.toml` version field
+- [ ] Update `__version__` in modified Python files
+- [ ] Update "Date Changed" in file headers
+- [ ] Add entry to `/docs/CHANGELOG.md`
+- [ ] Categorize changes (Added/Changed/Fixed/Removed)
+
+### File Creation Checklist
+
+For new Python files in `STRR/`:
+- [ ] Add proper shebang: `#!/usr/bin/env python3`
+- [ ] Complete docstring with all required sections
+- [ ] Type hints for all functions, variables, constants
+- [ ] Create matching `_doc.md` file in same directory
+- [ ] Add inline comments for significant code blocks
+- [ ] Follow max 20 lines per function
+- [ ] Use 3D coordinates (x, y, z) for positions
+
+## Key Documentation
+
+### Essential Files
+- **Architecture Guide**: `/docs/ARCHITECTURE.md` - Technical implementation details
+- **Game Design**: `/docs/DESIGN.md` - Complete game design specification
+- **Documentation Standards**: `/docs/DOCUMENTATION_STANDARDS.md` - Doc format and guidelines
+- **Versioning Guidelines**: `/docs/VERSIONING_GUIDELINES.md` - Version management rules
+- **Qt Designer Workflow**: `/docs/QT_DESIGNER_WORKFLOW.md` - UI design process
+- **Change Log**: `/docs/CHANGELOG.md` - Version history
+
+### Project Structure
+- **Source Code**: `STRR/src/` - Main game modules
+- **Tests**: `STRR/tests/` - pytest test suite
+- **Assets**: `STRR/assets/` - Graphics, audio, data files
+- **Configuration**: `STRR/config/` - TOML configuration files
+- **Entry Point**: `STRR/main.py` - Game launcher
+
+### Custom Prompts
+Located in `.github/prompts/`:
+- `code-review.prompt.md` - Code review guidelines
+- `documentation.prompt.md` - Documentation generation
+- `refactor.prompt.md` - Code refactoring rules
+- `test.prompt.md` - Test creation guidelines
+- `debug.prompt.md` - Debugging assistance
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue: Import errors with pygame**
+- **Solution**: Ensure pygame-ce (Community Edition) is installed: `pip install pygame-ce>=2.5`
+- **Note**: Standard pygame may not work with Python 3.14+
+
+**Issue: Type hint errors with union types**
+- **Solution**: Use modern syntax: `str | None` instead of `Optional[str]` or `Union[str, None]`
+- **Requires**: Python 3.14+
+
+**Issue: Tests failing after version update**
+- **Solution**: Verify all modified files have updated version numbers
+- **Check**: `pyproject.toml`, file `__version__` variables, CHANGELOG.md
+
+**Issue: Branch protection errors**
+- **Solution**: Ensure working on `testing` branch, not `main`
+- **Command**: `git checkout testing` or `git branch` to verify
+
+**Issue: Documentation out of sync**
+- **Solution**: Update both `.py` file docstring AND matching `_doc.md` file
+- **Location**: Each `STRR/module.py` needs `STRR/module_doc.md`
