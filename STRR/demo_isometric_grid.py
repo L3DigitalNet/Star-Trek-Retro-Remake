@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Isometric Grid Demo
 
@@ -41,16 +40,16 @@ Usage:
 """
 
 import sys
-import pygame
 from typing import Final
 
+import pygame
+
 # Add STRR to path for imports
-sys.path.insert(0, '/home/chris/GitHub/Star-Trek-Retro-Remake')
+sys.path.insert(0, "/home/chris/GitHub/Star-Trek-Retro-Remake")
 
 from STRR.src.engine.isometric_grid import (
-    GridRenderer,
-    create_default_grid,
     create_combat_grid,
+    create_default_grid,
     create_sector_grid,
 )
 from STRR.src.game.entities.base import GridPosition
@@ -210,9 +209,7 @@ class IsometricGridDemo:
             # Update selected cell if it exists
             if self.selected_cell:
                 self.selected_cell = GridPosition(
-                    self.selected_cell.x,
-                    self.selected_cell.y,
-                    self.current_z_level
+                    self.selected_cell.x, self.selected_cell.y, self.current_z_level
                 )
 
     def _pan_camera(self, key: int) -> None:
@@ -271,7 +268,9 @@ class IsometricGridDemo:
 
         # Render selected cell
         if self.selected_cell:
-            self.renderer.render_cell_highlight(self.screen, self.selected_cell, COLOR_GREEN)
+            self.renderer.render_cell_highlight(
+                self.screen, self.selected_cell, COLOR_GREEN
+            )
 
         # Render mouse hover (show which cell mouse is over)
         mouse_pos = pygame.mouse.get_pos()
@@ -309,7 +308,8 @@ class IsometricGridDemo:
         # Z-level info
         z_text = self.font_small.render(
             f"Z-Level: {self.current_z_level}/{self.renderer.max_z_levels - 1}",
-            True, COLOR_YELLOW
+            True,
+            COLOR_YELLOW,
         )
         self.screen.blit(z_text, (20, y_offset))
         y_offset += 30
@@ -317,15 +317,15 @@ class IsometricGridDemo:
         # Grid dimensions
         grid_text = self.font_small.render(
             f"Grid: {self.renderer.grid_width}x{self.renderer.grid_height}",
-            True, COLOR_WHITE
+            True,
+            COLOR_WHITE,
         )
         self.screen.blit(grid_text, (20, y_offset))
         y_offset += 30
 
         # Camera position
         cam_text = self.font_small.render(
-            f"Camera: {self.renderer.camera_offset}",
-            True, COLOR_WHITE
+            f"Camera: {self.renderer.camera_offset}", True, COLOR_WHITE
         )
         self.screen.blit(cam_text, (20, y_offset))
         y_offset += 30
@@ -334,12 +334,11 @@ class IsometricGridDemo:
         if self.selected_cell:
             sel_text = self.font_small.render(
                 f"Selected: ({self.selected_cell.x}, {self.selected_cell.y}, {self.selected_cell.z})",
-                True, COLOR_GREEN
+                True,
+                COLOR_GREEN,
             )
         else:
-            sel_text = self.font_small.render(
-                "Selected: None", True, COLOR_WHITE
-            )
+            sel_text = self.font_small.render("Selected: None", True, COLOR_WHITE)
         self.screen.blit(sel_text, (20, y_offset))
 
     def _render_help_panel(self) -> None:
@@ -401,6 +400,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error running demo: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 

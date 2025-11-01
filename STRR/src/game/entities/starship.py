@@ -36,8 +36,10 @@ Functions:
 from typing import TYPE_CHECKING, Final
 
 from ..components.ship_systems import (
+    CrewManager,
     EngineSystems,
     LifeSupportSystems,
+    ResourceManager,
     SensorSystems,
     ShieldSystems,
     ShipSystem,
@@ -48,7 +50,7 @@ from .base import GameObject, GridPosition
 if TYPE_CHECKING:
     from ..ai.ship_ai import ShipAI
 
-__version__: Final[str] = "0.0.20"
+__version__: Final[str] = "0.0.22"
 
 
 class Starship(GameObject):
@@ -113,11 +115,13 @@ class Starship(GameObject):
             "engines": EngineSystems(),
             "sensors": SensorSystems(),
             "life_support": LifeSupportSystems(),
+            "resources": ResourceManager(),
+            "crew": CrewManager(),
         }
 
-        # Ship resources and crew (simplified for initial implementation)
-        self.crew: object | None = None  # Will be implemented later
-        self.resources: object | None = None  # Will be implemented later
+        # Ship resources and crew (quick access properties)
+        self.resources: ResourceManager = self.systems["resources"]  # type: ignore
+        self.crew: CrewManager = self.systems["crew"]  # type: ignore
 
         # Ship state
         self.hull_integrity: float = 100.0
@@ -128,7 +132,7 @@ class Starship(GameObject):
         self.size = 16  # Base size in pixels for rendering
 
         # AI controller (None for player ship)
-        self.ai_controller: "ShipAI | None" = None
+        self.ai_controller: ShipAI | None = None
 
     def _get_faction_color(self, faction: str) -> tuple[int, int, int]:
         """
@@ -241,22 +245,39 @@ class Starship(GameObject):
                 system = self.systems[damaged_system]
                 system.damage(hull_damage * 0.1)  # System takes 10% of hull damage
 
-    def repair_system(self, system_name: str, repair_amount: float) -> bool:
+    def repair_system(
+        self, system_name: str, repair_amount: float, use_supplies: bool = True
+    ) -> bool:
         """
         Repair a damaged ship system.
 
         Args:
             system_name: Name of the system to repair
             repair_amount: Amount of repair to apply
+            use_supplies: Whether to consume spare parts for repair
 
         Returns:
             True if repair was successful, False otherwise
         """
         system = self.get_system(system_name)
-        if system:
-            system.repair(repair_amount)
-            return True
-        return False
+        if not system:
+            return False
+
+        # Calculate repair cost based on damage and crew efficiency
+        damage_amount = system.max_efficiency - system.efficiency
+        spare_parts_needed = int(damage_amount * 10)  # 10 parts per 0.1 efficiency
+
+        # Check if we have supplies for repair (if required)
+        if use_supplies and spare_parts_needed > 0:
+            if not self.resources.use_supplies("spare_parts", spare_parts_needed):
+                return False  # Not enough spare parts
+
+        # Apply repair with crew efficiency modifier
+        crew_efficiency = self.crew.get_efficiency_multiplier()
+        effective_repair = repair_amount * crew_efficiency
+
+        system.repair(effective_repair)
+        return True
 
     def get_orientation_radians(self) -> float:
         """
@@ -269,7 +290,80 @@ class Starship(GameObject):
 
         return math.radians(self.orientation)
 
-    def set_ai_controller(self, ai: "ShipAI") -> None:
+    def allocate_power(self, system: str, percentage: float) -> bool:
+        """
+        Set power distribution percentage for a system.
+
+        Args:
+            system: System name (shields, weapons, engines, sensors, life_support)
+            percentage: Power allocation percentage (0-100)
+
+        Returns:
+            True if allocation successful, False if invalid
+        """
+        return self.resources.allocate_power(system, percentage)
+
+    def consume_energy_for_action(self, action: str) -> bool:
+        """
+        Consume energy for an action.
+
+        Args:
+            action: Action name (move, fire_phaser, fire_torpedo, scan, shield_regen)
+
+        Returns:
+            True if energy was consumed, False if insufficient
+        """
+        return self.resources.consume_energy(action)
+
+    def has_sufficient_energy(self, action: str) -> bool:
+        """
+        Check if ship has enough energy for an action.
+
+        Args:
+            action: Action name
+
+        Returns:
+            True if energy is available
+        """
+        cost = self.resources.energy_costs.get(action, 0.0)
+        return self.resources.has_energy(cost)
+
+    def refuel_at_starbase(self) -> None:
+        """Refuel ship to maximum capacity at starbase."""
+        self.resources.refuel(
+            self.resources.fuel_capacity - self.resources.fuel_current
+        )
+
+    def resupply_at_starbase(self) -> None:
+        """Resupply ship to maximum capacity at starbase."""
+        self.resources.resupply(
+            "medical", 100 - self.resources.supplies.get("medical", 0)
+        )
+        self.resources.resupply(
+            "spare_parts", 50 - self.resources.supplies.get("spare_parts", 0)
+        )
+        # Boost crew morale on starbase visit
+        self.crew.visit_starbase()
+
+    def get_crew_efficiency(self) -> float:
+        """
+        Get current crew efficiency multiplier.
+
+        Returns:
+            Efficiency multiplier (0.5 - 1.5)
+        """
+        return self.crew.get_efficiency_multiplier()
+
+    def record_combat_result(self, victory: bool) -> None:
+        """
+        Record combat outcome and update crew morale.
+
+        Args:
+            victory: True if combat won, False if lost
+        """
+        self.crew.record_combat_outcome(victory)
+
+    def set_ai_controller(self, ai: ShipAI) -> None:
         """
         Attach AI controller to this ship.
 
@@ -351,10 +445,28 @@ class SpaceStation(GameObject):
 
         Args:
             ship: Ship receiving the service
-            service_type: Type of service to provide
+            service_type: Type of service to provide (repair, refuel, resupply)
 
         Returns:
             True if service was provided, False otherwise
         """
-        # Service implementation will be added later
-        return ship in self.docked_ships and service_type in self.services
+        # Check if ship is docked
+        if ship not in self.docked_ships:
+            return False
+
+        # Provide service based on type
+        if service_type == "refuel":
+            ship.refuel_at_starbase()
+            return True
+        elif service_type == "resupply":
+            ship.resupply_at_starbase()
+            return True
+        elif service_type == "repair":
+            # Repair all systems to full efficiency
+            for system in ship.systems.values():
+                system.repair(system.max_efficiency)
+            # Repair hull to 100%
+            ship.hull_integrity = 100.0
+            return True
+
+        return False

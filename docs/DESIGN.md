@@ -127,23 +127,50 @@
 - Complete PySide6 + pygame-ce UI integration (v0.0.10, v0.0.16, v0.0.18)
 - Isometric grid rendering with z-levels (v0.0.3-v0.0.15)
 - Basic starship entities with visual representation (v0.0.12)
-- Starship movement system with turn integration (v0.0.3-v0.0.18)
+- Combat system with weapons, shields, and AI (v0.0.20-v0.0.21)
 
-**Current Focus:** Ready for resource management system implementation
+**Current Focus:** Performance optimization and configuration system improvements
 
-**Next Major Goal:** Add energy allocation, supplies, crew morale, and maintenance
+**Next Major Goal:** Begin resource management system implementation
 
 ### In Progress Milestones
 
-Currently none - ready to start next milestone!
+#### Implement Dialog and Menu Systems (Priority 1)
+
+- Mission briefing dialogs
+  - Display mission objectives and parameters
+  - Accept/decline mission options
+  - Mission reward information (reputation)
+- Ship status reporting
+  - Detailed system status reports in log panel. Random events may trigger a dialog window depending on severity.
+  - Crew roster and assignment
+    - Very basic at first (Chief Engineer, First Officer, Science Officer, Security Chief, Helm Officer)
+  - Damage reports and repair priorities
+- Settings dialog tab or menu
+  - Display configuration options from TOML files
+  - Apply and save settings changes
+  - Key binding customization
+- Save/load game functionality through File menu
+  - Game state serialization to TOML
+  - Load saved games with state restoration
+  - Multiple save slot management
 
 ### Next Milestones
 
-#### Implement Resource Management System
+#### Implement Galaxy Map Mode (Priority 2)
+
+- Galaxy map grid rendering (10x10 sectors)
+- Sector navigation and selection
+- Federation, Neutral, and Hostile zone visualization
+- Sector information display (name, control, threat level)
+- Travel time and random encounter system
+- Transition from Galaxy to Sector map states
+
+#### Implement Sector Map Enhancements (Priority 3)
 
 - Energy allocation system
   - Power distribution sliders for shields, weapons, engines, sensors
-  - Energy consumption per action
+  - Energy consumption per action (configurable in game_settings.toml)
   - Energy regeneration from impulse/warp engines
 - Supplies tracking (fuel, medical supplies, spare parts)
   - Consumption rates based on activity
@@ -155,10 +182,39 @@ Currently none - ready to start next milestone!
   - Temporary crew morale boost after visits to starbases
 - Ship system condition and maintenance
   - Damage accumulation and repair mechanics
-  - System efficiency degradation
+  - System efficiency degradation (integrated with existing damage system)
   - Repair costs and time requirements affected by supplies and crew efficiency
 
-#### Implement Sector Map Enhancements
+#### Implement Dialog and Menu Systems (Priority 2)
+
+- Mission briefing dialogs
+  - Display mission objectives and parameters
+  - Accept/decline mission options
+  - Mission reward information (reputation)
+- Ship status reporting
+  - Detailed system status reports in log panel. Random events may trigger a dialog window depending on severity.
+  - Crew roster and assignment
+    - Very basic at first (Chief Engineer, First Officer, Science Officer, Security Chief, Helm Officer)
+  - Damage reports and repair priorities
+- Settings dialog tab or menu
+  - Display configuration options from TOML files
+  - Apply and save settings changes
+  - Key binding customization
+- Save/load game functionality through File menu
+  - Game state serialization to TOML
+  - Load saved games with state restoration
+  - Multiple save slot management
+
+#### Implement Galaxy Map Mode (Priority 3)
+
+- Galaxy map grid rendering (10x10 sectors)
+- Sector navigation and selection
+- Federation, Neutral, and Hostile zone visualization
+- Sector information display (name, control, threat level)
+- Travel time and random encounter system
+- Transition from Galaxy to Sector map states
+
+#### Implement Sector Map Enhancements (Priority 4)
 
 - Add space stations (starbases) to sector maps
   - Docking and undocking mechanics (a simple request to dock action that uses one turn)
@@ -174,36 +230,69 @@ Currently none - ready to start next milestone!
   - Detection of ships and objects
   - Sensor interference from environment
 
-#### Implement Dialog and Menu Systems
-
-- Mission briefing dialogs
-  - Display mission objectives and parameters
-  - Accept/decline mission options
-  - Mission reward information (reputation)
-- Ship status reporting
-  - Detailed system status reports in log panel. Random events may trigger a dialog window depending on severity.
-  - Crew roster and assignment
-    - Very basic at first (Chief Engineer, First Officer, Science Officer, Security Chief, Helm Officer)
-  - Damage reports and repair priorities
-- Settings dialog tab or menu
-  - Display configuration options
-  - Apply and save settings changes
-  - Key binding customization
-- Save/load game functionality through File menu
-  - Game state serialization to TOML
-  - Load saved games with state restoration
-  - Multiple save slot management
-
-#### Implement Galaxy Map Mode
-
-- Galaxy map grid rendering (10x10 sectors)
-- Sector navigation and selection
-- Federation, Neutral, and Hostile zone visualization
-- Sector information display (name, control, threat level)
-- Travel time and random encounter system
-- Transition from Galaxy to Sector map states
-
 ### Completed Milestones
+
+#### Implement Resource Management System (v0.0.22)
+
+- ✅ Energy allocation system
+  - Power distribution sliders for shields, weapons, engines, sensors, life support
+  - Configurable energy consumption per action (move: 10, fire phaser: 15, fire torpedo: 25, scan: 5, shield regen: 20)
+  - Energy regeneration from engines (10/sec base, affected by engine power allocation)
+  - Energy capacity (1000) with regeneration affected by system efficiency
+- ✅ Supplies tracking
+  - Medical supplies (100 starting) for crew health
+  - Spare parts (50 starting) for repairs
+  - Consumption tracking for maintenance and repairs
+  - Resupply at starbases restores to full capacity
+- ✅ Crew morale and efficiency systems
+  - Morale (0-100) affected by combat outcomes, casualties, time since starbase
+  - Efficiency bonuses: high morale (>80) = 1.2x, normal (60-80) = 1.0x, low (<40) = 0.8x
+  - Victory bonus (+5), defeat penalty (-10), casualty penalty (-5)
+  - Morale degradation over time away from starbase (-0.5 per turn after 10 turns)
+  - Starbase visit bonus (+20 morale) with counter resets
+- ✅ Ship system condition and maintenance
+  - Repair costs based on damage amount (10 spare parts per 0.1 efficiency)
+  - Repair effectiveness multiplied by crew efficiency
+  - System efficiency tracking with damage accumulation
+  - Starbase repairs restore all systems and hull to 100%
+- ✅ Space station services
+  - Docking mechanics for starbase access
+  - Free repairs to full capacity at friendly starbases
+  - Refuel and resupply services
+  - Crew morale boost on starbase visits
+
+Features implemented:
+
+- ResourceManager component with energy, fuel, and supplies tracking
+- CrewManager component with morale and efficiency system
+- Power distribution between ship systems
+- Configurable resource parameters in game_settings.toml
+- Integration with Starship entity for resource-aware operations
+- Space station service mechanics for repairs, refuel, and resupply
+- 35 comprehensive unit tests with 100% pass rate
+- Crew roster with key positions (Captain, First Officer, Chief Engineer, Science Officer, Security Chief, Helm Officer)
+
+#### Performance and Configuration System Optimization (v0.0.21)
+
+- ✅ Configuration System Improvements
+  - Moved all combat-related magic numbers to `game_settings.toml`
+  - Implemented class-level configuration caching for performance
+  - Added configurable combat parameters (firing arc, accuracy, range penalties, critical hits)
+  - Added AI behavior configuration (patrol radius, flee threshold, enemy cache duration)
+- ✅ Combat System Optimization
+  - Added enemy list caching in `ShipAI` to reduce scanning overhead
+  - Fixed division by zero guards in weapon calculations
+  - Improved AI turn loop scaling based on entity count
+  - Enhanced shield effectiveness calculations with minimum absorption
+- ✅ Test Suite Maintenance
+  - Updated all 292 unit tests to match new systems
+  - Maintained 80%+ coverage for critical paths
+  - Fixed mock fixtures and test expectations
+  - Ensured type consistency across damage calculations
+- ✅ Safety and Debugging Improvements
+  - Added warning logging for AI turn safety limits
+  - Implemented dynamic safety scaling for large battle scenarios
+  - Enhanced error handling for edge cases in combat
 
 #### Implement Basic Combat System (v0.0.20)
 

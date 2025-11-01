@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Controller Tests
 
@@ -28,14 +27,14 @@ Requirements:
 """
 
 from typing import Final
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
-import pytest
 import pygame
+import pytest
 
 from STRR.src.game.controller import GameController
-from STRR.src.game.model import GameModel
 from STRR.src.game.entities.base import GridPosition
+from STRR.src.game.model import GameModel
 from STRR.src.game.states.state_machine import GameMode
 
 __version__: Final[str] = "0.0.18"

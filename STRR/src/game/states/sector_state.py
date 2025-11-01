@@ -9,7 +9,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-30-2025
-Date Changed: 10-30-2025
+Date Changed: 10-31-2025
 License: MIT
 
 Features:
@@ -37,7 +37,7 @@ from .state_machine import GameMode, GameState
 if TYPE_CHECKING:
     from .state_machine import GameStateManager
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.23"
 
 
 class SectorState(GameState):
@@ -55,7 +55,7 @@ class SectorState(GameState):
         render: Render sector view
     """
 
-    def __init__(self, state_manager: "GameStateManager"):
+    def __init__(self, state_manager: GameStateManager):
         """
         Initialize the sector state.
 

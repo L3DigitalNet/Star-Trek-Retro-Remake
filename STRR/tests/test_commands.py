@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Command Pattern Tests
 
@@ -16,10 +15,9 @@ License: MIT
 from typing import Final
 
 from src.game.commands import (
-    Command,
-    MoveShipCommand,
-    FireWeaponCommand,
     CommandHistory,
+    FireWeaponCommand,
+    MoveShipCommand,
 )
 from src.game.entities.base import GridPosition
 from src.game.entities.starship import Starship

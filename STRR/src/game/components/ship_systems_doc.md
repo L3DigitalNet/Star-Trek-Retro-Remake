@@ -1,8 +1,8 @@
 # Ship Systems Documentation
 
 **File:** `STRR/src/game/components/ship_systems.py`
-**Version:** 0.0.1
-**Last Updated:** 10-30-2025
+**Version:** 0.0.22
+**Last Updated:** 10-31-2025
 
 ---
 
@@ -123,36 +123,121 @@ Implements ship subsystems using the **Component Pattern**. Each system is a sel
 
 ---
 
+### ResourceManager
+
+**Purpose:** Energy, fuel, and supplies management
+
+**Attributes:**
+
+- `energy_capacity` / `energy_current` (float): Energy reserves
+- `energy_regen_rate` (float): Regeneration per second
+- `fuel_capacity` / `fuel_current` (float): Fuel reserves
+- `fuel_consumption` (float): Fuel consumption rate
+- `supplies` (dict[str, int]): Medical supplies and spare parts
+- `power_distribution` (dict[str, float]): Power allocation percentages
+- `energy_costs` (dict[str, float]): Energy cost per action
+
+**Methods:**
+
+- `allocate_power(system, percentage)`: Set power distribution
+- `consume_energy(action)`: Use energy for action
+- `regenerate_energy(dt)`: Add energy from engines
+- `consume_fuel(amount)`: Use fuel
+- `refuel(amount)`: Add fuel to reserves
+- `resupply(supply_type, amount)`: Restock supplies
+- `use_supplies(supply_type, amount)`: Consume supplies
+- `has_energy(amount)`: Check available energy
+- `get_system_power(system)`: Get power allocation
+
+**Configuration:** Loads from `game_settings.toml` [game.resources] section
+
+---
+
+### CrewManager
+
+**Purpose:** Crew roster, morale, and efficiency
+
+**Attributes:**
+
+- `crew_roster` (dict[str, str]): Crew positions and names
+- `morale` (float): Current morale (0-100)
+- `base_efficiency` (float): Base efficiency multiplier
+- `turns_since_starbase` (int): Turns since last starbase visit
+- `casualties` (int): Casualties since starbase
+- `combat_victories` / `combat_defeats` (int): Combat record
+- `morale_modifiers` (dict[str, float]): Configurable morale changes
+
+**Methods:**
+
+- `get_efficiency_multiplier()`: Calculate efficiency from morale (0.8 - 1.2)
+- `update_morale(change)`: Directly modify morale
+- `record_combat_outcome(victory)`: Update morale from combat result
+- `record_casualty()`: Decrease morale for crew loss
+- `visit_starbase()`: Reset counters and boost morale
+- `assign_crew(position, name)`: Change crew assignment
+
+**Configuration:** Loads from `game_settings.toml` [game.crew] section
+
+**Efficiency Tiers:**
+
+- High morale (>80): 1.2x efficiency bonus
+- Normal morale (60-80): 1.0x efficiency
+- Low morale (40-60): 0.9x efficiency
+- Very low morale (<40): 0.8x efficiency penalty
+
+---
+
 ## Usage Example
 
 ```python
-from game.components.ship_systems import WeaponSystems, ShieldSystems
+from game.components.ship_systems import WeaponSystems, ShieldSystems, ResourceManager, CrewManager
 
 # Weapons
 weapons = WeaponSystems()
 if weapons.can_target(target_pos, ship_pos, orientation):
-    damage = weapons.calculate_damage("phaser", target)
+    damage = weapons.calculate_damage("phaser", distance, target)
     weapons.fire_weapon("phaser")
 
 # Shields
 shields = ShieldSystems()
-remaining_damage = shields.absorb_damage(50, "energy")
-print(f"Shield strength: {shields.shield_strength}")
+remaining_damage = shields.absorb_damage(50, "energy", ship_orientation, attacker_pos, ship_pos)
+print(f"Shield strength: {shields.total_shield_strength}")
+
+# Resources
+resources = ResourceManager()
+if resources.has_energy(15.0):
+    resources.consume_energy("fire_phaser")
+resources.allocate_power("shields", 40.0)
+resources.regenerate_energy(1.0)
+
+# Crew
+crew = CrewManager()
+crew.record_combat_outcome(victory=True)  # +5 morale
+efficiency = crew.get_efficiency_multiplier()  # 0.8 - 1.2
+crew.visit_starbase()  # +20 morale, reset counters
 ```
 
 ---
 
 ## Integration Points
 
-**Dependencies:** None (self-contained components)
+**Dependencies:**
+
+- `pathlib.Path` - For config file location
+- `tomllib` - For loading TOML configuration
+
+**Configuration Files:**
+
+- `STRR/config/game_settings.toml` - [game.resources] and [game.crew] sections
 
 **Used by:**
 
-- `game.entities.starship.Starship` - Composition pattern
+- `game.entities.starship.Starship` - Composition pattern for all ship systems
 
 ---
 
 ## Change History
 
+- **10-31-2025** - Added ResourceManager and CrewManager components (v0.0.22)
 - **10-30-2025** - Documentation created
 - **10-29-2025** - Ship system components implemented

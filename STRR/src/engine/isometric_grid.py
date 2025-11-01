@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-30-2025
-Date Changed: 10-30-2025 (v0.0.15 - Added z-level distance indicators)
+Date Changed: 10-31-2025
 License: MIT
 
 Features:
@@ -54,7 +54,7 @@ import pygame
 # Import GridPosition from the game entities module
 from src.game.entities.base import GridPosition
 
-__version__: Final[str] = "0.0.15"
+__version__: Final[str] = "0.0.23"
 
 logger = logging.getLogger(__name__)
 

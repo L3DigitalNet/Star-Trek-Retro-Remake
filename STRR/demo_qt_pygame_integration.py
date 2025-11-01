@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - PySide6 + pygame-ce Integration Demo
 
@@ -39,18 +38,18 @@ import sys
 from typing import Final
 
 import pygame
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
+    QMainWindow,
     QPushButton,
-    QGroupBox,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QImage, QPixmap
 
 __version__: Final[str] = "0.0.1"
 

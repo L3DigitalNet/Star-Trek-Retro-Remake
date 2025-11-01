@@ -20,6 +20,9 @@ Features:
     - Damage and repair mechanics with critical hits
     - Power usage and efficiency tracking
     - Range-based damage and hit calculations
+    - Resource management (energy, fuel, supplies)
+    - Crew morale and efficiency system
+    - Power distribution between ship systems
 
 Requirements:
     - Linux environment
@@ -32,19 +35,23 @@ Classes:
     - EngineSystems: Propulsion and movement
     - SensorSystems: Detection and scanning
     - LifeSupportSystems: Crew life support
+    - ResourceManager: Energy, fuel, and supplies management
+    - CrewManager: Crew roster, morale, and efficiency
 
 Functions:
     - None
 """
 
+import tomllib
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..entities.base import GameObject, GridPosition
     from ..entities.starship import Starship
 
-__version__ = "0.0.21"
+__version__ = "0.0.23"
 
 
 class ShipSystem(ABC):
@@ -181,8 +188,8 @@ class WeaponSystems(ShipSystem):
         """
         if cls._combat_config is None:
             try:
-                from pathlib import Path
                 import tomllib
+                from pathlib import Path
 
                 # Find config file relative to this module
                 config_path = (
@@ -207,12 +214,14 @@ class WeaponSystems(ShipSystem):
                     "shield_min_absorption": 0.1,
                 }
 
+        # Combat config is guaranteed to be set by this point
+        assert cls._combat_config is not None
         return cls._combat_config
 
     def can_target(
         self,
-        target_pos: "GridPosition",
-        ship_pos: "GridPosition",
+        target_pos: GridPosition,
+        ship_pos: GridPosition,
         ship_orientation: int,
         weapon_type: str = "phaser",
     ) -> bool:
@@ -246,8 +255,8 @@ class WeaponSystems(ShipSystem):
 
     def _calculate_firing_angle(
         self,
-        ship_pos: "GridPosition",
-        target_pos: "GridPosition",
+        ship_pos: GridPosition,
+        target_pos: GridPosition,
         ship_orientation: int,
     ) -> float:
         """
@@ -297,9 +306,9 @@ class WeaponSystems(ShipSystem):
 
     def check_line_of_sight(
         self,
-        ship_pos: "GridPosition",
-        target_pos: "GridPosition",
-        obstacles: list["GameObject"],
+        ship_pos: GridPosition,
+        target_pos: GridPosition,
+        obstacles: list[GameObject],
     ) -> bool:
         """
         Check if there's a clear line of sight to target.
@@ -322,7 +331,7 @@ class WeaponSystems(ShipSystem):
         return True
 
     def _is_between(
-        self, pos1: "GridPosition", pos2: "GridPosition", test_pos: "GridPosition"
+        self, pos1: GridPosition, pos2: GridPosition, test_pos: GridPosition
     ) -> bool:
         """
         Check if test position is between two positions.
@@ -376,7 +385,7 @@ class WeaponSystems(ShipSystem):
         return max(0.1, min(1.0, final_accuracy))  # Clamp between 10% and 100%
 
     def calculate_damage(
-        self, weapon_type: str, distance: float, target: "Starship" | None = None
+        self, weapon_type: str, distance: float, target: Starship | None = None
     ) -> int:
         """
         Calculate weapon damage against target.
@@ -493,8 +502,8 @@ class ShieldSystems(ShipSystem):
         damage: int,
         damage_type: str,
         ship_orientation: int = 0,
-        attacker_pos: "GridPosition | None" = None,
-        ship_pos: "GridPosition | None" = None,
+        attacker_pos: GridPosition | None = None,
+        ship_pos: GridPosition | None = None,
     ) -> int:
         """
         Absorb damage and return remaining damage.
@@ -549,8 +558,8 @@ class ShieldSystems(ShipSystem):
 
     def _determine_hit_facing(
         self,
-        ship_pos: "GridPosition",
-        attacker_pos: "GridPosition",
+        ship_pos: GridPosition,
+        attacker_pos: GridPosition,
         ship_orientation: int,
     ) -> str:
         """
@@ -616,7 +625,7 @@ class ShieldSystems(ShipSystem):
             return False
 
         # Validate each facing doesn't exceed per-facing maximum
-        for facing, strength in distribution.items():
+        for _facing, strength in distribution.items():
             if strength > self.max_shield_per_facing:
                 return False
 
@@ -768,7 +777,7 @@ class SensorSystems(ShipSystem):
         """
         self.passive_mode = passive
 
-    def detect_targets(self, ship_position: "GridPosition", targets: list) -> list:
+    def detect_targets(self, ship_position: GridPosition, targets: list) -> list:
         """
         Scan for targets in range.
 
@@ -843,3 +852,472 @@ class LifeSupportSystems(ShipSystem):
         if not self.active:
             return
         self.maintain_environment()
+
+
+class ResourceManager(ShipSystem):
+    """
+    Manages ship energy, fuel, and supplies.
+
+    Handles power distribution between systems, energy consumption/regeneration,
+    fuel tracking, and supply management for starship operations.
+
+    Attributes:
+        energy_current: Current energy reserves (0-energy_capacity)
+        energy_capacity: Maximum energy capacity
+        energy_regen_rate: Energy regeneration per second from engines
+        fuel_current: Current fuel reserves (0-fuel_capacity)
+        fuel_capacity: Maximum fuel capacity
+        fuel_consumption: Fuel consumption rate per turn
+        supplies: Dictionary of supply types and quantities
+        power_distribution: Power allocation percentages by system
+
+    Public methods:
+        allocate_power: Set power distribution percentages
+        consume_energy: Use energy for actions
+        regenerate_energy: Add energy from engines
+        consume_fuel: Use fuel for movement/operations
+        refuel: Add fuel to reserves
+        resupply: Restock supplies at starbase
+        get_system_power: Get power allocation for a system
+        has_energy: Check if enough energy available
+
+    Private methods:
+        _load_config: Load resource settings from TOML
+        _validate_power_distribution: Ensure power allocations sum to 100%
+    """
+
+    # Class-level configuration cache
+    _resource_config: dict[str, float | int] | None = None
+
+    def __init__(self):
+        """Initialize resource manager with default configuration."""
+        super().__init__("Resources", 1.0)
+
+        # Load configuration
+        config = self._load_config()
+
+        # Energy system
+        self.energy_capacity: float = config.get("energy_capacity", 1000.0)
+        self.energy_current: float = self.energy_capacity
+        self.energy_regen_rate: float = config.get("energy_regen_rate", 10.0)
+
+        # Fuel system
+        self.fuel_capacity: float = config.get("fuel_capacity", 500.0)
+        self.fuel_current: float = self.fuel_capacity
+        self.fuel_consumption: float = config.get("fuel_consumption", 5.0)
+
+        # Supplies tracking
+        self.supplies: dict[str, int] = {
+            "medical": int(config.get("medical_supplies", 100)),
+            "spare_parts": int(config.get("spare_parts", 50)),
+        }
+
+        # Power distribution (percentages for each system)
+        self.power_distribution: dict[str, float] = {
+            "shields": 25.0,
+            "weapons": 25.0,
+            "engines": 30.0,
+            "sensors": 10.0,
+            "life_support": 10.0,
+        }
+
+        # Energy consumption rates per action (from config)
+        self.energy_costs: dict[str, float] = {
+            "move": config.get("energy_cost_move", 10.0),
+            "fire_phaser": config.get("energy_cost_fire_phaser", 15.0),
+            "fire_torpedo": config.get("energy_cost_fire_torpedo", 25.0),
+            "scan": config.get("energy_cost_scan", 5.0),
+            "shield_regen": config.get("energy_cost_shield_regen", 20.0),
+        }
+
+    @classmethod
+    def _load_config(cls) -> dict[str, float | int]:
+        """
+        Load resource configuration from TOML file.
+
+        Returns:
+            Dictionary of resource configuration values
+        """
+        # Return cached config if available
+        if cls._resource_config is not None:
+            return cls._resource_config
+
+        # Default configuration
+        defaults: dict[str, float | int] = {
+            "energy_capacity": 1000.0,
+            "energy_regen_rate": 10.0,
+            "fuel_capacity": 500.0,
+            "fuel_consumption": 5.0,
+            "medical_supplies": 100,
+            "spare_parts": 50,
+            "energy_cost_move": 10.0,
+            "energy_cost_fire_phaser": 15.0,
+            "energy_cost_fire_torpedo": 25.0,
+            "energy_cost_scan": 5.0,
+            "energy_cost_shield_regen": 20.0,
+        }
+
+        # Try to load from TOML configuration
+        try:
+            config_path = Path(__file__).parents[2] / "config" / "game_settings.toml"
+            if config_path.exists():
+                with open(config_path, "rb") as f:
+                    config_data = tomllib.load(f)
+                    resources = config_data.get("game", {}).get("resources", {})
+                    defaults.update(resources)
+        except Exception:
+            pass  # Use defaults if config loading fails
+
+        cls._resource_config = defaults
+        return defaults
+
+    def allocate_power(self, system: str, percentage: float) -> bool:
+        """
+        Set power distribution percentage for a system.
+
+        Args:
+            system: System name (shields, weapons, engines, sensors, life_support)
+            percentage: Power allocation percentage (0-100)
+
+        Returns:
+            True if allocation successful, False if invalid
+        """
+        if system not in self.power_distribution:
+            return False
+
+        if percentage < 0 or percentage > 100:
+            return False
+
+        self.power_distribution[system] = percentage
+        return True
+
+    def _validate_power_distribution(self) -> bool:
+        """
+        Validate power distribution sums to ~100%.
+
+        Returns:
+            True if distribution is valid
+        """
+        total = sum(self.power_distribution.values())
+        return 95.0 <= total <= 105.0  # Allow small tolerance
+
+    def get_system_power(self, system: str) -> float:
+        """
+        Get power allocation for a system.
+
+        Args:
+            system: System name
+
+        Returns:
+            Power allocation percentage (0-100)
+        """
+        return self.power_distribution.get(system, 0.0)
+
+    def has_energy(self, amount: float) -> bool:
+        """
+        Check if enough energy is available.
+
+        Args:
+            amount: Energy amount to check
+
+        Returns:
+            True if energy is available
+        """
+        return self.energy_current >= amount
+
+    def consume_energy(self, action: str) -> bool:
+        """
+        Consume energy for an action.
+
+        Args:
+            action: Action name (move, fire_phaser, fire_torpedo, scan, shield_regen)
+
+        Returns:
+            True if energy was consumed, False if insufficient
+        """
+        cost = self.energy_costs.get(action, 0.0)
+        if self.energy_current >= cost:
+            self.energy_current = max(0.0, self.energy_current - cost)
+            return True
+        return False
+
+    def regenerate_energy(self, dt: float) -> None:
+        """
+        Regenerate energy based on engine power allocation.
+
+        Args:
+            dt: Time delta in seconds
+        """
+        if not self.active:
+            return
+
+        # Regeneration affected by engine power allocation and efficiency
+        engine_power_factor = self.power_distribution.get("engines", 30.0) / 100.0
+        regen = self.energy_regen_rate * engine_power_factor * self.efficiency * dt
+        self.energy_current = min(self.energy_capacity, self.energy_current + regen)
+
+    def consume_fuel(self, amount: float | None = None) -> bool:
+        """
+        Consume fuel for operations.
+
+        Args:
+            amount: Fuel amount to consume (uses default if None)
+
+        Returns:
+            True if fuel was consumed, False if insufficient
+        """
+        consumption = amount if amount is not None else self.fuel_consumption
+        if self.fuel_current >= consumption:
+            self.fuel_current = max(0.0, self.fuel_current - consumption)
+            return True
+        return False
+
+    def refuel(self, amount: float) -> None:
+        """
+        Add fuel to reserves.
+
+        Args:
+            amount: Fuel amount to add
+        """
+        self.fuel_current = min(self.fuel_capacity, self.fuel_current + amount)
+
+    def resupply(self, supply_type: str, amount: int) -> None:
+        """
+        Restock supplies.
+
+        Args:
+            supply_type: Type of supply (medical, spare_parts)
+            amount: Amount to add
+        """
+        if supply_type in self.supplies:
+            self.supplies[supply_type] = self.supplies[supply_type] + amount
+
+    def use_supplies(self, supply_type: str, amount: int) -> bool:
+        """
+        Use supplies for operations.
+
+        Args:
+            supply_type: Type of supply (medical, spare_parts)
+            amount: Amount to use
+
+        Returns:
+            True if supplies were used, False if insufficient
+        """
+        if supply_type in self.supplies and self.supplies[supply_type] >= amount:
+            self.supplies[supply_type] -= amount
+            return True
+        return False
+
+    def update(self, dt: float) -> None:
+        """
+        Update resource systems state.
+
+        Args:
+            dt: Time delta in seconds
+        """
+        if not self.active:
+            return
+
+        # Regenerate energy from engines
+        self.regenerate_energy(dt)
+
+
+class CrewManager(ShipSystem):
+    """
+    Manages crew roster, morale, and efficiency.
+
+    Handles crew assignments, morale tracking based on mission outcomes,
+    and efficiency bonuses/penalties affecting ship system performance.
+
+    Attributes:
+        crew_roster: Dictionary of crew positions and names
+        morale: Current crew morale (0-100)
+        base_efficiency: Base efficiency multiplier (0-2.0)
+        turns_since_starbase: Turns since last starbase visit
+        casualties: Number of casualties since last starbase
+        combat_victories: Recent combat victories
+        combat_defeats: Recent combat defeats
+
+    Public methods:
+        get_efficiency_multiplier: Calculate efficiency based on morale
+        update_morale: Update morale based on events
+        record_combat_outcome: Record combat victory/defeat
+        record_casualty: Record crew casualty
+        visit_starbase: Reset morale and casualty counters
+        assign_crew: Assign crew member to position
+
+    Private methods:
+        _load_config: Load crew settings from TOML
+        _calculate_morale_modifiers: Calculate morale from various factors
+    """
+
+    # Class-level configuration cache
+    _crew_config: dict[str, float | int] | None = None
+
+    def __init__(self):
+        """Initialize crew manager with default configuration."""
+        super().__init__("Crew", 1.0)
+
+        # Load configuration
+        config = self._load_config()
+
+        # Crew roster (simplified for initial implementation)
+        self.crew_roster: dict[str, str] = {
+            "captain": "James T. Kirk",
+            "first_officer": "Spock",
+            "chief_engineer": "Montgomery Scott",
+            "science_officer": "Spock",
+            "security_chief": "Pavel Chekov",
+            "helm_officer": "Hikaru Sulu",
+        }
+
+        # Morale and efficiency tracking
+        self.morale: float = config.get("base_morale", 75.0)
+        self.base_efficiency: float = 1.0
+
+        # Mission tracking
+        self.turns_since_starbase: int = 0
+        self.casualties: int = 0
+        self.combat_victories: int = 0
+        self.combat_defeats: int = 0
+
+        # Morale modifiers from config
+        self.morale_modifiers: dict[str, float] = {
+            "victory_bonus": config.get("morale_victory_bonus", 5.0),
+            "defeat_penalty": config.get("morale_defeat_penalty", -10.0),
+            "casualty_penalty": config.get("morale_casualty_penalty", -5.0),
+            "turns_penalty": config.get("morale_turns_penalty", -0.5),
+            "starbase_bonus": config.get("morale_starbase_bonus", 20.0),
+        }
+
+    @classmethod
+    def _load_config(cls) -> dict[str, float | int]:
+        """
+        Load crew configuration from TOML file.
+
+        Returns:
+            Dictionary of crew configuration values
+        """
+        # Return cached config if available
+        if cls._crew_config is not None:
+            return cls._crew_config
+
+        # Default configuration
+        defaults: dict[str, float | int] = {
+            "base_morale": 75.0,
+            "morale_victory_bonus": 5.0,
+            "morale_defeat_penalty": -10.0,
+            "morale_casualty_penalty": -5.0,
+            "morale_turns_penalty": -0.5,
+            "morale_starbase_bonus": 20.0,
+            "efficiency_high_morale": 1.2,
+            "efficiency_low_morale": 0.8,
+        }
+
+        # Try to load from TOML configuration
+        try:
+            config_path = Path(__file__).parents[2] / "config" / "game_settings.toml"
+            if config_path.exists():
+                with open(config_path, "rb") as f:
+                    config_data = tomllib.load(f)
+                    crew = config_data.get("game", {}).get("crew", {})
+                    defaults.update(crew)
+        except Exception:
+            pass  # Use defaults if config loading fails
+
+        cls._crew_config = defaults
+        return defaults
+
+    def get_efficiency_multiplier(self) -> float:
+        """
+        Calculate efficiency multiplier based on morale.
+
+        Returns:
+            Efficiency multiplier (0.5 - 1.5)
+        """
+        # High morale (>80) provides bonus, low morale (<50) provides penalty
+        if self.morale >= 80:
+            return 1.2  # 20% efficiency bonus
+        elif self.morale >= 60:
+            return 1.0  # Normal efficiency
+        elif self.morale >= 40:
+            return 0.9  # 10% efficiency penalty
+        else:
+            return 0.8  # 20% efficiency penalty
+
+    def update_morale(self, change: float) -> None:
+        """
+        Update crew morale directly.
+
+        Args:
+            change: Morale change amount (positive or negative)
+        """
+        self.morale = max(0.0, min(100.0, self.morale + change))
+
+    def record_combat_outcome(self, victory: bool) -> None:
+        """
+        Record combat victory or defeat and update morale.
+
+        Args:
+            victory: True if combat won, False if lost
+        """
+        if victory:
+            self.combat_victories += 1
+            self.update_morale(self.morale_modifiers["victory_bonus"])
+        else:
+            self.combat_defeats += 1
+            self.update_morale(self.morale_modifiers["defeat_penalty"])
+
+    def record_casualty(self) -> None:
+        """Record crew casualty and update morale."""
+        self.casualties += 1
+        self.update_morale(self.morale_modifiers["casualty_penalty"])
+
+    def visit_starbase(self) -> None:
+        """Reset morale and counters after starbase visit."""
+        self.update_morale(self.morale_modifiers["starbase_bonus"])
+        self.turns_since_starbase = 0
+        self.casualties = 0
+        self.combat_victories = 0
+        self.combat_defeats = 0
+
+    def assign_crew(self, position: str, name: str) -> bool:
+        """
+        Assign crew member to position.
+
+        Args:
+            position: Crew position
+            name: Crew member name
+
+        Returns:
+            True if assignment successful
+        """
+        if position in self.crew_roster:
+            self.crew_roster[position] = name
+            return True
+        return False
+
+    def _calculate_morale_modifiers(self) -> None:
+        """Calculate and apply morale modifiers from various factors."""
+        # Morale slowly decreases based on turns since starbase visit
+        if self.turns_since_starbase > 10:
+            turns_penalty = (self.turns_since_starbase - 10) * self.morale_modifiers[
+                "turns_penalty"
+            ]
+            self.update_morale(turns_penalty)
+
+    def update(self, dt: float) -> None:
+        """
+        Update crew systems state.
+
+        Args:
+            dt: Time delta in seconds
+        """
+        if not self.active:
+            return
+
+        # Increment turn counter
+        self.turns_since_starbase += 1
+
+        # Calculate and apply morale modifiers
+        self._calculate_morale_modifiers()

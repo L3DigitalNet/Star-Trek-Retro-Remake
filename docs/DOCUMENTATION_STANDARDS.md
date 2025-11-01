@@ -26,7 +26,7 @@ This document defines the documentation standards for the Star Trek Retro Remake
 **All Python files must have proper headers following repository standards:**
 
 - Include shebang: `#!/usr/bin/env python3`
-- Include encoding: `# -*- coding: utf-8 -*-`
+- No encoding declaration needed (Python 3 default is UTF-8)
 - Complete docstring format with:
   - Description (what the module does and why)
   - Author (full name or team name)

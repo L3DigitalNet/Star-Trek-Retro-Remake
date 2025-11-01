@@ -47,6 +47,37 @@ ai_patrol_radius = 5           # Patrol radius in grid cells
 ai_flee_threshold = 30.0       # Hull integrity % to trigger flee behavior
 ai_enemy_cache_turns = 3       # Turns to cache enemy list before refresh
 
+[game.resources]
+# Energy system
+energy_capacity = 1000.0       # Maximum energy capacity
+energy_regen_rate = 10.0       # Energy regeneration per second from engines
+energy_cost_move = 10.0        # Energy cost for movement action
+energy_cost_fire_phaser = 15.0 # Energy cost for firing phasers
+energy_cost_fire_torpedo = 25.0 # Energy cost for firing torpedoes
+energy_cost_scan = 5.0         # Energy cost for sensor scan
+energy_cost_shield_regen = 20.0 # Energy cost for shield regeneration
+
+# Fuel system
+fuel_capacity = 500.0          # Maximum fuel capacity
+fuel_consumption = 5.0         # Fuel consumption per turn
+
+# Supply system
+medical_supplies = 100         # Starting medical supplies
+spare_parts = 50               # Starting spare parts inventory
+
+[game.crew]
+# Crew morale settings
+base_morale = 75.0             # Starting crew morale (0-100)
+morale_victory_bonus = 5.0     # Morale increase per combat victory
+morale_defeat_penalty = -10.0  # Morale decrease per combat defeat
+morale_casualty_penalty = -5.0 # Morale decrease per casualty
+morale_turns_penalty = -0.5    # Morale decrease per turn away from starbase (after 10 turns)
+morale_starbase_bonus = 20.0   # Morale increase on starbase visit
+
+# Crew efficiency settings
+efficiency_high_morale = 1.2   # Efficiency multiplier at high morale (>80)
+efficiency_low_morale = 0.8    # Efficiency multiplier at low morale (<40)
+
 [audio]
 master_volume = 0.8            # Master audio volume (0.0 - 1.0)
 music_volume = 0.6             # Background music volume

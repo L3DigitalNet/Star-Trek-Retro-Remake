@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Application Tests
 
@@ -26,9 +25,7 @@ Requirements:
 """
 
 from typing import Final
-from unittest.mock import Mock, patch, MagicMock
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 from STRR.src.game.application import StarTrekRetroRemake
 

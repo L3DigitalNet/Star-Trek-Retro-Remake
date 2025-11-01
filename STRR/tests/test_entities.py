@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Entity Tests
 
@@ -14,8 +13,8 @@ License: MIT
 
 from typing import Final
 
-from src.game.entities.base import GridPosition, GameObject
-from src.game.entities.starship import Starship, SpaceStation
+from src.game.entities.base import GameObject, GridPosition
+from src.game.entities.starship import SpaceStation, Starship
 
 __version__: Final[str] = "0.0.1"
 
@@ -121,7 +120,9 @@ class TestStarship:
         assert ship.faction == "Federation"
         assert ship.hull_integrity == 100.0
         assert ship.orientation == 0
-        assert len(ship.systems) == 5  # All ship systems
+        assert (
+            len(ship.systems) == 7
+        )  # All ship systems (weapons, shields, engines, sensors, life_support, resources, crew)
         assert ship.color == (60, 120, 200)  # Federation blue
         assert ship.size == 16
 
