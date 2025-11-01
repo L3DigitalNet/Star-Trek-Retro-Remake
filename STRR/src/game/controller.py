@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-31-2025 (v0.0.23 - Confident design patterns, removed defensive checks)
+Date Changed: 10-31-2025 (v0.0.26 - Added mission system coordination methods)
 License: MIT
 
 Features:
@@ -20,6 +20,7 @@ Features:
     - Command processing and validation
     - Combat action coordination with targeting
     - Target selection and weapon firing
+    - Mission system coordination and dialog management
 
 Requirements:
     - Linux environment
@@ -43,11 +44,12 @@ from .states.sector_state import SectorState
 from .states.state_machine import GameMode, GameStateManager
 
 if TYPE_CHECKING:
+    from .components.mission_manager import Mission
     from .entities.starship import Starship
     from .model import GameModel
     from .view import GameView
 
-__version__: Final[str] = "0.0.23"
+__version__: Final[str] = "0.0.26"
 
 logger = logging.getLogger(__name__)
 
@@ -389,8 +391,13 @@ class GameController:
 
         logger.debug(f"Processing key press: {key}")
 
+        # Settings dialog
+        if key == pygame.K_ESCAPE:
+            logger.debug("Opening settings dialog")
+            self.view.show_settings_dialog()
+
         # Z-level controls (validation is centralized in set_z_level)
-        if key == pygame.K_PAGEUP:
+        elif key == pygame.K_PAGEUP:
             self.view.set_z_level(self.view.current_z_level + 1)
         elif key == pygame.K_PAGEDOWN:
             self.view.set_z_level(self.view.current_z_level - 1)
@@ -459,3 +466,47 @@ class GameController:
             action_points=turn_info["action_points"],
             phase=turn_info["current_phase"],
         )
+
+    def show_mission_selection(self, sector: str) -> None:
+        """
+        Show mission selection dialog at starbase.
+
+        Args:
+            sector: Sector identifier for mission filtering
+        """
+        if not self.view:
+            return
+
+        self.view.show_mission_selection_dialog(sector)
+
+    def accept_mission(self, mission: Mission) -> None:
+        """
+        Accept a mission and add to active missions.
+
+        Args:
+            mission: Mission to accept
+        """
+        self.model.mission_manager.accept_mission(mission)
+
+        if self.view:
+            self.view.show_message(f"Mission accepted: {mission.name}")
+            self.view.update_mission_tracker()
+
+    def show_mission_briefing(self, mission: Mission) -> None:
+        """
+        Show detailed mission briefing dialog.
+
+        Args:
+            mission: Mission to display
+        """
+        if not self.view:
+            return
+
+        self.view.show_mission_briefing_dialog(mission)
+
+    def update_mission_tracker(self) -> None:
+        """Update the mission tracker widget with current mission status."""
+        if not self.view:
+            return
+
+        self.view.update_mission_tracker()

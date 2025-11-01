@@ -7,6 +7,137 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.26] - 2025-10-31
+
+### Fixed
+
+- **Local Import Anti-Pattern**: Moved `MissionType` import to top-level in mission_dialogs.py (line 73)
+- **Controller Test Failures**: Updated tests to match confident design pattern (no defensive None checks)
+  - test_handle_ship_move_request_without_player_ship: Expects None propagation
+  - test_handle_combat_action_without_player_ship: Expects None propagation
+- **Settings Dialog Test Failures**: Fixed GameplayTab attribute references
+  - Updated tests to use `autosave_check` (checkbox) instead of `autosave_combo`
+  - Corrected nested dict structure for settings validation
+  - Fixed boolean comparison style (PEP 8 compliance)
+
+### Added
+
+- **Controller Integration Methods**: Mission system coordination
+  - `show_mission_briefing(mission)`: Display mission briefing dialog
+  - `accept_mission(mission)`: Add mission to active missions
+  - `show_mission_selection()`: Show available missions dialog
+  - `update_mission_tracker()`: Update mission tracker widget
+- **View Integration Methods**: Dialog display handlers
+  - `_on_settings()`: Show settings dialog
+  - `_show_mission_selection()`: Display mission selection dialog
+  - `_show_mission_briefing(mission)`: Display mission briefing
+  - `_update_mission_tracker()`: Update tracker with active missions
+- **Test Infrastructure**: PySide6 Qt testing support
+  - `qtbot` fixture in conftest.py for widget lifecycle management
+  - `qapp` session fixture for QApplication singleton
+  - `SimpleQtBot` class for widget cleanup
+- **Comprehensive Test Suites**: 34 new tests for dialog systems
+  - test_mission_dialogs.py: 16 tests (mission UI components)
+  - test_settings_dialog.py: 18 tests (settings dialog and tabs)
+
+### Changed
+
+- **Version Consistency**: Updated to 0.0.26
+  - pyproject.toml
+  - All modified component files
+- **Test Coverage**: From 347 → 381 tests (100% pass rate)
+  - Mission dialog components fully tested
+  - Settings dialog components fully tested
+  - Controller integration verified
+
+### Technical
+
+- **Testing Framework**: Enhanced pytest with Qt support
+  - QtBot fixture for widget interaction testing
+  - Mission manager fixture for dialog tests
+  - Temporary config file fixtures for settings tests
+- **Code Quality**: Confident design pattern enforcement
+  - Controller methods rely on valid model state
+  - No defensive None checks in business logic
+  - Type hints maintained throughout
+
+## [0.0.25] - 2025-10-31
+
+### Added
+
+- **Dialog and Menu Systems (Priority 2 Milestone - Partial)**: UI components for mission and settings management
+  - MissionBriefingDialog with detailed mission information display
+  - MissionSelectionDialog for browsing and selecting missions at starbases
+  - MissionTrackerWidget for displaying active missions in main UI
+  - ObjectiveProgressBar for visualizing objective progress
+  - SettingsDialog with tabbed interface (Graphics, Audio, Gameplay, Key Bindings)
+  - TOML integration for loading and saving settings
+  - Difficulty color-coding and visual indicators
+  - Signal-based mission acceptance/decline workflow
+  - Auto-generation of missions if none available in sector
+
+### Features
+
+- **Mission UI Components**:
+  - Mission briefing with objectives, rewards, and difficulty display
+  - Mission preview panel in selection dialog
+  - Active mission tracker with progress bars
+  - Accept/Decline buttons with signal emission
+  - Formatted reward text with HTML styling
+
+- **Settings Management**:
+  - Graphics settings (resolution, fullscreen, V-Sync, FPS limit)
+  - Audio settings (master, music, effects volume sliders)
+  - Gameplay settings (difficulty, auto-save, hints, animations)
+  - Key bindings tab with reset to defaults
+  - Apply/OK/Cancel button workflow
+
+### Technical
+
+- **Version Consistency**: Updated to version 0.0.25
+  - mission_dialogs.py, settings_dialog.py
+  - Updated Date Changed to 10-31-2025 for all modified files
+- **File Structure**: New UI component files
+  - STRR/src/game/ui/mission_dialogs.py (507 lines)
+  - STRR/src/game/ui/mission_dialogs_doc.md (comprehensive documentation)
+  - STRR/src/game/ui/settings_dialog.py (470 lines)
+
+## [0.0.24] - 2025-10-31
+
+### Added
+
+- **Mission System Foundation (Priority 1 Milestone)**: Complete mission management system
+  - Mission data structures with comprehensive type hints (MissionType, MissionStatus, MissionObjective, MissionReward, Mission)
+  - MissionManager component for tracking mission lifecycle
+  - Six mission types: PATROL, COMBAT, ESCORT, RESCUE, DIPLOMATIC, SURVEY
+  - TOML-based mission templates with configurable objectives and rewards
+  - Dynamic mission generation with difficulty scaling
+  - Mission state tracking (available, active, completed, failed)
+  - Mission objective progress tracking and auto-completion
+  - Reward system with reputation, supplies, spare parts, and experience
+  - Sector-based mission filtering
+  - Integration with GameModel for turn-based mission updates
+  - 18 comprehensive unit tests with 100% pass rate
+  - Complete API documentation in mission_manager_doc.md
+
+### Changed
+
+- **GameModel Integration**: Added MissionManager to GameModel initialization
+  - Mission system initialized with path to mission_templates.toml
+  - New `update_missions()` method for turn-based mission lifecycle updates
+  - Updated version to 0.0.24 across modified modules
+
+### Technical
+
+- **Version Consistency**: Updated all modified modules to version 0.0.24
+  - model.py, mission_manager.py
+  - Updated Date Changed to 10-31-2025 for all modified files
+- **File Structure**: New mission system files
+  - STRR/src/game/components/mission_manager.py (369 lines)
+  - STRR/src/game/components/mission_manager_doc.md (comprehensive documentation)
+  - STRR/assets/data/mission_templates.toml (mission definitions)
+  - STRR/tests/test_mission_manager.py (18 tests)
+
 ## [0.0.23] - 2025-10-31
 
 ### Changed

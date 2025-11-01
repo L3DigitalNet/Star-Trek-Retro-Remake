@@ -115,122 +115,286 @@
 
 ## Milestones
 
-### Current Project Status (v0.0.20 - October 30, 2025)
+### Current Project Status (v0.0.25 - October 31, 2025)
 
 **Project Phase:** Core Systems Implementation (Pre-Alpha)
 
 **Recently Completed:**
 
-- Basic combat system with weapons, shields, and AI (v0.0.20)
-- UI to game logic connections (v0.0.19)
-- Turn-based game loop with initiative and action points (v0.0.18)
-- Complete PySide6 + pygame-ce UI integration (v0.0.10, v0.0.16, v0.0.18)
-- Isometric grid rendering with z-levels (v0.0.3-v0.0.15)
-- Basic starship entities with visual representation (v0.0.12)
-- Combat system with weapons, shields, and AI (v0.0.20-v0.0.21)
+- Dialog and Menu Systems - Mission and Settings Dialogs (v0.0.25)
+  - Mission briefing, selection, and tracking dialogs
+  - Comprehensive settings dialog with TOML integration
+- Mission System Foundation (v0.0.24)
+  - Complete mission lifecycle management with 6 mission types
+  - TOML-based mission templates and rewards system
+- Resource Management System (v0.0.22)
+  - Energy allocation, supplies tracking, crew morale
+- Performance Optimization and Configuration (v0.0.21)
+- Basic Combat System with AI (v0.0.20)
 
-**Current Focus:** Performance optimization and configuration system improvements
+**Current Focus:** Completing Dialog and Menu Systems (Priority 2)
 
-**Next Major Goal:** Begin resource management system implementation
+**Next Major Goals:**
+
+- Ship Status Panel implementation
+- Save/Load Dialog System
+- Galaxy Map Mode (Priority 3)
 
 ### In Progress Milestones
 
-#### Implement Dialog and Menu Systems (Priority 1)
+#### Implement Dialog and Menu Systems (Priority 2)
 
-- Mission briefing dialogs
-  - Display mission objectives and parameters
-  - Accept/decline mission options
-  - Mission reward information (reputation)
-- Ship status reporting
-  - Detailed system status reports in log panel. Random events may trigger a dialog window depending on severity.
-  - Crew roster and assignment
-    - Very basic at first (Chief Engineer, First Officer, Science Officer, Security Chief, Helm Officer)
-  - Damage reports and repair priorities
-- Settings dialog tab or menu
-  - Display configuration options from TOML files
-  - Apply and save settings changes
-  - Key binding customization
-- Save/load game functionality through File menu
-  - Game state serialization to TOML
-  - Load saved games with state restoration
-  - Multiple save slot management
+**Status:** Partial Implementation (v0.0.25 - Mission and Settings Dialogs Complete)
+
+**✅ Completed Components (v0.0.25):**
+
+**Mission Dialogs:**
+
+- ✅ MissionBriefingDialog: Display mission details with accept/decline options
+- ✅ MissionSelectionDialog: Browse and select from available missions at starbases
+- ✅ MissionTrackerWidget: Real-time display of active missions and objective progress
+- ✅ ObjectiveProgressBar: Visual progress indicators for mission objectives
+- ✅ Mission reward display (reputation, supplies, spare parts)
+- ✅ Mission difficulty indicators and risk assessment
+- ✅ Mission objective progress tracking with automatic completion
+
+**Settings Dialog:**
+
+- ✅ SettingsDialog: Tabbed interface with Graphics, Audio, Gameplay, and KeyBindings tabs
+- ✅ GraphicsTab: Resolution, fullscreen, VSync, FPS limit configuration
+- ✅ AudioTab: Master volume, music volume, effects volume sliders
+- ✅ GameplayTab: Difficulty, auto-save interval, tutorial hints, grid display toggles
+- ✅ KeyBindingsTab: Customizable key bindings with conflict detection
+- ✅ TOML integration: Load from and save to `game_settings.toml`
+- ✅ Settings validation and error handling
+- ✅ Apply and Cancel button functionality
+
+**🔲 Remaining Components:**
+
+**Ship Status Panel:**
+
+- Detailed system health display (shields, weapons, engines, sensors, life support)
+- Crew roster and assignment interface
+  - Initial crew: Captain, First Officer, Chief Engineer, Science Officer, Security Chief, Helm Officer
+  - Crew health and efficiency display
+  - Crew assignment optimization suggestions
+- Damage reports with repair priority recommendations
+- Resource consumption tracking and alerts
+- Real-time status updates during gameplay
+
+**Save/Load Game System:**
+
+- Game state serialization to TOML format
+- Load saved games with complete state restoration
+- Multiple save slot management (5 manual + 1 auto-save)
+- Save game metadata (timestamp, turn count, sector, mission status)
+- Save file validation and corruption recovery
+- Auto-save functionality with configurable interval
 
 ### Next Milestones
 
-#### Implement Galaxy Map Mode (Priority 2)
-
-- Galaxy map grid rendering (10x10 sectors)
-- Sector navigation and selection
-- Federation, Neutral, and Hostile zone visualization
-- Sector information display (name, control, threat level)
-- Travel time and random encounter system
-- Transition from Galaxy to Sector map states
-
-#### Implement Sector Map Enhancements (Priority 3)
-
-- Energy allocation system
-  - Power distribution sliders for shields, weapons, engines, sensors
-  - Energy consumption per action (configurable in game_settings.toml)
-  - Energy regeneration from impulse/warp engines
-- Supplies tracking (fuel, medical supplies, spare parts)
-  - Consumption rates based on activity
-  - Resupply at starbases
-  - Mission impact of low supplies
-- Crew morale and efficiency systems
-  - Morale affected by combat success/failure, casualties, mission outcomes, time since last visit to starbase
-  - Efficiency bonuses/penalties for ship systems
-  - Temporary crew morale boost after visits to starbases
-- Ship system condition and maintenance
-  - Damage accumulation and repair mechanics
-  - System efficiency degradation (integrated with existing damage system)
-  - Repair costs and time requirements affected by supplies and crew efficiency
-
-#### Implement Dialog and Menu Systems (Priority 2)
-
-- Mission briefing dialogs
-  - Display mission objectives and parameters
-  - Accept/decline mission options
-  - Mission reward information (reputation)
-- Ship status reporting
-  - Detailed system status reports in log panel. Random events may trigger a dialog window depending on severity.
-  - Crew roster and assignment
-    - Very basic at first (Chief Engineer, First Officer, Science Officer, Security Chief, Helm Officer)
-  - Damage reports and repair priorities
-- Settings dialog tab or menu
-  - Display configuration options from TOML files
-  - Apply and save settings changes
-  - Key binding customization
-- Save/load game functionality through File menu
-  - Game state serialization to TOML
-  - Load saved games with state restoration
-  - Multiple save slot management
-
 #### Implement Galaxy Map Mode (Priority 3)
 
-- Galaxy map grid rendering (10x10 sectors)
-- Sector navigation and selection
-- Federation, Neutral, and Hostile zone visualization
-- Sector information display (name, control, threat level)
-- Travel time and random encounter system
-- Transition from Galaxy to Sector map states
+**Status:** Design Phase
 
-#### Implement Sector Map Enhancements (Priority 4)
+**Galaxy Map Features:**
 
-- Add space stations (starbases) to sector maps
-  - Docking and undocking mechanics (a simple request to dock action that uses one turn)
-  - Repair and resupply services at starbases
-    - Free repairs and resupply to full capacity at friendly starbases
-  - Mission briefing and assignment
-- Add environmental objects
-  - Asteroids (providing cover, collision damage)
-  - Nebulae (sensor interference, movement penalties)
-  - Debris fields (navigation hazards)
-- Implement sensor system
-  - Short-range and long-range sensor modes
-  - Detection of ships and objects
-  - Sensor interference from environment
+- Galaxy map grid rendering (10x10 sectors = 100 total sectors)
+- Isometric grid visualization adapted from sector map
+- Sector navigation and selection with mouse interaction
+- Federation, Neutral, and Hostile zone color-coded visualization
+- Current sector highlight and path preview
+
+**Sector Information Display:**
+
+- Sector name and coordinates (A1-J10 format)
+- Control status (Federation, Neutral, Klingon, Romulan, Gorn, Uncharted)
+- Threat level indicator (1-5 scale)
+- Known starbase locations marked
+- Anomaly and mission icons
+
+**Travel Mechanics:**
+
+- Travel time calculation based on warp speed and distance
+- Energy consumption for warp travel (configurable)
+- Random encounter system during travel
+  - Encounter probability based on threat level
+  - Types: hostile ships, distress calls, anomalies, traders
+- Transition from Galaxy to Sector map with state preservation
+
+**UI Integration:**
+
+- Galaxy map button in mode switcher toolbar
+- Sector information panel in right dock
+- Travel route planning with waypoints
+- Auto-travel option with interrupt on encounters
+
+#### Implement Sector Map Environmental Objects (Priority 4)
+
+**Status:** Concept Phase
+
+**Space Stations (Starbases):**
+
+- Multiple starbase types (Federation, trading post, repair depot)
+- Docking mechanics (simple request action, costs 1 turn)
+- Repair and resupply services
+  - Free full repairs and resupply at Federation starbases
+  - Paid services at neutral trading posts
+- Mission briefing and assignment hub
+- Crew shore leave and morale boost
+
+**Environmental Hazards:**
+
+- **Asteroids**: Provide cover (+20% defense), collision damage (10 hull)
+- **Nebulae**: Sensor interference (-50% range), movement penalty (+1 AP per move)
+- **Debris Fields**: Navigation hazards, random damage on entry (5-15 hull)
+- **Ion Storms**: Shield disruption, communication jamming
+- **Gravity Wells**: Movement cost increase, escape difficulty
+
+**Sensor System Enhancement:**
+
+- Short-range sensors (5 grid cells, standard accuracy)
+- Long-range sensors (15 grid cells, reduced accuracy)
+- Active scan action (costs 1 AP, reveals detailed info)
+- Passive detection (automatic, limited range)
+- Sensor interference calculation from environment
+- Cloaked ship detection mechanics (future feature)
+
+**Object Interaction:**
+
+- Mining asteroids for resources (future feature)
+- Salvaging debris for spare parts
+- Scientific analysis of anomalies
+- Environmental damage to ship systems
 
 ### Completed Milestones
+
+#### Implement Dialog and Menu Systems - Phase 1 (v0.0.25)
+
+**Mission Dialog Components:**
+
+- ✅ MissionBriefingDialog (PySide6 QDialog)
+  - Display mission details with formatted objectives
+  - Accept/decline buttons with confirmation
+  - Mission reward display (reputation, supplies, spare parts)
+  - Mission difficulty indicators (1-5 scale with color coding)
+  - Estimated completion time and sector location
+  - Mission type icons and status indicators
+- ✅ MissionSelectionDialog (PySide6 QDialog)
+  - Browse available missions at starbases
+  - List view with mission name, type, difficulty, rewards
+  - Filter missions by type and difficulty
+  - Select mission and view detailed briefing
+  - Integration with MissionManager for mission availability
+- ✅ MissionTrackerWidget (PySide6 QWidget)
+  - Real-time display of active missions
+  - Collapsible mission cards with objective progress
+  - ObjectiveProgressBar for visual progress indication
+  - Mission completion status and rewards earned
+  - Integration with mission system for automatic updates
+- ✅ ObjectiveProgressBar (Custom QProgressBar)
+  - Visual progress indicators for mission objectives
+  - Color-coded progress (blue = in progress, green = complete)
+  - Percentage display with current/target values
+
+**Settings Dialog Components:**
+
+- ✅ SettingsDialog (PySide6 QDialog with QTabWidget)
+  - Tabbed interface for organized settings management
+  - Apply and Cancel buttons with validation
+  - TOML integration for persistent settings
+- ✅ GraphicsTab
+  - Resolution selection (multiple presets + custom)
+  - Fullscreen toggle
+  - VSync toggle
+  - FPS limit configuration (30/60/144 FPS)
+  - Grid display options
+- ✅ AudioTab
+  - Master volume slider (0-100%)
+  - Music volume slider (0-100%)
+  - Sound effects volume slider (0-100%)
+  - Mute toggles for each audio channel
+- ✅ GameplayTab
+  - Difficulty selection (Easy/Normal/Hard)
+  - Auto-save interval configuration (1-10 turns)
+  - Tutorial hints toggle
+  - Grid coordinate display toggle
+- ✅ KeyBindingsTab
+  - Customizable key bindings for all game actions
+  - Conflict detection and validation
+  - Reset to defaults option
+  - Key capture for easy rebinding
+
+**Features Implemented:**
+
+- Complete mission dialog system with PySide6 integration
+- Settings management with TOML persistence
+- Mission tracking UI with real-time updates
+- Visual progress indicators for objectives
+- Comprehensive settings validation and error handling
+- Qt signal/slot architecture for event handling
+- Integration with existing mission_manager and config systems
+
+**Documentation:**
+
+- mission_dialogs_doc.md with API reference and usage examples
+- Updated DESIGN.md with completed features
+- Code documentation with type hints and docstrings
+
+**Next Steps:**
+
+- Ship Status Panel implementation
+- Save/Load Dialog System
+- Integration testing for dialog interactions
+
+#### Implement Mission System Foundation (v0.0.24)
+
+- ✅ Mission data structures and TOML schema
+  - MissionType enum (PATROL, COMBAT, ESCORT, RESCUE, DIPLOMATIC, SURVEY)
+  - MissionStatus enum (AVAILABLE, ACTIVE, COMPLETED, FAILED)
+  - MissionObjective with progress tracking and auto-completion
+  - MissionReward with reputation, supplies, spare parts, experience
+  - Mission class with complete lifecycle management
+- ✅ Mission templates system
+  - TOML-based mission definitions in `mission_templates.toml`
+  - Six mission types with unique objectives and rewards
+  - Configurable base rewards and objective targets
+  - Dynamic mission generation from templates
+- ✅ MissionManager component
+  - Mission lifecycle tracking (available, active, completed, failed)
+  - Accept, abandon, and complete mission operations
+  - Difficulty-based reward scaling (rewards × difficulty)
+  - Sector-based mission filtering
+  - Active mission count and status tracking
+  - Turn-based mission updates with auto-completion
+- ✅ GameModel integration
+  - Mission system initialized with templates on startup
+  - `update_missions()` method for turn-based updates
+  - Mission rewards applied to player ship resources
+  - Support for multiple active missions
+- ✅ Comprehensive testing
+  - 18 unit tests with 100% pass rate
+  - Tests for mission lifecycle, objectives, rewards, manager operations
+  - AAA pattern test structure
+  - Fixture-based temporary TOML file testing
+
+Features implemented:
+
+- Complete mission system architecture with type safety
+- Mission templates for all six mission types
+- Dynamic mission generation with difficulty scaling
+- Mission objective progress tracking
+- Reward distribution system
+- Integration with GameModel turn system
+- Comprehensive API documentation
+- Full test coverage for mission operations
+
+Next steps for mission system:
+
+- Mission briefing dialog (PySide6) - Priority 2
+- Mission selection UI at starbases
+- Mission objective tracker in UI status panel
+- Reputation system integration
 
 #### Implement Resource Management System (v0.0.22)
 

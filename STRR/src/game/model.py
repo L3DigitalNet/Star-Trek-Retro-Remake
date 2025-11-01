@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-31-2025 (v0.0.23 - Confident design patterns, removed defensive None checks)
+Date Changed: 10-31-2025 (v0.0.24 - Integrated mission system with MissionManager)
 License: MIT
 
 Features:
@@ -39,14 +39,16 @@ Functions:
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Final
 
+from .components.mission_manager import MissionManager
 from .entities.base import GameObject, GridPosition
 from .entities.starship import Starship
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.23"
+__version__: Final[str] = "0.0.24"
 
 
 @dataclass
@@ -280,7 +282,15 @@ class GameModel:
 
         # Game systems
         self.turn_manager = TurnManager()
-        self.active_missions: list[object] = []  # Will be properly typed later
+
+        # Mission system - initialize with mission templates path
+        mission_path = (
+            Path(__file__).parent.parent.parent
+            / "assets"
+            / "data"
+            / "mission_templates.toml"
+        )
+        self.mission_manager = MissionManager(mission_path)
 
     def initialize_new_game(self) -> None:
         """Set up a new game with default starting conditions."""
@@ -673,6 +683,10 @@ class GameModel:
             info["max_action_points"] = 0
 
         return info
+
+    def update_missions(self) -> None:
+        """Update all active missions and check for completion."""
+        self.mission_manager.update_active_missions()
 
     def _cleanup_inactive_objects(self) -> None:
         """

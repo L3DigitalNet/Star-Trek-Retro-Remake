@@ -1,0 +1,136 @@
+# Mission Templates Configuration
+# Star Trek Retro Remake - Mission System
+
+# Mission templates define the base structure for different mission types.
+# Actual missions are generated from these templates with scaled difficulty.
+
+[missions.patrol]
+name = "Patrol Mission"
+description = "Scan designated waypoints in the sector and report any anomalies or hostile activity."
+mission_type = "PATROL"
+
+[[missions.patrol.objectives]]
+description = "Scan waypoint coordinates"
+type = "scan_waypoint"
+target_count = 3
+
+[[missions.patrol.objectives]]
+description = "Report findings to Starfleet Command"
+type = "report_data"
+target_count = 1
+
+[missions.patrol.rewards]
+reputation = 10
+supplies = 5
+spare_parts = 0
+experience = 50
+
+
+[missions.combat]
+name = "Combat Mission"
+description = "Engage and defeat enemy vessels threatening Federation space in this sector."
+mission_type = "COMBAT"
+
+[[missions.combat.objectives]]
+description = "Destroy enemy ships"
+type = "destroy_enemy"
+target_count = 2
+
+[[missions.combat.objectives]]
+description = "Secure the sector"
+type = "clear_sector"
+target_count = 1
+
+[missions.combat.rewards]
+reputation = 20
+supplies = 0
+spare_parts = 10
+experience = 100
+
+
+[missions.escort]
+name = "Escort Mission"
+description = "Protect a civilian transport vessel traveling between starbases. Ensure safe passage."
+mission_type = "ESCORT"
+
+[[missions.escort.objectives]]
+description = "Escort transport ship to destination"
+type = "escort_ship"
+target_count = 1
+
+[[missions.escort.objectives]]
+description = "Prevent transport damage"
+type = "protect_ship"
+target_count = 1
+
+[missions.escort.rewards]
+reputation = 15
+supplies = 10
+spare_parts = 5
+experience = 75
+
+
+[missions.rescue]
+name = "Rescue Mission"
+description = "Locate and recover a stranded vessel or crew. Time is critical."
+mission_type = "RESCUE"
+
+[[missions.rescue.objectives]]
+description = "Locate distress signal"
+type = "scan_signal"
+target_count = 1
+
+[[missions.rescue.objectives]]
+description = "Rescue survivors"
+type = "rescue_crew"
+target_count = 1
+
+[missions.rescue.rewards]
+reputation = 25
+supplies = 0
+spare_parts = 0
+experience = 125
+
+
+[missions.diplomatic]
+name = "Diplomatic Mission"
+description = "Transport Federation diplomats to neutral territory for crucial negotiations."
+mission_type = "DIPLOMATIC"
+
+[[missions.diplomatic.objectives]]
+description = "Transport diplomats safely"
+type = "transport_vip"
+target_count = 1
+
+[[missions.diplomatic.objectives]]
+description = "Arrive on schedule"
+type = "meet_deadline"
+target_count = 1
+
+[missions.diplomatic.rewards]
+reputation = 30
+supplies = 15
+spare_parts = 5
+experience = 150
+
+
+[missions.survey]
+name = "Survey Mission"
+description = "Gather scientific data from anomalies, planets, or phenomena in the sector."
+mission_type = "SURVEY"
+
+[[missions.survey.objectives]]
+description = "Scan scientific anomalies"
+type = "scan_anomaly"
+target_count = 4
+
+[[missions.survey.objectives]]
+description = "Collect sensor data"
+type = "collect_data"
+target_count = 1
+
+[missions.survey.rewards]
+reputation = 12
+supplies = 5
+spare_parts = 5
+experience = 80

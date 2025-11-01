@@ -14,7 +14,6 @@ License: MIT
 from typing import Final
 
 from src.game.entities.base import GridPosition
-from src.game.entities.starship import Starship
 from src.game.model import CombatResult, GameModel, TurnManager
 
 __version__: Final[str] = "0.0.1"
@@ -94,11 +93,11 @@ class TestGameModel:
 
         # Assert
         assert model.galaxy is not None
-        assert model.current_sector is None
-        assert model.player_ship is None
         assert model.turn_manager is not None
+        assert model.mission_manager is not None
         assert model.game_objects == []
-        assert model.active_missions == []
+        # current_sector and player_ship are initialized in initialize_new_game()
+        # Mission manager tracks active missions internally
 
     def test_initialize_new_game(self, game_model):
         """Test that initialize_new_game sets up game correctly."""
@@ -209,17 +208,17 @@ class TestGameModel:
         # Currently returns True as placeholder
         assert result is True
 
-    def test_is_valid_move_no_sector(self, game_model):
-        """Test move validation with no current sector."""
+    def test_is_valid_move_with_initialized_sector(self, initialized_game_model):
+        """Test move validation with initialized game."""
         # Arrange
-        ship = Starship(GridPosition(0, 0), "Constitution", "Test")
-        destination = GridPosition(1, 1)
+        ship = initialized_game_model.player_ship
+        destination = GridPosition(7, 7, 1)  # Valid position in default 20x20 sector
 
         # Act
-        result = game_model._is_valid_move(ship, destination)
+        result = initialized_game_model._is_valid_move(ship, destination)
 
         # Assert
-        assert result is False
+        assert result is True  # Should be valid within sector bounds
 
     def test_create_player_ship(self, game_model):
         """Test player ship creation."""

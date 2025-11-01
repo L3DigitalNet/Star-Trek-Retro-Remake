@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-31-2025 (v0.0.23 - Confident UI access, configuration-driven values, code quality)
+Date Changed: 10-31-2025 (v0.0.26 - Added mission and settings dialog integration)
 License: MIT
 
 Features:
@@ -20,6 +20,9 @@ Features:
     - Event handling and user interaction
     - Target selection dialog for combat
     - Weapon firing with phaser and torpedo options
+    - Mission briefing and selection dialogs
+    - Settings dialog with TOML integration
+    - Mission tracker widget
 
 Requirements:
     - Linux environment
@@ -49,9 +52,10 @@ from ..engine.isometric_grid import create_sector_grid
 from .entities.base import GridPosition
 
 if TYPE_CHECKING:
+    from .components.mission_manager import Mission
     from .controller import GameController
 
-__version__: Final[str] = "0.0.23"
+__version__: Final[str] = "0.0.26"
 
 logger = logging.getLogger(__name__)
 
@@ -563,6 +567,10 @@ class GameView:
         """Handle Load Game action."""
         logger.info("Load game functionality coming soon...")
 
+    def _on_settings(self) -> None:
+        """Handle Settings action."""
+        self.show_settings_dialog()
+
     def _on_quit(self) -> None:
         """Handle Quit action."""
         self.main_window.close()
@@ -753,11 +761,15 @@ class GameView:
         """
         Handle Dock at Station button click.
 
-        Initiates docking procedure at nearby station (placeholder).
+        Initiates docking procedure and shows mission selection dialog.
         """
         logger.info("Dock at station action selected")
-        # TODO: Implement docking system (future milestone)
-        self.show_message("Docking not yet implemented")
+        # Show mission selection dialog for current sector
+        if self.controller and self.controller.model.current_sector:
+            sector_name = "Sol System"  # TODO: Get actual sector name
+            self.controller.show_mission_selection(sector_name)
+        else:
+            self.show_message("No station in range")
 
     def _on_hail(self) -> None:
         """
@@ -938,3 +950,47 @@ class GameView:
                 text = font.render(obj.name, True, tuple(text_color))
                 text_rect = text.get_rect(center=(screen_pos[0], screen_pos[1] - 15))
                 self.game_surface.blit(text, text_rect)
+
+    def show_mission_selection_dialog(self, sector: str) -> None:
+        """
+        Show mission selection dialog for current sector.
+
+        Args:
+            sector: Sector identifier for mission filtering
+        """
+        from STRR.src.game.ui.mission_dialogs import MissionSelectionDialog
+
+        dialog = MissionSelectionDialog(
+            self.controller.model.mission_manager, sector, self.main_window
+        )
+        dialog.mission_selected.connect(self.controller.accept_mission)
+        dialog.exec()
+
+    def show_mission_briefing_dialog(self, mission: Mission) -> None:
+        """
+        Show detailed mission briefing dialog.
+
+        Args:
+            mission: Mission to display
+        """
+        from STRR.src.game.ui.mission_dialogs import MissionBriefingDialog
+
+        dialog = MissionBriefingDialog(mission, self.main_window)
+        dialog.mission_accepted.connect(self.controller.accept_mission)
+        dialog.exec()
+
+    def show_settings_dialog(self) -> None:
+        """Show settings dialog."""
+        from STRR.src.game.ui.settings_dialog import SettingsDialog
+
+        config_path = Path("STRR/config/game_settings.toml")
+        dialog = SettingsDialog(config_path, self.main_window)
+        if dialog.exec():
+            # Settings were saved, reload if needed
+            logger.info("Settings updated")
+
+    def update_mission_tracker(self) -> None:
+        """Update mission tracker widget with current missions."""
+        # Placeholder for mission tracker widget update
+        # Will be implemented when mission tracker is added to main window
+        logger.info("Mission tracker update requested")

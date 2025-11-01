@@ -179,7 +179,7 @@ class TestGameControllerShipMovement:
         mock_view.show_message.assert_called_once_with("Invalid move")
 
     def test_handle_ship_move_request_without_player_ship(self, controller, mock_model):
-        """Test handling move request when player ship doesn't exist."""
+        """Test confident design allows None to propagate to model."""
         # Arrange
         mock_model.player_ship = None
         destination = GridPosition(6, 6, 0)
@@ -187,8 +187,8 @@ class TestGameControllerShipMovement:
         # Act
         controller.handle_ship_move_request(destination)
 
-        # Assert
-        mock_model.execute_move.assert_not_called()
+        # Assert - Confident design: controller passes None to model
+        mock_model.execute_move.assert_called_once_with(None, destination)
 
 
 class TestGameControllerCombat:
@@ -215,7 +215,7 @@ class TestGameControllerCombat:
         mock_view.show_message.assert_called_once_with(mock_result.message)
 
     def test_handle_combat_action_without_player_ship(self, controller, mock_model):
-        """Test handling combat action when player ship doesn't exist."""
+        """Test confident design allows None to propagate to model."""
         # Arrange
         mock_model.player_ship = None
         target = Mock()
@@ -223,8 +223,8 @@ class TestGameControllerCombat:
         # Act
         controller.handle_combat_action(target, "phaser")
 
-        # Assert
-        mock_model.resolve_combat.assert_not_called()
+        # Assert - Confident design: controller passes None to model
+        mock_model.resolve_combat.assert_called_once_with(None, target, "phaser")
 
 
 class TestGameControllerGameManagement:

@@ -38,6 +38,47 @@ import pytest
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
+# Qt Application fixture for PySide6 tests
+try:
+    from PySide6.QtWidgets import QApplication
+
+    @pytest.fixture(scope="session")
+    def qapp():
+        """Create QApplication instance for Qt tests."""
+        app = QApplication.instance()
+        if app is None:
+            app = QApplication([])
+        yield app
+        # No cleanup needed - QApplication handles it
+
+    @pytest.fixture
+    def qtbot(qapp, request):
+        """Provide pytest-qt style qtbot fixture."""
+        from collections import namedtuple
+
+        # Simple qtbot replacement with addWidget method
+        QtBot = namedtuple("QtBot", [])
+
+        class SimpleQtBot:
+            def __init__(self):
+                self._widgets = []
+
+            def addWidget(self, widget):
+                """Add widget for cleanup."""
+                self._widgets.append(widget)
+                request.addfinalizer(
+                    lambda: widget.close() if hasattr(widget, "close") else None
+                )
+
+        return SimpleQtBot()
+
+except ImportError:
+    # PySide6 not available, skip Qt tests
+    @pytest.fixture
+    def qtbot():
+        pytest.skip("PySide6 not available for Qt tests")
+
+
 from src.game.entities.base import GridPosition
 from src.game.entities.starship import Starship
 from src.game.maps.galaxy import GalaxyMap
