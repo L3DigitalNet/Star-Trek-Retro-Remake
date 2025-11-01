@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Event System Tests
 
@@ -14,13 +13,12 @@ License: MIT
 """
 
 from typing import Final
-import time
 
 from src.game.events import (
-    GameEvent,
-    EventPriority,
-    EventListener,
     EventBus,
+    EventListener,
+    EventPriority,
+    GameEvent,
 )
 
 __version__: Final[str] = "0.0.11"

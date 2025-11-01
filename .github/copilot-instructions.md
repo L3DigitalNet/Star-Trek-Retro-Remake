@@ -74,7 +74,6 @@ Turn-based strategy game set in Kirk-era Star Trek universe. Features grid-based
 
 ```python
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - [Module Name]
 
@@ -160,7 +159,7 @@ Functions:
 
 **File Header Standards:**
 - All files must have proper headers following repository standards
-- Include shebang (`#!/usr/bin/env python3`) and encoding (`# -*- coding: utf-8 -*-`)
+- Include shebang (`#!/usr/bin/env python3`) - no encoding declaration needed (Python 3 default is UTF-8)
 - Complete docstring format with Description, Author, Email, GitHub, Date Created, Date Changed, License, Features, Requirements, Known Issues, Planned Features, Classes, Functions
 - Header content must reflect current code implementation
 - Update "Date Changed" to current date when modified
@@ -203,7 +202,7 @@ Functions:
 18. **Separation:** Clear component boundaries
 19. **Pooling:** Reuse projectiles, effects, temporary objects
 20. **Linux-Only:** All code, docs, and examples must target Linux exclusively
-21. **Header Compliance:** All files have proper shebang, encoding, and complete docstring headers
+21. **Header Compliance:** All files have proper shebang and complete docstring headers (no encoding declaration needed)
 
 ## Decision Framework
 

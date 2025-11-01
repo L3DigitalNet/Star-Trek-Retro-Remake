@@ -17,13 +17,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Configuration Management**: Moved magic numbers to TOML configuration (display dimensions, frame rates, UI colors)
 - **Import Optimization**: Simplified TYPE_CHECKING imports where circular dependencies don't exist (moved GridPosition out of TYPE_CHECKING in view.py)
 - **Initialization Patterns**: Implemented confident object creation with proper error handling only during setup phase, not during gameplay
+- **Code Quality Improvements**: Comprehensive codebase cleanup and standardization
+  - Confirmed pygame-ce (Community Edition) package provides drop-in pygame module for Python 3.14+ compatibility
+  - Removed unnecessary UTF-8 encoding declarations (`# -*- coding: utf-8 -*-`) from all files per Python 3 standards
+  - Cleaned up unused imports (MagicMock, pytest, time) from test files
+  - Updated repository guidelines to remove UTF-8 encoding declaration requirements
 
 ### Fixed
 
 - **Architectural Integrity**: Eliminated scattered defensive checks that indicated architectural problems
 - **Error Handling**: Moved error handling to initialization phase where it belongs, ensuring clean gameplay logic
+- **Type Safety**: Resolved type errors in ship_systems.py
+  - Fixed return type mismatch in `_load_combat_config()` method (added assertion to ensure non-None return)
+  - Fixed unused loop variable warning by prefixing with underscore (`_facing`)
+
+### Documentation
+
+- **Repository Standards**: Updated documentation to reflect Python 3 defaults
+  - Modified `.github/copilot-instructions.md` to remove encoding declaration requirement
+  - Updated `docs/DOCUMENTATION_STANDARDS.md` to clarify Python 3 UTF-8 default
+  - All documentation now correctly states "no encoding declaration needed"
+
+### Technical
+
+- **Version Consistency**: Updated all modified core modules to version 0.0.23
+  - application.py, controller.py, view.py, isometric_grid.py
+  - sector_state.py, ship_systems.py
+  - Updated Date Changed to 10-31-2025 for all modified files
 
 ## [0.0.22] - 2025-10-31
+
+### Added
+
+- **Resource Management System**: Complete energy, fuel, and supplies tracking
+  - ResourceManager component with energy capacity (1000), regeneration (10/sec), and consumption tracking
+  - Power distribution system for shields, weapons, engines, sensors, life support
+  - Configurable energy costs per action (move: 10, fire phaser: 15, fire torpedo: 25, scan: 5, shield regen: 20)
+  - Fuel system with capacity (500) and consumption tracking
+  - Supply tracking for medical supplies (100) and spare parts (50)
+  - Energy regeneration affected by engine power allocation and system efficiency
+  - Resupply and refuel mechanics for starbase services
+
+- **Crew Management System**: Morale and efficiency tracking
+  - CrewManager component with crew roster (Captain, First Officer, Chief Engineer, Science Officer, Security Chief, Helm Officer)
+  - Morale system (0-100) affecting ship system efficiency
+  - Morale modifiers: victory (+5), defeat (-10), casualty (-5), turns away from starbase (-0.5 per turn after 10)
+  - Efficiency multipliers based on morale: high morale (>80) = 1.2x, normal (60-80) = 1.0x, low (<40) = 0.8x
+  - Starbase visit bonus (+20 morale) and counter resets
+  - Combat outcome tracking (victories/defeats) with morale impact
+
+- **Enhanced Starship Resource Integration**:
+  - Integrated ResourceManager and CrewManager into Starship entity
+  - Power allocation methods for system-level power distribution
+  - Energy consumption checks before actions
+  - Crew efficiency modifiers for repairs and operations
+  - Repair system now consumes spare parts based on damage amount
+  - Repair effectiveness affected by crew efficiency multiplier
+
+- **Space Station Services**:
+  - Refuel service restores fuel to maximum capacity
+  - Resupply service restores medical supplies and spare parts
+  - Repair service fixes all systems and hull to 100% efficiency
+  - Starbase visit boosts crew morale and resets mission counters
+
+- **Configuration System**:
+  - Added [game.resources] section to game_settings.toml with all energy, fuel, and supply parameters
+  - Added [game.crew] section with morale modifiers and efficiency multipliers
+  - All resource values configurable via TOML with fallback defaults
 
 ### Fixed
 
@@ -40,6 +100,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Version Management**: Updated version to 0.0.22 across all core modules and pyproject.toml
 - **Error Handling**: Improved defensive programming with proper null checks and early returns
+- **Starship Repair Mechanics**: Updated repair_system() to consume supplies and apply crew efficiency
+  - Repair costs calculated based on damage amount (10 spare parts per 0.1 efficiency)
+  - Repair effectiveness multiplied by crew efficiency (0.8x to 1.2x)
+  - Optional supply consumption for field repairs vs starbase repairs
+
+### Testing
+
+- **Comprehensive Test Coverage**: Added 35 new unit tests for resource management
+  - TestResourceManager: 14 tests covering energy, fuel, supplies, and power distribution
+  - TestCrewManager: 10 tests covering morale, efficiency, combat outcomes, and crew management
+  - TestStarshipResourceIntegration: 11 tests covering integration with Starship entity
+  - All tests passing with edge case coverage (zero energy, insufficient supplies, morale extremes)
 
 ## [0.0.21] - 2025-01-27
 

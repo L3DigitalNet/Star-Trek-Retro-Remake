@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - State Machine Tests
 
@@ -14,9 +13,9 @@ License: MIT
 """
 
 from typing import Final
-from unittest.mock import Mock, MagicMock
-import pygame
+from unittest.mock import Mock
 
+import pygame
 from src.game.states.state_machine import (
     GameMode,
     GameState,

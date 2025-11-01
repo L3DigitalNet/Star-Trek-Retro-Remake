@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Test Configuration
 
@@ -30,19 +29,20 @@ Functions:
 """
 
 import sys
-import pytest
-from typing import Final
 from pathlib import Path
+from typing import Final
+
+import pytest
 
 # Add src to path for imports
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
-from src.game.model import GameModel
 from src.game.entities.base import GridPosition
 from src.game.entities.starship import Starship
 from src.game.maps.galaxy import GalaxyMap
 from src.game.maps.sector import SectorMap
+from src.game.model import GameModel
 
 __version__: Final[str] = "0.0.1"
 
@@ -99,5 +99,5 @@ def combat_scenario(initialized_game_model):
     return {
         "model": initialized_game_model,
         "player_ship": initialized_game_model.player_ship,
-        "enemy_ship": enemy_ship
+        "enemy_ship": enemy_ship,
     }

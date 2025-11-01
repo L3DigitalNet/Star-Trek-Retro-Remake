@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Ship Systems Tests
 
@@ -33,12 +32,12 @@ from unittest.mock import Mock
 import pytest
 
 from STRR.src.game.components.ship_systems import (
+    EngineSystems,
+    LifeSupportSystems,
+    SensorSystems,
+    ShieldSystems,
     ShipSystem,
     WeaponSystems,
-    ShieldSystems,
-    EngineSystems,
-    SensorSystems,
-    LifeSupportSystems,
 )
 from STRR.src.game.entities.base import GridPosition
 

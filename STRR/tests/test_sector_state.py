@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Sector State Tests
 
@@ -25,10 +24,10 @@ Requirements:
 """
 
 from typing import Final
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
-import pytest
 import pygame
+import pytest
 
 from STRR.src.game.states.sector_state import SectorState
 from STRR.src.game.states.state_machine import GameMode

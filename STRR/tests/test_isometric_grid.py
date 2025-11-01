@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Star Trek Retro Remake - Isometric Grid Tests
 
@@ -28,14 +27,15 @@ Requirements:
     - pygame-ce for rendering surface
 """
 
-import pytest
-import pygame
 from math import isclose
+
+import pygame
+import pytest
 
 from STRR.src.engine.isometric_grid import (
     GridRenderer,
-    create_default_grid,
     create_combat_grid,
+    create_default_grid,
     create_sector_grid,
 )
 from STRR.src.game.entities.base import GridPosition
