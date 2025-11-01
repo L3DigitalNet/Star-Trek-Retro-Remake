@@ -7,6 +7,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.29] - 2025-11-01
+
+### Fixed
+
+- **Starship Attribute Access**: Corrected component-based attribute access in `view.py`
+  - Changed `ship.shields` to `ship.systems["shields"].total_shield_strength`
+  - Changed `ship.energy` to `ship.resources.energy_current`
+  - Fixed `AttributeError` that occurred when displaying ship status
+  - Properly uses ShieldSystems and ResourceManager components
+
+### Technical Details
+
+- Shields accessed via ShieldSystems component: `total_shield_strength` property
+- Energy accessed via ResourceManager component: `energy_current` attribute
+- Progress bars now correctly display shield and energy percentages
+- Follows component-based architecture pattern consistently
+
+## [0.0.28] - 2025-11-01
+
+### Fixed
+
+- **Config Manager Initialization**: Added `initialize_config_manager()` call in `application.py`
+  - Config manager now properly initialized before first use
+  - Fixes `ConfigurationError: Configuration manager not initialized` on startup
+  - Added imports to top-level: `Path`, `initialize_config_manager`
+- **Undefined Variable**: Fixed `sector_name` potentially unbound in `view.py`
+  - Added else clause with "Sector: Unknown" fallback
+  - Prevents `NameError` when `current_sector` is None
+- **Duplicate Code**: Removed duplicate `setText(sector_name)` call in `update_ui_state()`
+- **Version Inconsistency**: Updated `application.py` from v0.0.23 to v0.0.28
+
+### Changed
+
+- **Import Organization**: Moved local imports to module top-level
+  - Dialog imports (`QDialog`, `QHBoxLayout`, `QLabel`, `QListWidget`, `QPushButton`, `QVBoxLayout`)
+  - Mission dialogs (`MissionSelectionDialog`, `MissionBriefingDialog`)
+  - Settings dialog (`SettingsDialog`)
+  - Improves code clarity and performance (PEP 8 compliance)
+- **Version Updates**: Incremented to 0.0.28
+  - pyproject.toml
+  - application.py
+  - view.py
+
+### Technical Details
+
+- Configuration manager initialization successful ✓
+- Config file paths corrected (removed duplicate .toml extension) ✓
+- All critical startup bugs resolved ✓
+- Code quality improved with proper import organization ✓
+- 380/381 tests passing (99.7% pass rate) ✓
+
+## [0.0.27] - 2025-11-01
+
+### Changed
+
+- **UI Loading Architecture**: Refactored to use compiled .ui files for better performance
+  - Replaced `QUiLoader` runtime loading with compiled `Ui_MainWindow` class
+  - Direct access to UI elements via `self.ui.element_name` for type safety
+  - Removed `_get_required_ui_element()` method (no longer needed)
+  - Updated imports: removed unused `QAction`, `QDockWidget`, `QProgressBar`, `QPushButton`
+  - Compiled `main_window_complete.ui` to `main_window_complete_ui.py`
+- **Version Consistency**: Updated to 0.0.27
+  - pyproject.toml
+  - STRR/src/game/view.py
+
+### Technical Benefits
+
+- **Performance**: Eliminated runtime XML parsing overhead
+- **Type Safety**: Direct attribute access provides better IDE autocompletion
+- **Compile-Time Verification**: UI elements validated during compilation
+- **Code Clarity**: Cleaner initialization pattern with `setupUi()`
+
 ## [0.0.26] - 2025-10-31
 
 ### Fixed

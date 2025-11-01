@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-31-2025 (v0.0.26 - Added mission and settings dialog integration)
+Date Changed: 11-01-2025 (v0.0.29 - Fixed starship attribute access)
 License: MIT
 
 Features:
@@ -43,19 +43,29 @@ from typing import TYPE_CHECKING, Final
 
 import pygame
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QAction, QImage, QKeyEvent, QMouseEvent, QPixmap
-from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QPushButton
+from PySide6.QtGui import QImage, QKeyEvent, QMouseEvent, QPixmap
+from PySide6.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QMainWindow,
+    QPushButton,
+    QVBoxLayout,
+)
 
 from ..engine.config_manager import get_config_value
 from ..engine.isometric_grid import create_sector_grid
+from ..ui.compiled.main_window_complete_ui import Ui_MainWindow
 from .entities.base import GridPosition
+from .ui.mission_dialogs import MissionBriefingDialog, MissionSelectionDialog
+from .ui.settings_dialog import SettingsDialog
 
 if TYPE_CHECKING:
     from .components.mission_manager import Mission
     from .controller import GameController
 
-__version__: Final[str] = "0.0.26"
+__version__: Final[str] = "0.0.29"
 
 logger = logging.getLogger(__name__)
 
@@ -214,10 +224,10 @@ class GameView:
         # Initialize pygame-ce surface using configuration
         pygame.init()
         game_width = get_config_value(
-            "game_settings.toml", "display.game_surface_width", 1280
+            "game_settings", "display.game_surface_width", 1280
         )
         game_height = get_config_value(
-            "game_settings.toml", "display.game_surface_height", 900
+            "game_settings", "display.game_surface_height", 900
         )
         self.game_surface = pygame.Surface((game_width, game_height))
 
@@ -252,7 +262,7 @@ class GameView:
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self._update_display)
         update_interval = get_config_value(
-            "game_settings.toml", "display.update_timer_ms", 16
+            "game_settings", "display.update_timer_ms", 16
         )
         self.update_timer.start(update_interval)
 
@@ -308,12 +318,12 @@ class GameView:
             if z == self.current_z_level:
                 # Current level: fully opaque
                 alpha = get_config_value(
-                    "game_settings.toml", "graphics.current_layer_alpha", 255
+                    "game_settings", "graphics.current_layer_alpha", 255
                 )
             else:
                 # Adjacent levels: semi-transparent
                 alpha = get_config_value(
-                    "game_settings.toml", "graphics.adjacent_layer_alpha", 80
+                    "game_settings", "graphics.adjacent_layer_alpha", 80
                 )
 
             # Render this z-level to temporary surface with dashing based on distance
@@ -326,7 +336,7 @@ class GameView:
         # Highlight selected cell if any using configuration
         if self.selected_cell:
             highlight_color = get_config_value(
-                "game_settings.toml", "graphics.selection_highlight_color", [0, 255, 0]
+                "game_settings", "graphics.selection_highlight_color", [0, 255, 0]
             )
             self.grid_renderer.render_cell_highlight(
                 self.game_surface,
@@ -363,9 +373,16 @@ class GameView:
         # Update hull progress bar
         self.hull_progress.setValue(int(ship.hull_integrity))
 
-        # Update shields and energy with confident access pattern
-        self.shields_progress.setValue(int(ship.shields))
-        self.energy_progress.setValue(int(ship.energy))
+        # Update shields and energy using component-based access
+        shields_pct = (
+            ship.systems["shields"].total_shield_strength
+            / ship.systems["shields"].max_shield_strength
+        ) * 100
+        energy_pct = (
+            ship.resources.energy_current / ship.resources.energy_capacity
+        ) * 100
+        self.shields_progress.setValue(int(shields_pct))
+        self.energy_progress.setValue(int(energy_pct))
 
         # Update position - all ships have position
         pos = ship.position
@@ -382,100 +399,60 @@ class GameView:
         # Message display removed in new layout - use status bar or dialogs
 
     def _load_ui(self) -> None:
-        """Load UI from Qt Designer .ui file."""
-        # Get the path to the UI file
-        ui_dir = Path(__file__).parent.parent / "ui" / "designer"
-        ui_file = ui_dir / "main_window.ui"
+        """Load UI from compiled UI class."""
+        # Create main window
+        self.main_window = QMainWindow()
 
-        if not ui_file.exists():
-            logger.error(f"UI file not found: {ui_file}")
-            raise FileNotFoundError(f"UI file not found: {ui_file}")
-
-        # Load the UI file - QUiLoader.load() expects a file path string or QIODevice
-        loader = QUiLoader()
-        self.main_window = loader.load(str(ui_file))
+        # Create UI instance and set up the main window
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self.main_window)
 
         # Initialize all UI elements with confident pattern
         self._initialize_ui_elements()
 
-        logger.info(f"UI loaded from: {ui_file}")
+        logger.info("UI loaded from compiled main_window_complete_ui.py")
 
     def _initialize_ui_elements(self) -> None:
         """Initialize all UI elements with confident access pattern."""
-        # Status UI elements in right dock
-        self.ship_name_label = self._get_required_ui_element(QLabel, "shipNameLabel")
-        self.hull_progress = self._get_required_ui_element(
-            QProgressBar, "hullProgressBar"
-        )
-        self.shields_progress = self._get_required_ui_element(
-            QProgressBar, "shieldsProgressBar"
-        )
-        self.energy_progress = self._get_required_ui_element(
-            QProgressBar, "energyProgressBar"
-        )
-        self.coordinates_label = self._get_required_ui_element(
-            QLabel, "coordinatesLabel"
-        )
-        self.sector_label = self._get_required_ui_element(QLabel, "sectorLabel")
+        # Status UI elements in right dock - accessed directly from compiled UI
+        self.ship_name_label = self.ui.shipNameLabel
+        self.hull_progress = self.ui.hullProgressBar
+        self.shields_progress = self.ui.shieldsProgressBar
+        self.energy_progress = self.ui.energyProgressBar
+        self.coordinates_label = self.ui.coordinatesLabel
+        self.sector_label = self.ui.sectorLabel
 
         # Turn bar elements
-        self.end_turn_btn = self._get_required_ui_element(QPushButton, "endTurnButton")
-        self.action_points_label = self._get_required_ui_element(
-            QLabel, "actionPointsLabel"
-        )
-        self.phase_label = self._get_required_ui_element(QLabel, "phaseLabel")
-        self.turn_number_label = self._get_required_ui_element(
-            QLabel, "turnNumberLabel"
-        )
+        self.end_turn_btn = self.ui.endTurnButton
+        self.action_points_label = self.ui.actionPointsLabel
+        self.phase_label = self.ui.phaseLabel
+        self.turn_number_label = self.ui.turnNumberLabel
 
         # Action buttons
-        self.move_btn = self._get_required_ui_element(QPushButton, "moveButton")
-        self.rotate_btn = self._get_required_ui_element(QPushButton, "rotateButton")
-        self.fire_btn = self._get_required_ui_element(QPushButton, "fireButton")
-        self.scan_btn = self._get_required_ui_element(QPushButton, "scanButton")
-        self.evasive_btn = self._get_required_ui_element(QPushButton, "evasiveButton")
-        self.dock_btn = self._get_required_ui_element(QPushButton, "dockButton")
-        self.hail_btn = self._get_required_ui_element(QPushButton, "hailButton")
+        self.move_btn = self.ui.moveButton
+        self.rotate_btn = self.ui.rotateButton
+        self.fire_btn = self.ui.fireButton
+        self.scan_btn = self.ui.scanButton
+        self.evasive_btn = self.ui.evasiveButton
+        self.dock_btn = self.ui.dockButton
+        self.hail_btn = self.ui.hailButton
 
         # Toolbar actions
-        self.action_galaxy = self._get_required_ui_element(QAction, "actionGalaxyMode")
-        self.action_sector = self._get_required_ui_element(QAction, "actionSectorMode")
-        self.action_combat = self._get_required_ui_element(QAction, "actionCombatMode")
-        self.action_zoom_in = self._get_required_ui_element(QAction, "actionZoomIn")
-        self.action_zoom_out = self._get_required_ui_element(QAction, "actionZoomOut")
-        self.action_zoom_reset = self._get_required_ui_element(
-            QAction, "actionZoomReset"
-        )
+        self.action_galaxy = self.ui.actionGalaxyMode
+        self.action_sector = self.ui.actionSectorMode
+        self.action_combat = self.ui.actionCombatMode
+        self.action_zoom_in = self.ui.actionZoomIn
+        self.action_zoom_out = self.ui.actionZoomOut
+        self.action_zoom_reset = self.ui.actionZoomReset
 
         # Menu actions
-        self.action_new_game = self._get_required_ui_element(QAction, "actionNewGame")
-        self.action_save_game = self._get_required_ui_element(QAction, "actionSaveGame")
-        self.action_load_game = self._get_required_ui_element(QAction, "actionLoadGame")
-        self.action_quit = self._get_required_ui_element(QAction, "actionQuit")
+        self.action_new_game = self.ui.actionNewGame
+        self.action_save_game = self.ui.actionSaveGame
+        self.action_load_game = self.ui.actionLoadGame
+        self.action_quit = self.ui.actionQuit
 
         # Right dock
-        self.right_dock = self._get_required_ui_element(QDockWidget, "rightDock")
-
-    def _get_required_ui_element(self, element_type, element_name: str):
-        """
-        Get a required UI element with confident access pattern.
-
-        Args:
-            element_type: Qt widget/action type
-            element_name: Object name in the UI file
-
-        Returns:
-            The UI element
-
-        Raises:
-            RuntimeError: If the element is not found
-        """
-        element = self.main_window.findChild(element_type, element_name)
-        if element is None:
-            raise RuntimeError(
-                f"Critical UI element missing: {element_name} not found in main_window.ui"
-            )
-        return element
+        self.right_dock = self.ui.rightDock
 
     def _connect_signals(self) -> None:
         """Connect UI signals to slots."""
@@ -509,11 +486,8 @@ class GameView:
 
     def _setup_game_display(self) -> None:
         """Replace the placeholder game display with custom GameDisplay widget."""
-        # Find the game display label in the loaded UI
-        old_label = self.main_window.findChild(QLabel, "gameDisplay")
-        if not old_label:
-            logger.error("gameDisplay label not found in UI file")
-            return
+        # Access the game display label directly from compiled UI
+        old_label = self.ui.gameDisplay
 
         # Get parent layout
         parent_layout = old_label.parent().layout()
@@ -535,10 +509,10 @@ class GameView:
         # Create custom game display widget using configuration
         self.game_label = GameDisplay(self)
         game_width = get_config_value(
-            "game_settings.toml", "display.game_surface_width", 1280
+            "game_settings", "display.game_surface_width", 1280
         )
         game_height = get_config_value(
-            "game_settings.toml", "display.game_surface_height", 900
+            "game_settings", "display.game_surface_height", 900
         )
         self.game_label.setMinimumSize(game_width, game_height)
         self.game_label.setMaximumSize(game_width, game_height)
@@ -659,19 +633,10 @@ class GameView:
             return
 
         # Show target selection dialog
-        from PySide6.QtWidgets import (
-            QDialog,
-            QHBoxLayout,
-            QLabel,
-            QListWidget,
-            QPushButton,
-            QVBoxLayout,
-        )
-
         dialog = QDialog(self.main_window)
         dialog.setWindowTitle("Select Target")
         dialog.setMinimumWidth(
-            get_config_value("game_settings.toml", "graphics.min_dialog_width", 300)
+            get_config_value("game_settings", "graphics.min_dialog_width", 300)
         )
 
         layout = QVBoxLayout()
@@ -787,7 +752,7 @@ class GameView:
         # pygame.event.pump() removed to prevent event queue conflicts
 
         # Calculate delta time using configuration
-        fps_limit = get_config_value("game_settings.toml", "display.fps_limit", 60)
+        fps_limit = get_config_value("game_settings", "display.fps_limit", 60)
         dt = self.clock.tick(fps_limit) / 1000.0
 
         # Update controller
@@ -856,12 +821,15 @@ class GameView:
         # Update ship status if player ship exists
         if self.controller.model.player_ship:
             self.show_ship_status(self.controller.model.player_ship)
+
         # Update sector name if current_sector exists (defensive check for early UI update)
         if getattr(self.controller.model, "current_sector", None) is not None:
             coords = self.controller.model.current_sector.coordinates
             sector_name = f"Sector {coords[0]}-{coords[1]}"
             self.sector_label.setText(sector_name)
-        self.sector_label.setText(sector_name)
+        else:
+            # Fallback when sector is not yet initialized
+            self.sector_label.setText("Sector: Unknown")
 
     def set_selected_cell(self, position: GridPosition) -> None:
         """
@@ -934,7 +902,7 @@ class GameView:
 
             # Draw a placeholder shape
             default_color = get_config_value(
-                "game_settings.toml", "graphics.default_entity_color", [255, 255, 0]
+                "game_settings", "graphics.default_entity_color", [255, 255, 0]
             )
             color = tuple(default_color)
 
@@ -945,7 +913,7 @@ class GameView:
             if hasattr(obj, "name") and obj.name:
                 font = self._fonts[18]
                 text_color = get_config_value(
-                    "game_settings.toml", "graphics.text_color", [255, 255, 255]
+                    "game_settings", "graphics.text_color", [255, 255, 255]
                 )
                 text = font.render(obj.name, True, tuple(text_color))
                 text_rect = text.get_rect(center=(screen_pos[0], screen_pos[1] - 15))
@@ -958,8 +926,6 @@ class GameView:
         Args:
             sector: Sector identifier for mission filtering
         """
-        from STRR.src.game.ui.mission_dialogs import MissionSelectionDialog
-
         dialog = MissionSelectionDialog(
             self.controller.model.mission_manager, sector, self.main_window
         )
@@ -973,16 +939,12 @@ class GameView:
         Args:
             mission: Mission to display
         """
-        from STRR.src.game.ui.mission_dialogs import MissionBriefingDialog
-
         dialog = MissionBriefingDialog(mission, self.main_window)
         dialog.mission_accepted.connect(self.controller.accept_mission)
         dialog.exec()
 
     def show_settings_dialog(self) -> None:
         """Show settings dialog."""
-        from STRR.src.game.ui.settings_dialog import SettingsDialog
-
         config_path = Path("STRR/config/game_settings.toml")
         dialog = SettingsDialog(config_path, self.main_window)
         if dialog.exec():
