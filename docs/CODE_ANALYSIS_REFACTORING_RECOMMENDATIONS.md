@@ -194,8 +194,16 @@ class WeaponSystems(ShipSystem):
 - ✅ Removed manual TOML imports and path calculations
 - ✅ Simplified WeaponSystems and ShieldSystems initialization
 
+- `STRR/src/game/ai/ship_ai.py` - Migrated to use get_combat_config()
+  - Removed _load_ai_config() method (24 lines eliminated)
+  - Removed _ai_config class variable
+  - Added __future__ annotations import for proper type checking
+  - Updated version to 0.0.29
+
+**Code Reduction Total:**
+- ✅ Eliminated ~82 lines of duplicated configuration loading code so far
+
 **Next Steps:**
-- [ ] Migrate ship_ai.py to use ConfigLoader
 - [ ] Migrate mission_manager.py to use ConfigLoader
 - [ ] Migrate settings_dialog.py to use ConfigLoader
 

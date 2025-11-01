@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-30-2025
-Date Changed: 10-31-2025
+Date Changed: 11-01-2025 (v0.0.29 - Refactored to use centralized config loader)
 License: MIT
 
 Features:
@@ -32,6 +32,8 @@ Functions:
     - None
 """
 
+from __future__ import annotations
+
 from enum import Enum, auto
 from typing import Final, TYPE_CHECKING
 import random
@@ -41,7 +43,9 @@ if TYPE_CHECKING:
     from ..entities.base import GridPosition, GameObject
     from ..model import GameModel
 
-__version__ = "0.0.21"
+from ...engine.config_loader import get_combat_config
+
+__version__ = "0.0.29"
 
 
 class AIState(Enum):
@@ -85,24 +89,21 @@ class ShipAI:
         _transition_state: Handle state transitions
         _find_patrol_point: Find random point for patrol
         _assess_threat: Evaluate threat level
-        _load_ai_config: Load AI configuration from game settings
     """
 
-    _ai_config: dict[str, float] | None = None  # Class-level config cache
-
-    def __init__(self, ship: "Starship"):
+    def __init__(self, ship: Starship):
         """
         Initialize AI controller for a ship.
 
         Args:
             ship: Starship to control
         """
-        # Load AI configuration
-        config = self._load_ai_config()
+        # Load AI configuration using centralized config loader
+        config = get_combat_config()
 
         self.ship = ship
         self.state = AIState.PATROL
-        self.target: "Starship | None" = None
+        self.target: Starship | None = None
 
         # Patrol parameters (from config)
         self.patrol_center = ship.position
@@ -112,7 +113,7 @@ class ShipAI:
         self.flee_threshold = config.get("ai_flee_threshold", 30.0)
 
         # Performance cache (from config)
-        self._cached_enemies: list["Starship"] = []
+        self._cached_enemies: list[Starship] = []
         self._cache_age = 0
         self._cache_max_age = config.get("ai_enemy_cache_turns", 3)
 
@@ -416,36 +417,3 @@ class ShipAI:
             state: New AI state
         """
         self.state = state
-
-    @classmethod
-    def _load_ai_config(cls) -> dict[str, float]:
-        """
-        Load AI configuration from game settings.
-
-        Returns:
-            Dictionary of AI configuration values
-        """
-        if cls._ai_config is None:
-            try:
-                from pathlib import Path
-                import tomllib
-
-                # Find config file relative to this module
-                config_path = (
-                    Path(__file__).parent.parent.parent
-                    / "config"
-                    / "game_settings.toml"
-                )
-
-                with open(config_path, "rb") as f:
-                    settings = tomllib.load(f)
-                    cls._ai_config = settings.get("game", {}).get("combat", {})
-            except Exception:
-                # Fallback to defaults if config can't be loaded
-                cls._ai_config = {
-                    "ai_patrol_radius": 5,
-                    "ai_flee_threshold": 30.0,
-                    "ai_enemy_cache_turns": 3,
-                }
-
-        return cls._ai_config
