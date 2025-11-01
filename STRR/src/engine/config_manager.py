@@ -35,11 +35,11 @@ Functions:
     - set_config_value(): Set configuration value using dot notation
 """
 
-__version__: Final[str] = "0.0.11"
-
 import tomllib
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, Final
+
+__version__: Final[str] = "0.0.11"
 
 # For TOML writing, we'll use tomli_w (lightweight, stdlib-compatible)
 try:

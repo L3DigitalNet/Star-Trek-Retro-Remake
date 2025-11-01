@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-31-2025
+Date Changed: 11-01-2025 (v0.0.28 - Fixed config manager initialization)
 License: MIT
 
 Features:
@@ -38,16 +38,18 @@ Functions:
 """
 
 import sys
+from pathlib import Path
 from typing import Final
 
 import pygame
 from PySide6.QtWidgets import QApplication
 
+from ..engine.config_manager import initialize_config_manager
 from .controller import GameController
 from .model import GameModel
 from .view import GameView
 
-__version__: Final[str] = "0.0.23"
+__version__: Final[str] = "0.0.28"
 
 
 class StarTrekRetroRemake:
@@ -112,6 +114,10 @@ class StarTrekRetroRemake:
 
     def _initialize_systems(self) -> None:
         """Initialize PyGame and PySide6 systems."""
+        # Initialize configuration manager FIRST (required by other systems)
+        config_dir = Path(__file__).parents[2] / "config"
+        initialize_config_manager(config_dir)
+
         # Initialize PyGame for game rendering (without display)
         pygame.init()
 
