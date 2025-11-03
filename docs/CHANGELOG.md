@@ -7,7 +7,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.29] - 2025-11-01
+## [0.0.29] - 2025-11-02
+
+### Added
+
+- **Resource Management Systems**: Added comprehensive resource tracking for starships
+  - `ResourceManager` component for energy, fuel, and torpedo management
+  - Real-time resource consumption and regeneration
+  - Resource validation and limits enforcement
+  - Shield and system power distribution
+- **Contributing Guidelines**: Added comprehensive `CONTRIBUTING.md`
+  - Development environment setup instructions
+  - Git workflow and branch management
+  - Code style and testing requirements
+  - Pull request and code review process
+
+### Changed
+
+- **Development Documentation**: Enhanced development setup and workflow docs
+  - Added `QUICKSTART.md` for fast project setup
+  - Updated `AGENTS.md` with resource management patterns
+  - Branch protection documentation improvements
+
+### Fixed
+
+- **Test Suite**: All resource management tests passing
+  - 100% coverage for ResourceManager component
+  - Energy consumption and regeneration tests
+  - Fuel tracking and torpedo management tests
+  - Resource limit validation tests
+
+## [0.0.28] - 2025-11-02
+
+### Fixed
+
+- **Critical Bug**: Configuration manager initialization missing during application startup
+  - Added `initialize_config_manager()` call in `StarTrekRetroRemake._initialize_systems()`
+  - Config manager now properly initialized before `GameView` creation
+  - Fixed `ConfigurationError: Configuration manager not initialized` crash on startup
+  - Config directory path correctly resolved: `STRR/config/`
+
+### Changed
+
+- **Config Manager API**: Enhanced filename handling for improved usability
+  - `load_config()` now accepts filenames with or without `.toml` extension
+  - Automatic extension stripping for consistent caching
+  - Updated docstring to reflect flexible filename handling
+  - Backward compatible with existing code
+
+### Added
+
+- **Comprehensive Test Suite**: Added `test_config_manager.py` with 19 tests (100% pass rate)
+  - `TestConfigManager`: 11 tests for core functionality (initialization, loading, caching, value access)
+  - `TestGlobalConfigManager`: 5 tests for global singleton pattern
+  - `TestApplicationIntegration`: 3 tests for startup integration scenarios
+  - Covers edge cases: missing files, nested values, default values, extension handling
+- **Application Integration**: Config manager initialization in MVC architecture
+  - Import added: `from ..engine.config_manager import initialize_config_manager`
+  - Import added: `from pathlib import Path`
+  - Initialization in `_initialize_systems()` before component creation
+  - Path resolution relative to application module location
+
+### Technical Details
+
+- **Root Cause**: Global `_global_config_manager` variable remained `None` because `initialize_config_manager()` was never called
+- **Call Chain**: `GameView.__init__()` → `get_config_value()` → `get_config_manager()` → raised `ConfigurationError`
+- **Fix Location**: `STRR/src/game/application.py` line 121-123
+- **Test Coverage**: Config manager tests ensure initialization is verified during application startup
+
+## [0.0.27] - 2025-10-31
+
+### Changed
+
+- **AI Prompt Enhancements**: Updated all AI prompt files in `.github/prompts/` with game-specific content
+  - `test.prompt.md`: Added game-specific testing patterns (turn-based mechanics, 3D grid, state machine, component system, MVC separation)
+  - `refactor.prompt.md`: Added game architecture examples (hybrid state machine, component composition, 3D positioning, turn consumption)
+  - `debug.prompt.md`: Added game-specific debugging scenarios (architecture violations, turn-based bugs, 3D grid issues, pygame integration)
+  - `code-review.prompt.md`: Added comprehensive game-specific review checklist (hybrid architecture, turn mechanics, 3D grid, framework separation)
+  - Replaced generic template references with Star Trek Retro Remake specific structure
+- **Documentation**: Updated project structure references in prompts to reflect STRR organization (`STRR/src/game/`, `STRR/src/ui/`, `STRR/src/engine/`)
 
 ### Fixed
 

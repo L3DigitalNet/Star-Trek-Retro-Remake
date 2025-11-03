@@ -204,6 +204,21 @@ Functions:
 20. **Linux-Only:** All code, docs, and examples must target Linux exclusively
 21. **Header Compliance:** All files have proper shebang and complete docstring headers (no encoding declaration needed)
 
+## AI Agent Workflow
+
+When an AI agent is working on this codebase:
+
+1. **Verify branch first**: Run `python .agents/branch_protection.py` before any file modifications
+2. **Read memory first**: Check `.agents/memory.instruction.md` for game-specific preferences
+3. **Follow hybrid architecture strictly**: State Machine + GameObject + Component + MVC
+4. **Write tests first**: TDD approach is preferred (AAA pattern)
+5. **Use type hints**: Always include type annotations (Python 3.14+ syntax)
+6. **Inject dependencies**: Never create dependencies inside classes
+7. **Document decisions**: Add inline comments and update `_doc.md` files
+8. **Run tests after changes**: Verify nothing breaks (`pytest STRR/tests/`)
+9. **Update version**: Increment version for non-trivial changes
+10. **Update memory**: Add new patterns or solutions discovered to memory file
+
 ## Decision Framework
 
 **Solution Priority:**
@@ -219,3 +234,14 @@ Functions:
 - Real-time logic in turn-based game
 - UI dependencies in game logic (MVC violation)
 - 2D positioning (use 3D: x, y, z)
+
+## Quick Reference Files
+
+- `AGENTS.md` - Quick reference for AI agents and developers
+- `.agents/memory.instruction.md` - Comprehensive coding preferences
+- `.agents/branch_protection.py` - Branch protection checker
+- `CONTRIBUTING.md` - Contribution guidelines
+- `QUICKSTART.md` - Fast setup guide
+- `docs/BRANCH_PROTECTION.md` - Branch protection documentation
+- `docs/ARCHITECTURE.md` - Architecture deep dive
+- `docs/DESIGN.md` - Game design document

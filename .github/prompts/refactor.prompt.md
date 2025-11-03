@@ -105,9 +105,15 @@ Follow [repository guidelines](../copilot-instructions.md).
 ## Repository Integration
 
 ### Project Structure Compliance
-- **MUST** follow project template structure from `templates/my_project_folder_template/`
-- **MUST** store ALL test files in each project's `/tests/` directory
+- **MUST** follow Star Trek Retro Remake directory structure:
+  - `STRR/src/game/` - Game logic (Models/Controllers)
+  - `STRR/src/ui/` - UI components (Views)
+  - `STRR/src/engine/` - Core engine utilities
+  - `STRR/assets/` - Data, graphics, audio assets
+  - `STRR/config/` - TOML configuration files
+- **MUST** store ALL test files in `STRR/tests/` directory
 - **MUST** maintain proper `__init__.py` files and package organization
+- **MUST** create `_doc.md` files alongside Python modules for documentation
 
 ### Linux Environment Compliance
 - **PYTHON VERSION**: Ensure compatibility with Python 3.14+.
@@ -123,3 +129,109 @@ Follow [repository guidelines](../copilot-instructions.md).
 3. **Type Safety**: Are all elements properly typed and documented?
 4. **Confident Design**: Can defensive patterns be replaced with architectural solutions?
 5. **Reusability**: Can this be generalized for use by other projects?
+
+## Game-Specific Refactoring Patterns
+
+### Hybrid Architecture Compliance
+**State Machine + Game Object + Component + MVC**
+
+✅ **Good - Clear Separation:**
+```python
+# Model (game logic only)
+class WeaponSystem:
+    def calculate_damage(self, target_distance: int) -> int:
+        """Calculate damage based on distance."""
+        return max(0, self.base_damage - (target_distance * 2))
+
+# View (rendering only)
+class WeaponRenderer:
+    def render_weapon_fire(self, source: tuple[int, int, int],
+                          target: tuple[int, int, int]) -> None:
+        """Render weapon fire animation between 3D positions."""
+        pass  # pygame-ce rendering code
+```
+
+❌ **Bad - Mixed Concerns:**
+```python
+class WeaponSystem:
+    def fire(self, target):
+        damage = self.calculate_damage()
+        target.take_damage(damage)
+        # ❌ Rendering in game logic!
+        pygame.draw.line(self.screen, RED, self.pos, target.pos)
+```
+
+### Component System Refactoring
+**GameObject composition over inheritance**
+
+✅ **Good - Component Composition:**
+```python
+class Starship:
+    def __init__(self):
+        self.components: dict[type, Any] = {}
+
+    def add_component(self, component: Any) -> None:
+        self.components[type(component)] = component
+
+    def get_component(self, component_type: type[T]) -> T | None:
+        return self.components.get(component_type)
+
+ship = Starship()
+ship.add_component(WeaponSystem(damage=50))
+ship.add_component(ShieldSystem(capacity=100))
+```
+
+❌ **Bad - Deep Inheritance:**
+```python
+class Entity:
+    pass
+
+class Ship(Entity):
+    pass
+
+class ArmedShip(Ship):
+    pass
+
+class FederationShip(ArmedShip):  # ❌ Too deep!
+    pass
+```
+
+### 3D Grid System Refactoring
+**Always use (x, y, z) coordinates**
+
+✅ **Good - 3D Positioning:**
+```python
+def calculate_distance_3d(self, pos1: tuple[int, int, int],
+                         pos2: tuple[int, int, int]) -> float:
+    """Calculate 3D distance between positions."""
+    dx = pos2[0] - pos1[0]
+    dy = pos2[1] - pos1[1]
+    dz = pos2[2] - pos1[2]
+    return math.sqrt(dx*dx + dy*dy + dz*dz)
+```
+
+❌ **Bad - 2D Only:**
+```python
+def calculate_distance(self, pos1: tuple[int, int],
+                       pos2: tuple[int, int]) -> float:
+    # ❌ Ignores z-level!
+    return math.sqrt((pos2[0]-pos1[0])**2 + (pos2[1]-pos1[1])**2)
+```
+
+### Turn-Based Mechanics Refactoring
+**All actions must consume turns**
+
+✅ **Good - Turn Consumption:**
+```python
+def execute_move_action(self, ship: Starship, target_pos: tuple[int, int, int]) -> None:
+    """Execute movement and advance turn."""
+    ship.position = target_pos
+    self.turn_manager.advance_turn()  # ✅ Turn consumed
+```
+
+❌ **Bad - Forgetting Turns:**
+```python
+def move_ship(self, ship: Starship, target_pos: tuple[int, int, int]) -> None:
+    ship.position = target_pos
+    # ❌ No turn advancement!
+```
