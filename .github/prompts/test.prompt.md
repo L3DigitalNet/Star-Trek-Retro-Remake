@@ -78,14 +78,95 @@ def test_function_name_should_behavior_when_condition():
 - **VALIDATE** class invariants and state consistency
 - **CHECK** module boundaries and interaction points
 
+## Game-Specific Testing Patterns
+
+### Turn-Based Mechanics Testing
+```python
+def test_ship_fires_weapon(starship, enemy_ship):
+    """Test weapon firing consumes turn and damages target."""
+    # Arrange
+    initial_shields = enemy_ship.shields
+    initial_turn = game_state.turn_number
+    weapon = starship.get_component(WeaponSystem)
+
+    # Act
+    weapon.fire(enemy_ship, distance=5)
+
+    # Assert
+    assert enemy_ship.shields < initial_shields  # Damage applied
+    assert game_state.turn_number == initial_turn + 1  # Turn consumed
+```
+
+### 3D Grid System Testing
+```python
+def test_3d_distance_calculation(grid):
+    """Test 3D distance between two positions."""
+    # Arrange
+    pos1 = (0, 0, 0)  # Origin
+    pos2 = (3, 4, 0)  # Same z-level
+
+    # Act
+    distance = grid.calculate_distance_3d(pos1, pos2)
+
+    # Assert
+    assert distance == 5.0  # Pythagorean theorem: 3² + 4² = 5²
+```
+
+### State Machine Testing
+```python
+def test_state_transition_galaxy_to_sector(state_machine):
+    """Test valid state transition."""
+    # Arrange
+    state_machine.current_state = GameState.GALAXY_MAP
+
+    # Act
+    state_machine.transition_to(GameState.SECTOR_MAP)
+
+    # Assert
+    assert state_machine.current_state == GameState.SECTOR_MAP
+    assert state_machine.previous_state == GameState.GALAXY_MAP
+```
+
+### Component System Testing
+```python
+def test_ship_component_composition(starship):
+    """Test ship has all required systems."""
+    # Arrange/Act
+    weapons = starship.get_component(WeaponSystem)
+    shields = starship.get_component(ShieldSystem)
+    engines = starship.get_component(EngineSystem)
+
+    # Assert
+    assert weapons is not None
+    assert shields is not None
+    assert engines is not None
+    assert weapons.power_level == 100  # Full power on initialization
+```
+
+### MVC Separation Testing
+```python
+def test_model_no_rendering_dependencies():
+    """Test game model has no pygame/UI dependencies."""
+    # Arrange
+    import STRR.src.game.model as model_module
+
+    # Act
+    imports = get_module_imports(model_module)
+
+    # Assert
+    assert 'pygame' not in imports
+    assert 'PySide6' not in imports  # Except for type hints
+```
+
 ## Coverage Analysis and Reporting
 
 ### Coverage Targets and Priorities
-- **TARGET** 80%+ coverage for critical business logic paths
-- **PRIORITIZE** core functionality over defensive error handling
-- **FOCUS** on testing actual program behavior patterns
-- **MEASURE** coverage of happy path scenarios and expected workflows
-- **IDENTIFY** gaps in business logic testing
+- **TARGET** 85%+ coverage for game logic (models, controllers, state machine)
+- **TARGET** 80%+ coverage for entity/component systems
+- **PRIORITIZE** turn-based mechanics, combat calculations, state transitions
+- **FOCUS** on testing actual game behavior patterns
+- **MEASURE** coverage of critical gameplay scenarios
+- **IDENTIFY** gaps in game logic testing (ship systems, combat, movement)
 
 ### Coverage Tools and Configuration
 ```python

@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: team@startrekretroremake.dev
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025 (v0.0.11 - Import fixes)
+Date Changed: 11-02-2025 (v0.0.28 - Config manager initialization fix, extension handling)
 License: MIT
 
 Features:
@@ -37,9 +37,9 @@ Functions:
 
 import tomllib
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, Final
+from typing import Any, Final
 
-__version__: Final[str] = "0.0.11"
+__version__: Final[str] = "0.0.29"
 
 # For TOML writing, we'll use tomli_w (lightweight, stdlib-compatible)
 try:
@@ -54,7 +54,7 @@ from src.game.exceptions import ConfigurationError
 class ConfigManager:
     """Manages loading and saving of TOML/JSON configuration files."""
 
-    def __init__(self, config_dir: Union[str, Path]):
+    def __init__(self, config_dir: str | Path):
         """
         Initialize ConfigManager with configuration directory.
 
@@ -62,14 +62,14 @@ class ConfigManager:
             config_dir: Path to configuration files directory
         """
         self.config_dir = Path(config_dir)
-        self.config_cache: Dict[str, Dict[str, Any]] = {}
+        self.config_cache: dict[str, dict[str, Any]] = {}
 
-    def load_config(self, filename: str, use_cache: bool = True) -> Dict[str, Any]:
+    def load_config(self, filename: str, use_cache: bool = True) -> dict[str, Any]:
         """
         Load configuration from TOML file.
 
         Args:
-            filename: Configuration filename (without extension)
+            filename: Configuration filename (with or without .toml extension)
             use_cache: Whether to use cached configuration data
 
         Returns:
@@ -78,6 +78,10 @@ class ConfigManager:
         Raises:
             ConfigurationError: If configuration cannot be loaded
         """
+        # Remove .toml extension if present for consistent caching
+        if filename.endswith(".toml"):
+            filename = filename[:-5]
+
         if use_cache and filename in self.config_cache:
             return self.config_cache[filename]
 
@@ -95,7 +99,7 @@ class ConfigManager:
                 f"Failed to load TOML config '{toml_path}': {e}"
             ) from e
 
-    def save_config(self, filename: str, config_data: Dict[str, Any]) -> None:
+    def save_config(self, filename: str, config_data: dict[str, Any]) -> None:
         """
         Save configuration to TOML format.
 
@@ -182,17 +186,17 @@ class ConfigManager:
         # Save updated configuration
         self.save_config(filename, config)
 
-    def _load_toml(self, file_path: Path) -> Dict[str, Any]:
+    def _load_toml(self, file_path: Path) -> dict[str, Any]:
         """Load TOML file using Python 3.14+ stdlib."""
         with open(file_path, "rb") as f:
             return tomllib.load(f)
 
 
 # Convenience functions for global configuration access
-_global_config_manager: Optional[ConfigManager] = None
+_global_config_manager: ConfigManager | None = None
 
 
-def initialize_config_manager(config_dir: Union[str, Path]) -> ConfigManager:
+def initialize_config_manager(config_dir: str | Path) -> ConfigManager:
     """
     Initialize global configuration manager.
 
@@ -225,12 +229,12 @@ def get_config_manager() -> ConfigManager:
     return _global_config_manager
 
 
-def load_config(filename: str, use_cache: bool = True) -> Dict[str, Any]:
+def load_config(filename: str, use_cache: bool = True) -> dict[str, Any]:
     """Convenience function to load configuration."""
     return get_config_manager().load_config(filename, use_cache)
 
 
-def save_config(filename: str, config_data: Dict[str, Any]) -> None:
+def save_config(filename: str, config_data: dict[str, Any]) -> None:
     """Convenience function to save configuration."""
     return get_config_manager().save_config(filename, config_data)
 

@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 11-01-2025 (v0.0.28 - Fixed config manager initialization)
+Date Changed: 11-02-2025
 License: MIT
 
 Features:
@@ -70,7 +70,7 @@ class StarTrekRetroRemake:
         shutdown: Clean shutdown of the application
 
     Private methods:
-        _initialize_systems: Initialize pygame-ce and PySide6 systems
+        _initialize_systems: Initialize pygame-ce, PySide6, and configuration systems
         _cleanup: Clean up resources on shutdown
     """
 
@@ -113,7 +113,18 @@ class StarTrekRetroRemake:
         self._cleanup()
 
     def _initialize_systems(self) -> None:
-        """Initialize PyGame and PySide6 systems."""
+        """
+        Initialize PyGame, PySide6, and configuration systems.
+
+        Initializes core game systems in the following order:
+        1. PyGame (game rendering engine)
+        2. PySide6 (UI framework)
+        3. Configuration manager (TOML config file loading)
+
+        The configuration manager must be initialized before creating
+        the GameView, as the view requires access to display settings
+        and other configuration values during initialization.
+        """
         # Initialize configuration manager FIRST (required by other systems)
         config_dir = Path(__file__).parents[2] / "config"
         initialize_config_manager(config_dir)
@@ -126,6 +137,11 @@ class StarTrekRetroRemake:
             self.qt_app = QApplication(sys.argv)
         else:
             self.qt_app = QApplication.instance()
+
+        # Initialize configuration manager with config directory
+        # Path: STRR/src/game/application.py -> STRR/config/
+        config_dir = Path(__file__).parent.parent.parent / "config"
+        initialize_config_manager(config_dir)
 
     def _cleanup(self) -> None:
         """Clean up resources on shutdown."""
