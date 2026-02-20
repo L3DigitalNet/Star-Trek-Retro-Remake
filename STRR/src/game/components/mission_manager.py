@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-31-2025
-Date Changed: 10-31-2025
+Date Changed: 02-19-2026
 License: MIT License
 
 Features:
@@ -66,9 +66,9 @@ if TYPE_CHECKING:
 try:
     import tomllib
 except ImportError:
-    import tomli as tomllib  # type: ignore[import-not-found]
+    import tomli as tomllib  # type: ignore[import-not-found,no-redef]
 
-__version__: Final[str] = "0.0.24"
+__version__: Final[str] = "0.0.31"
 
 
 # Mission system configuration
@@ -316,11 +316,15 @@ class MissionManager:
         if mission.status == MissionStatus.ACTIVE and mission.is_completed():
             mission.status = MissionStatus.COMPLETED
 
-            # Apply rewards - use getattr for dynamic access
-            resource_manager = getattr(player_ship, "resource_manager", None)
-            if resource_manager:
-                resource_manager.add_supplies(mission.reward.supplies)
-                resource_manager.add_spare_parts(mission.reward.spare_parts)
+            # Apply rewards via the component system — Starship stores all subsystems
+            # in a dict accessed via get_system(), not as direct attributes.
+            # Local runtime import required: TYPE_CHECKING imports are erased at runtime
+            # and PySide6 swallows the resulting NameError silently.
+            from ..components.ship_systems import ResourceManager
+            resource_manager = player_ship.get_system("resources")
+            if resource_manager and isinstance(resource_manager, ResourceManager):
+                resource_manager.resupply("medical", mission.reward.supplies)
+                resource_manager.resupply("spare_parts", mission.reward.spare_parts)
 
             # Move to completed missions
             if mission in self.active_missions:

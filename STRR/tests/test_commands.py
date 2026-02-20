@@ -14,6 +14,7 @@ License: MIT
 
 from typing import Final
 
+import pytest
 from src.game.commands import (
     CommandHistory,
     FireWeaponCommand,
@@ -21,6 +22,8 @@ from src.game.commands import (
 )
 from src.game.entities.base import GridPosition
 from src.game.entities.starship import Starship
+
+pytestmark = pytest.mark.unit
 
 __version__: Final[str] = "0.0.11"
 

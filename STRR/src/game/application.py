@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 11-02-2025
+Date Changed: 02-19-2026
 License: MIT
 
 Features:
@@ -49,7 +49,7 @@ from .controller import GameController
 from .model import GameModel
 from .view import GameView
 
-__version__: Final[str] = "0.0.28"
+__version__: Final[str] = "0.0.31"
 
 
 class StarTrekRetroRemake:
@@ -74,7 +74,7 @@ class StarTrekRetroRemake:
         _cleanup: Clean up resources on shutdown
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Star Trek Retro Remake application."""
         # Initialize core systems
         self._initialize_systems()

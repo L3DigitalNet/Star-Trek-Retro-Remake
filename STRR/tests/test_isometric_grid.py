@@ -26,11 +26,11 @@ Requirements:
     - pytest for test framework
     - pygame-ce for rendering surface
 """
+import pytest
+pygame = pytest.importorskip("pygame")
+
 
 from math import isclose
-
-import pygame
-import pytest
 
 from src.engine.isometric_grid import (
     GridRenderer,
@@ -39,6 +39,8 @@ from src.engine.isometric_grid import (
     create_sector_grid,
 )
 from src.game.entities.base import GridPosition
+
+pytestmark = pytest.mark.gui
 
 
 class TestGridPosition:

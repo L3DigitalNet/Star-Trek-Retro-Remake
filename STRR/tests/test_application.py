@@ -23,11 +23,16 @@ Requirements:
     - pytest >= 8.0.0
     - Python 3.14+
 """
+import pytest
+pytest.importorskip("PySide6")
+
 
 from typing import Final
 from unittest.mock import MagicMock, patch
 
 from src.game.application import StarTrekRetroRemake
+
+pytestmark = pytest.mark.gui
 
 __version__: Final[str] = "0.0.18"
 

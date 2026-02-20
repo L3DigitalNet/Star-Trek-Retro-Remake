@@ -14,4 +14,4 @@ License: MIT
 
 from typing import Final
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.31"

@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 02-19-2026
 License: MIT
 
 Features:
@@ -35,13 +35,13 @@ Functions:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Final, Optional
+from typing import Final
 
 from .entities.base import GridPosition
 from .entities.starship import Starship
 from .exceptions import InvalidMoveError
 
-__version__: Final[str] = "0.0.21"
+__version__: Final[str] = "0.0.31"
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +192,7 @@ class MoveShipCommand(Command):
         )
         self.ship = ship
         self.destination = destination
-        self.previous_position: Optional[GridPosition] = None
+        self.previous_position: GridPosition | None = None
         self.previous_fuel: float = 0.0
 
     def _do_execute(self) -> bool:
@@ -207,13 +207,14 @@ class MoveShipCommand(Command):
             self.ship.position.x, self.ship.position.y, self.ship.position.z
         )
 
+        from .components.ship_systems import EngineSystems  # local runtime import for isinstance narrowing
         engines = self.ship.get_system("engines")
-        if engines:
+        if isinstance(engines, EngineSystems):
             self.previous_fuel = engines.fuel
 
         # Calculate fuel cost
         distance = int(self.ship.position.distance_to(self.destination))
-        if engines:
+        if isinstance(engines, EngineSystems):
             fuel_cost = engines.calculate_movement_cost(distance)
 
             # Check if enough fuel
@@ -246,8 +247,9 @@ class MoveShipCommand(Command):
         self.ship.position = self.previous_position
 
         # Restore fuel
+        from .components.ship_systems import EngineSystems  # local runtime import for isinstance narrowing
         engines = self.ship.get_system("engines")
-        if engines:
+        if isinstance(engines, EngineSystems):
             engines.fuel = self.previous_fuel
 
         return True
@@ -301,8 +303,9 @@ class FireWeaponCommand(Command):
         self.previous_target_hull = self.target.hull_integrity
 
         # Get weapon system
+        from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
         weapons = self.attacker.get_system("weapons")
-        if not weapons or not weapons.active:
+        if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return False
 
         # Check targeting
@@ -341,8 +344,9 @@ class FireWeaponCommand(Command):
 
         # Restore ammo if torpedo was fired
         if self.weapon_type == "torpedo":
+            from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
             weapons = self.attacker.get_system("weapons")
-            if weapons:
+            if isinstance(weapons, WeaponSystems):
                 weapons.torpedo_count += 1
 
         return True

@@ -30,7 +30,6 @@ from typing import Final
 from unittest.mock import Mock
 
 import pytest
-
 from src.game.components.ship_systems import (
     EngineSystems,
     LifeSupportSystems,
@@ -40,6 +39,8 @@ from src.game.components.ship_systems import (
     WeaponSystems,
 )
 from src.game.entities.base import GridPosition
+
+pytestmark = pytest.mark.unit
 
 __version__: Final[str] = "0.0.18"
 

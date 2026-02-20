@@ -37,7 +37,7 @@ from .state_machine import GameMode, GameState
 if TYPE_CHECKING:
     from .state_machine import GameStateManager
 
-__version__: Final[str] = "0.0.23"
+__version__: Final[str] = "0.0.31"
 
 
 class SectorState(GameState):

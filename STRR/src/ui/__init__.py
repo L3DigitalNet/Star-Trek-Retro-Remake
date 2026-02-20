@@ -25,4 +25,4 @@ Requirements:
 
 from typing import Final
 
-__version__: Final[str] = "0.0.27"
+__version__: Final[str] = "0.0.31"
