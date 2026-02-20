@@ -281,7 +281,7 @@ class GameController:
 
             # Stop if safety limit reached (prevents infinite loops)
             if turns_processed >= max_ai_turns:
-                logger.warning(f"AI turn limit reached ({max_ai_turns}), breaking loop")
+                logger.warning("AI turn limit reached (%s), breaking loop", max_ai_turns)
                 break
 
             # Process AI turn if ship has AI controller
@@ -348,25 +348,25 @@ class GameController:
         if not self.view:
             return
 
-        logger.debug(f"Processing mouse click at screen position: {mouse_pos}")
+        logger.debug("Processing mouse click at screen position: %s", mouse_pos)
 
         # Convert screen coordinates to grid position
         grid_pos = self.view.grid_renderer.screen_to_world(
             mouse_pos, self.view.current_z_level
         )
 
-        logger.debug(f"Converted to grid position: {grid_pos}")
+        logger.debug("Converted to grid position: %s", grid_pos)
 
         # Validate grid position is within renderer bounds
         if not self.view.grid_renderer.is_in_bounds(grid_pos):
-            logger.warning(f"Grid position {grid_pos} is out of renderer bounds")
+            logger.warning("Grid position %s is out of renderer bounds", grid_pos)
             return
 
         # Additional validation: check if position is within sector map bounds
         if self.model.current_sector and not self.model.current_sector.is_in_bounds(
             grid_pos
         ):
-            logger.warning(f"Grid position {grid_pos} is out of sector bounds")
+            logger.warning("Grid position %s is out of sector bounds", grid_pos)
             return
 
         # Update view selection
@@ -374,7 +374,7 @@ class GameController:
 
         # If move mode is active, attempt to move player ship
         if self.view.move_mode and self.model.player_ship:
-            logger.debug(f"Move mode: Attempting to move ship to {grid_pos}")
+            logger.debug("Move mode: Attempting to move ship to %s", grid_pos)
             self.handle_ship_move_request(grid_pos)
             # Deactivate move mode after successful click
             self.view.move_mode = False
@@ -391,7 +391,7 @@ class GameController:
         if not self.view:
             return
 
-        logger.debug(f"Processing key press: {key}")
+        logger.debug("Processing key press: %s", key)
 
         # Settings dialog
         if key == pygame.K_ESCAPE:

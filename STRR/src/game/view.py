@@ -178,10 +178,10 @@ class GameDisplay(QLabel):
         qt_key = event.key()
         if qt_key in key_map:
             pygame_key = key_map[qt_key]
-            logger.debug(f"Key pressed: {event.key()} -> pygame key: {pygame_key}")
+            logger.debug("Key pressed: %s -> pygame key: %s", event.key(), pygame_key)
             self.view.controller.handle_keypress(pygame_key)
         else:
-            logger.debug(f"Unmapped key pressed: {event.key()}")
+            logger.debug("Unmapped key pressed: %s", event.key())
 
 
 class GameView:
@@ -579,13 +579,13 @@ class GameView:
     def _on_zoom_in(self) -> None:
         """Handle Zoom In toolbar action."""
         self.grid_renderer.zoom_in()
-        logger.info(f"Zoom in: {self.grid_renderer.zoom_level:.2f}x")
+        logger.info("Zoom in: %.2fx", self.grid_renderer.zoom_level)
         self.show_message(f"Zoom: {self.grid_renderer.zoom_level:.2f}x")
 
     def _on_zoom_out(self) -> None:
         """Handle Zoom Out toolbar action."""
         self.grid_renderer.zoom_out()
-        logger.info(f"Zoom out: {self.grid_renderer.zoom_level:.2f}x")
+        logger.info("Zoom out: %.2fx", self.grid_renderer.zoom_level)
         self.show_message(f"Zoom: {self.grid_renderer.zoom_level:.2f}x")
 
     def _on_zoom_reset(self) -> None:
