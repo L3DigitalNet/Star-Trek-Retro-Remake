@@ -33,6 +33,8 @@ Functions:
     - None
 """
 
+import math
+import random
 from typing import TYPE_CHECKING, Final
 
 from ..components.ship_systems import (
@@ -233,8 +235,6 @@ class Starship(GameObject):
         Args:
             hull_damage: Amount of hull damage taken
         """
-        import random
-
         # Chance of system damage increases as hull weakens
         damage_chance = 0.3 + (1.0 - self.hull_integrity / 100.0) * 0.4
 
@@ -287,8 +287,6 @@ class Starship(GameObject):
         Returns:
             Orientation angle in radians (0 to 2π)
         """
-        import math
-
         return math.radians(self.orientation)
 
     def allocate_power(self, system: str, percentage: float) -> bool:

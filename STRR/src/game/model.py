@@ -38,10 +38,12 @@ Functions:
     - None
 """
 
+import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, TypedDict, cast
 
+from ..engine.config_loader import get_combat_config
 from .components.mission_manager import MissionManager
 from .entities.base import GameObject, GridPosition
 from .entities.starship import Starship
@@ -421,8 +423,6 @@ class GameModel:
         Returns:
             CombatResult containing the outcome
         """
-        import random
-
         # Get attacker's weapon system
         from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
         weapons = attacker.get_system("weapons")
@@ -470,8 +470,6 @@ class GameModel:
         damage = weapons.calculate_damage(weapon_type, distance, target)
 
         # Load combat config for critical hits
-        from ..engine.config_loader import get_combat_config
-
         config = get_combat_config()
         crit_chance = cast(float, config.get("critical_hit_chance") or 0.1)
         crit_multiplier = cast(float, config.get("critical_hit_multiplier") or 1.5)

@@ -45,6 +45,7 @@ Functions:
 from __future__ import annotations
 
 import logging
+import math
 import tomllib
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -234,8 +235,6 @@ class WeaponSystems(ShipSystem):
         Returns:
             Relative angle to target in degrees (-180 to 180)
         """
-        import math
-
         # Calculate absolute angle to target
         dx = target_pos.x - ship_pos.x
         dy = target_pos.y - ship_pos.y
@@ -537,8 +536,6 @@ class ShieldSystems(ShipSystem):
         Returns:
             Name of shield facing that was hit
         """
-        import math
-
         # Calculate angle from ship to attacker
         dx = attacker_pos.x - ship_pos.x
         dy = attacker_pos.y - ship_pos.y
