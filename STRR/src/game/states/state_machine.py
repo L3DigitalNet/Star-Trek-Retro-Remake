@@ -34,7 +34,7 @@ Functions:
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, Final, Optional
+from typing import TYPE_CHECKING, Final
 
 if TYPE_CHECKING:
     import pygame
@@ -80,7 +80,7 @@ class GameState(ABC):
         None
     """
 
-    def __init__(self, state_manager: "GameStateManager"):
+    def __init__(self, state_manager: GameStateManager):
         """
         Initialize the game state.
 
@@ -88,7 +88,7 @@ class GameState(ABC):
             state_manager: Reference to the state manager
         """
         self.state_manager = state_manager
-        self.mode: Optional[GameMode] = None  # Set by subclasses
+        self.mode: GameMode | None = None  # Set by subclasses
 
     @abstractmethod
     def enter(self) -> None:
@@ -101,7 +101,7 @@ class GameState(ABC):
         pass
 
     @abstractmethod
-    def handle_input(self, event: "pygame.event.Event") -> None:
+    def handle_input(self, event: pygame.event.Event) -> None:
         """
         Process input events.
 
@@ -121,7 +121,7 @@ class GameState(ABC):
         pass
 
     @abstractmethod
-    def render(self, surface: "pygame.Surface") -> None:
+    def render(self, surface: pygame.Surface) -> None:
         """
         Render state-specific content.
 
@@ -156,9 +156,9 @@ class GameStateManager:
 
     def __init__(self) -> None:
         """Initialize the game state manager."""
-        self.current_state: Optional[GameState] = None
-        self.previous_state: Optional[GameState] = None
-        self.states: Dict[GameMode, GameState] = {}
+        self.current_state: GameState | None = None
+        self.previous_state: GameState | None = None
+        self.states: dict[GameMode, GameState] = {}
 
     def register_state(self, mode: GameMode, state: GameState) -> None:
         """
@@ -207,7 +207,7 @@ class GameStateManager:
         if self.current_state:
             self.current_state.update(dt)
 
-    def render(self, surface: "pygame.Surface") -> None:
+    def render(self, surface: pygame.Surface) -> None:
         """
         Render current state.
 
@@ -217,7 +217,7 @@ class GameStateManager:
         if self.current_state:
             self.current_state.render(surface)
 
-    def handle_input(self, event: "pygame.event.Event") -> None:
+    def handle_input(self, event: pygame.event.Event) -> None:
         """
         Process input events for current state.
 
@@ -227,7 +227,7 @@ class GameStateManager:
         if self.current_state:
             self.current_state.handle_input(event)
 
-    def get_current_mode(self) -> Optional[GameMode]:
+    def get_current_mode(self) -> GameMode | None:
         """
         Get current game mode.
 

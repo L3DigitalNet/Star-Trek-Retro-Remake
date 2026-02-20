@@ -9,7 +9,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 02-19-2026
 License: MIT
 
 Features:
@@ -29,11 +29,11 @@ Functions:
     - None
 """
 
-from typing import Dict, Final, Optional, Tuple
+from typing import Final
 
 from .sector import SectorMap
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.31"
 
 
 class GalaxyMap:
@@ -58,7 +58,7 @@ class GalaxyMap:
         _initialize_default_sectors: Create starting sectors
     """
 
-    def __init__(self, galaxy_size: Tuple[int, int] = (10, 10)):
+    def __init__(self, galaxy_size: tuple[int, int] = (10, 10)):
         """
         Initialize the galaxy map.
 
@@ -66,13 +66,13 @@ class GalaxyMap:
             galaxy_size: Size of the galaxy grid as (width, height)
         """
         self.galaxy_size = galaxy_size
-        self.sectors: Dict[Tuple[int, int], SectorMap] = {}
-        self.current_coordinates: Tuple[int, int] = (0, 0)
+        self.sectors: dict[tuple[int, int], SectorMap] = {}
+        self.current_coordinates: tuple[int, int] = (0, 0)
 
         # Initialize starting sectors
         self._initialize_default_sectors()
 
-    def get_sector(self, x: int, y: int) -> Optional[SectorMap]:
+    def get_sector(self, x: int, y: int) -> SectorMap | None:
         """
         Retrieve a sector map by coordinates.
 
