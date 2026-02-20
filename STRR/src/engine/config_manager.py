@@ -48,7 +48,7 @@ except ImportError:
     # Fallback for development - will need tomli_w for production
     tomli_w = None
 
-from src.game.exceptions import ConfigurationError
+from ..game.exceptions import ConfigurationError
 
 
 class ConfigManager:
