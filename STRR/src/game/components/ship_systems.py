@@ -48,7 +48,7 @@ import logging
 import tomllib
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import Final, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from ..entities.base import GameObject, GridPosition
@@ -58,7 +58,7 @@ from ...engine.config_loader import get_combat_config
 
 logger = logging.getLogger(__name__)
 
-__version__ = "0.0.31"
+__version__: Final[str] = "0.0.31"
 
 
 class ShipSystem(ABC):

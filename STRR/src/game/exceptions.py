@@ -37,7 +37,7 @@ Functions:
 
 from typing import Final, Optional
 
-__version__: Final[str] = "0.0.11"
+__version__: Final[str] = "0.0.31"
 
 
 class GameError(Exception):

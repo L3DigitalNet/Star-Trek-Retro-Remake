@@ -75,7 +75,7 @@ if TYPE_CHECKING:
         MissionManager,
     )
 
-__version__: Final[str] = "0.0.26"
+__version__: Final[str] = "0.0.31"
 
 
 def format_difficulty_color(difficulty: int) -> str:
