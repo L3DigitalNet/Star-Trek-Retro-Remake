@@ -12,6 +12,7 @@ License: MIT
 """
 
 from typing import Final
+from unittest.mock import patch
 
 import pytest
 from src.game.entities.base import GridPosition
@@ -166,8 +167,13 @@ class TestGameModel:
         player_ship = combat_scenario["player_ship"]
         enemy_ship = combat_scenario["enemy_ship"]
 
-        # Act
-        result = model.resolve_combat(player_ship, enemy_ship, "phaser")
+        # Patch random.random through model's module reference so both the hit
+        # roll (must be <= hit_chance to register a hit) and the crit roll are
+        # deterministic. 0.0 guarantees a hit; crit is allowed to remain random
+        # but we pin it to 0.0 as well to avoid any edge-case interaction.
+        with patch("src.game.model.random.random", return_value=0.0):
+            # Act
+            result = model.resolve_combat(player_ship, enemy_ship, "phaser")
 
         # Assert
         assert result.success is True
