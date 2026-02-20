@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025 (v0.0.18 - Turn-based system)
+Date Changed: 02-19-2026 (v0.0.31 - Fix distance_to return type with math.sqrt)
 License: MIT
 
 Features:
@@ -31,11 +31,12 @@ Functions:
     - None
 """
 
+import math
 import uuid
 from dataclasses import dataclass
 from typing import Final
 
-__version__: Final[str] = "0.0.18"
+__version__: Final[str] = "0.0.31"
 
 
 @dataclass(frozen=True)
@@ -71,7 +72,7 @@ class GridPosition:
         dx = self.x - other.x
         dy = self.y - other.y
         dz = self.z - other.z
-        return (dx * dx + dy * dy + dz * dz) ** 0.5
+        return math.sqrt(dx * dx + dy * dy + dz * dz)
 
     def __add__(self, other: "GridPosition") -> "GridPosition":
         """Add two grid positions component-wise."""

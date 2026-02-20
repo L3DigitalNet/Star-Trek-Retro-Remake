@@ -13,8 +13,11 @@ Date Changed: 11-01-2025
 License: MIT
 """
 
-import pytest
 from pathlib import Path
+
+import pytest
+
+pytestmark = pytest.mark.unit
 
 
 class TestPathConstants:
@@ -41,7 +44,7 @@ class TestPathConstants:
     def test_config_root_relationship(self):
         """Test that CONFIG_ROOT is correctly related to PROJECT_ROOT."""
         # Arrange
-        from src.engine.paths import PROJECT_ROOT, CONFIG_ROOT
+        from src.engine.paths import CONFIG_ROOT, PROJECT_ROOT
 
         # Act & Assert
         assert CONFIG_ROOT == PROJECT_ROOT / "config"
@@ -50,7 +53,7 @@ class TestPathConstants:
     def test_assets_root_relationship(self):
         """Test that ASSETS_ROOT is correctly related to PROJECT_ROOT."""
         # Arrange
-        from src.engine.paths import PROJECT_ROOT, ASSETS_ROOT
+        from src.engine.paths import ASSETS_ROOT, PROJECT_ROOT
 
         # Act & Assert
         assert ASSETS_ROOT == PROJECT_ROOT / "assets"
@@ -160,7 +163,7 @@ class TestGetAssetPath:
     def test_get_graphics_asset_path(self):
         """Test getting path for graphics asset."""
         # Arrange
-        from src.engine.paths import get_asset_path, GRAPHICS_DIR
+        from src.engine.paths import GRAPHICS_DIR, get_asset_path
 
         # Act
         result = get_asset_path("graphics", "ship.png")
@@ -171,7 +174,7 @@ class TestGetAssetPath:
     def test_get_audio_asset_path(self):
         """Test getting path for audio asset."""
         # Arrange
-        from src.engine.paths import get_asset_path, AUDIO_DIR
+        from src.engine.paths import AUDIO_DIR, get_asset_path
 
         # Act
         result = get_asset_path("audio", "phaser.wav")
@@ -182,7 +185,7 @@ class TestGetAssetPath:
     def test_get_data_asset_path(self):
         """Test getting path for data asset."""
         # Arrange
-        from src.engine.paths import get_asset_path, DATA_DIR
+        from src.engine.paths import DATA_DIR, get_asset_path
 
         # Act
         result = get_asset_path("data", "mission.toml")

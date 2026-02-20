@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 02-19-2026
 License: MIT
 
 Features:
@@ -33,6 +33,8 @@ Functions:
     - None
 """
 
+import math
+import random
 from typing import TYPE_CHECKING, Final
 
 from ..components.ship_systems import (
@@ -50,7 +52,7 @@ from .base import GameObject, GridPosition
 if TYPE_CHECKING:
     from ..ai.ship_ai import ShipAI
 
-__version__: Final[str] = "0.0.22"
+__version__: Final[str] = "0.0.31"
 
 
 class Starship(GameObject):
@@ -192,8 +194,9 @@ class Starship(GameObject):
         }
 
         # Shield absorption first
+        from ..components.ship_systems import ShieldSystems  # local runtime import for isinstance narrowing
         shields = self.get_system("shields")
-        if shields and shields.active:
+        if shields and shields.active and isinstance(shields, ShieldSystems):
             remaining = shields.absorb_damage(
                 amount,
                 damage_type,
@@ -232,8 +235,6 @@ class Starship(GameObject):
         Args:
             hull_damage: Amount of hull damage taken
         """
-        import random
-
         # Chance of system damage increases as hull weakens
         damage_chance = 0.3 + (1.0 - self.hull_integrity / 100.0) * 0.4
 
@@ -286,8 +287,6 @@ class Starship(GameObject):
         Returns:
             Orientation angle in radians (0 to 2π)
         """
-        import math
-
         return math.radians(self.orientation)
 
     def allocate_power(self, system: str, percentage: float) -> bool:

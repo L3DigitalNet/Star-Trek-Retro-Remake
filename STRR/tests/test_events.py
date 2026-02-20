@@ -14,12 +14,15 @@ License: MIT
 
 from typing import Final
 
+import pytest
 from src.game.events import (
     EventBus,
     EventListener,
     EventPriority,
     GameEvent,
 )
+
+pytestmark = pytest.mark.unit
 
 __version__: Final[str] = "0.0.11"
 

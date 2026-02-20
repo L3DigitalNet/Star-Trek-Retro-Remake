@@ -47,7 +47,7 @@ from typing import Any, TypeVar, Generic, Final
 
 from .config_manager import get_config_manager
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.31"
 
 T = TypeVar("T")
 

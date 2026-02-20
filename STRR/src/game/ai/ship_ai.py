@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-30-2025
-Date Changed: 11-01-2025 (v0.0.29 - Refactored to use centralized config loader)
+Date Changed: 02-19-2026 (v0.0.31 - Use public is_valid_move, remove stale _assess_threat docstring)
 License: MIT
 
 Features:
@@ -35,17 +35,17 @@ Functions:
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import Final, TYPE_CHECKING
+from typing import Final, TYPE_CHECKING, cast
 import random
 
 if TYPE_CHECKING:
     from ..entities.starship import Starship
-    from ..entities.base import GridPosition, GameObject
+    from ..entities.base import GridPosition
     from ..model import GameModel
 
 from ...engine.config_loader import get_combat_config
 
-__version__ = "0.0.29"
+__version__: Final[str] = "0.0.31"
 
 
 class AIState(Enum):
@@ -88,7 +88,6 @@ class ShipAI:
         _update_flee: Execute flee behavior
         _transition_state: Handle state transitions
         _find_patrol_point: Find random point for patrol
-        _assess_threat: Evaluate threat level
     """
 
     def __init__(self, ship: Starship):
@@ -107,15 +106,15 @@ class ShipAI:
 
         # Patrol parameters (from config)
         self.patrol_center = ship.position
-        self.patrol_radius = config.get("ai_patrol_radius", 5)
+        self.patrol_radius = cast(int, config.get("ai_patrol_radius") or 5)
 
         # Behavior thresholds (from config)
-        self.flee_threshold = config.get("ai_flee_threshold", 30.0)
+        self.flee_threshold = cast(float, config.get("ai_flee_threshold") or 30.0)
 
         # Performance cache (from config)
         self._cached_enemies: list[Starship] = []
         self._cache_age = 0
-        self._cache_max_age = config.get("ai_enemy_cache_turns", 3)
+        self._cache_max_age = cast(int, config.get("ai_enemy_cache_turns") or 3)
 
     def update(self, model: "GameModel") -> None:
         """
@@ -196,12 +195,10 @@ class ShipAI:
             return
 
         # Get weapon system
+        from ..components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
         weapons = self.ship.get_system("weapons")
-        if not weapons or not weapons.active:
+        if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return
-
-        # Calculate distance to target
-        distance = self.ship.position.distance_to(self.target.position)
 
         # If in weapon range, fire
         if weapons.can_target(
@@ -273,8 +270,9 @@ class ShipAI:
         enemies: list["Starship"] = []
 
         # Get sensor system for range
+        from ..components.ship_systems import SensorSystems  # local runtime import for isinstance narrowing
         sensors = self.ship.get_system("sensors")
-        sensor_range = sensors.scan_range() if sensors and sensors.active else 10
+        sensor_range = sensors.scan_range() if sensors and sensors.active and isinstance(sensors, SensorSystems) else 10
 
         # Find all enemy ships in range
         for obj in model.game_objects:
@@ -332,7 +330,7 @@ class ShipAI:
                 self.ship.position.z,
             )
 
-            if model._is_valid_move(self.ship, destination):
+            if model.is_valid_move(self.ship, destination):
                 return destination
 
         return None
@@ -368,7 +366,7 @@ class ShipAI:
             self.ship.position.x + dx, self.ship.position.y + dy, self.ship.position.z
         )
 
-        if model._is_valid_move(self.ship, destination):
+        if model.is_valid_move(self.ship, destination):
             return destination
 
         return None
@@ -404,7 +402,7 @@ class ShipAI:
             self.ship.position.x + dx, self.ship.position.y + dy, self.ship.position.z
         )
 
-        if model._is_valid_move(self.ship, destination):
+        if model.is_valid_move(self.ship, destination):
             return destination
 
         return None

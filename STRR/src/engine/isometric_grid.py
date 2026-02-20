@@ -47,14 +47,15 @@ Functions:
 """
 
 import logging
+import math
 from typing import Final, TypeAlias
 
 import pygame
 
 # Import GridPosition from the game entities module
-from src.game.entities.base import GridPosition
+from ..game.entities.base import GridPosition
 
-__version__: Final[str] = "0.0.23"
+__version__: Final[str] = "0.0.31"
 
 logger = logging.getLogger(__name__)
 
@@ -334,8 +335,6 @@ class GridRenderer:
             name: Entity name to display
             current_z_level: Current active z-level (None = no reference line)
         """
-        import math
-
         if not self.is_in_bounds(position):
             return
 

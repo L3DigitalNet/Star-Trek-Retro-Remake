@@ -4,17 +4,19 @@ Star Trek Retro Remake - Settings Dialog Tests
 
 Tests for settings dialog and all configuration tabs.
 """
+import pytest
+pytest.importorskip("PySide6")
+
 
 import sys
 from pathlib import Path
 from unittest.mock import Mock
 
-import pytest
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from STRR.src.game.ui.settings_dialog import (
+from src.game.ui.settings_dialog import (
     AudioTab,
     GameplayTab,
     GraphicsTab,
@@ -23,6 +25,8 @@ from STRR.src.game.ui.settings_dialog import (
     load_settings_from_toml,
     save_settings_to_toml,
 )
+
+pytestmark = pytest.mark.gui
 
 
 @pytest.fixture

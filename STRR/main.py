@@ -49,20 +49,16 @@ Functions:
 
 import logging
 import sys
-from pathlib import Path
 from typing import Final
 
-# Add src directory to Python path to enable module imports from STRR/src/
-sys.path.insert(0, str(Path(__file__).parent / "src"))
-
-from src.game.application import StarTrekRetroRemake
+from .src.game.application import StarTrekRetroRemake
 
 # Configure logging for application-wide debugging and monitoring
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.30"
 
 
 def main() -> None:

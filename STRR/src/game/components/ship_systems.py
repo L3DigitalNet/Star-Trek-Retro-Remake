@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 11-01-2025 (v0.0.29 - Refactored to use centralized config loader)
+Date Changed: 02-19-2026 (v0.0.32 - Move CrewManager morale tick from update(dt) to on_turn_advanced())
 License: MIT
 
 Features:
@@ -44,8 +44,12 @@ Functions:
 
 from __future__ import annotations
 
+import logging
+import math
+import tomllib
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import Final, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from ..entities.base import GameObject, GridPosition
@@ -53,7 +57,9 @@ if TYPE_CHECKING:
 
 from ...engine.config_loader import get_combat_config
 
-__version__ = "0.0.29"
+logger = logging.getLogger(__name__)
+
+__version__: Final[str] = "0.0.32"
 
 
 class ShipSystem(ABC):
@@ -80,7 +86,7 @@ class ShipSystem(ABC):
         None
     """
 
-    def __init__(self, name: str, max_efficiency: float = 1.0):
+    def __init__(self, name: str, max_efficiency: float = 1.0) -> None:
         """
         Initialize a ship system.
 
@@ -160,7 +166,7 @@ class WeaponSystems(ShipSystem):
         _is_in_firing_arc: Check if angle is within weapon arc
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize weapon systems with default configuration."""
         super().__init__("Weapons", 1.0)
 
@@ -172,8 +178,8 @@ class WeaponSystems(ShipSystem):
         self.torpedo_count = 10
         self.phaser_range = 5  # grid cells
         self.torpedo_range = 8  # grid cells
-        self.firing_arc = config.get("weapon_firing_arc", 270)
-        self.accuracy_base = config.get("weapon_accuracy_base", 0.85)
+        self.firing_arc = cast(float, config.get("weapon_firing_arc") or 270)
+        self.accuracy_base = cast(float, config.get("weapon_accuracy_base") or 0.85)
         self.cooldown_time = 1.0  # seconds between shots
         self.current_cooldown = 0.0
 
@@ -229,8 +235,6 @@ class WeaponSystems(ShipSystem):
         Returns:
             Relative angle to target in degrees (-180 to 180)
         """
-        import math
-
         # Calculate absolute angle to target
         dx = target_pos.x - ship_pos.x
         dy = target_pos.y - ship_pos.y
@@ -333,7 +337,7 @@ class WeaponSystems(ShipSystem):
 
         # Get range penalty from config
         config = get_combat_config()
-        range_penalty = config.get("weapon_range_penalty", 0.4)
+        range_penalty = cast(float, config.get("weapon_range_penalty") or 0.4)
 
         # Base accuracy modified by range
         range_factor = 1.0 - (distance / max_range) * range_penalty
@@ -434,7 +438,7 @@ class ShieldSystems(ShipSystem):
         _calculate_angle_to_attacker: Get angle from target to attacker
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize shield systems with default configuration."""
         super().__init__("Shields", 1.0)
 
@@ -494,16 +498,16 @@ class ShieldSystems(ShipSystem):
 
         # Shield effectiveness based on damage type (from config)
         if damage_type == "energy":
-            effectiveness = config.get("shield_energy_effectiveness", 0.85)
+            effectiveness = cast(float, config.get("shield_energy_effectiveness") or 0.85)
         else:
-            effectiveness = config.get("shield_kinetic_effectiveness", 0.65)
+            effectiveness = cast(float, config.get("shield_kinetic_effectiveness") or 0.65)
 
         # Calculate maximum possible absorption for this facing
         facing_strength = self.shield_facings[facing]
         max_absorption = damage * effectiveness
 
         # Shields absorb at least some damage when active (from config)
-        min_absorption_rate = config.get("shield_min_absorption", 0.1)
+        min_absorption_rate = cast(float, config.get("shield_min_absorption") or 0.1)
         min_absorption = min(damage * min_absorption_rate, facing_strength)
         absorbed = max(min_absorption, min(max_absorption, facing_strength))
 
@@ -532,8 +536,6 @@ class ShieldSystems(ShipSystem):
         Returns:
             Name of shield facing that was hit
         """
-        import math
-
         # Calculate angle from ship to attacker
         dx = attacker_pos.x - ship_pos.x
         dy = attacker_pos.y - ship_pos.y
@@ -653,7 +655,7 @@ class EngineSystems(ShipSystem):
         None
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize engine systems with default configuration."""
         super().__init__("Engines", 1.0)
         self.impulse_power = 1.0
@@ -710,7 +712,7 @@ class SensorSystems(ShipSystem):
         None
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize sensor systems with default configuration."""
         super().__init__("Sensors", 1.0)
         self.short_range = 3  # grid cells
@@ -785,7 +787,7 @@ class LifeSupportSystems(ShipSystem):
         None
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize life support systems with default configuration."""
         super().__init__("Life Support", 1.0)
         self.atmosphere_quality = 100.0
@@ -848,7 +850,7 @@ class ResourceManager(ShipSystem):
     # Class-level configuration cache
     _resource_config: dict[str, float | int] | None = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize resource manager with default configuration."""
         super().__init__("Resources", 1.0)
 
@@ -924,8 +926,8 @@ class ResourceManager(ShipSystem):
                     config_data = tomllib.load(f)
                     resources = config_data.get("game", {}).get("resources", {})
                     defaults.update(resources)
-        except Exception:
-            pass  # Use defaults if config loading fails
+        except (OSError, tomllib.TOMLDecodeError) as e:
+            logger.warning("Failed to load config %s: %s", config_path, e)
 
         cls._resource_config = defaults
         return defaults
@@ -1104,6 +1106,7 @@ class CrewManager(ShipSystem):
         record_casualty: Record crew casualty
         visit_starbase: Reset morale and casualty counters
         assign_crew: Assign crew member to position
+        on_turn_advanced: Process one game turn (morale tick, starbase counter)
 
     Private methods:
         _load_config: Load crew settings from TOML
@@ -1113,7 +1116,7 @@ class CrewManager(ShipSystem):
     # Class-level configuration cache
     _crew_config: dict[str, float | int] | None = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize crew manager with default configuration."""
         super().__init__("Crew", 1.0)
 
@@ -1181,8 +1184,8 @@ class CrewManager(ShipSystem):
                     config_data = tomllib.load(f)
                     crew = config_data.get("game", {}).get("crew", {})
                     defaults.update(crew)
-        except Exception:
-            pass  # Use defaults if config loading fails
+        except (OSError, tomllib.TOMLDecodeError) as e:
+            logger.warning("Failed to load config %s: %s", config_path, e)
 
         cls._crew_config = defaults
         return defaults
@@ -1265,18 +1268,34 @@ class CrewManager(ShipSystem):
             ]
             self.update_morale(turns_penalty)
 
-    def update(self, dt: float) -> None:
+    def on_turn_advanced(self) -> None:
         """
-        Update crew systems state.
+        Apply per-turn morale tick and starbase distance tracking.
 
-        Args:
-            dt: Time delta in seconds
+        Called once per game turn by GameModel.end_current_turn() — NOT from
+        update(dt), which fires at ~60fps. Incrementing turns_since_starbase in
+        update() would count 60 turns per second instead of one per game turn.
         """
         if not self.active:
             return
 
-        # Increment turn counter
+        # Increment turn counter once per game turn
         self.turns_since_starbase += 1
 
-        # Calculate and apply morale modifiers
+        # Calculate and apply morale modifiers based on new count
         self._calculate_morale_modifiers()
+
+    def update(self, dt: float) -> None:
+        """
+        Update crew systems state per frame.
+
+        Args:
+            dt: Time delta in seconds
+
+        Note: Per-turn logic (turns_since_starbase, morale tick) lives in
+        on_turn_advanced() — this method is intentionally a no-op so callers
+        that iterate all ShipSystem.update() calls don't need to be changed.
+        """
+        # Per-turn morale logic is handled in on_turn_advanced(); nothing to do
+        # here at frame rate. Method retained because ShipSystem ABC requires it
+        # and callers invoke update() on all systems without type inspection.

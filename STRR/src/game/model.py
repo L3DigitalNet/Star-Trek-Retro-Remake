@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 11-01-2025 (v0.0.29 - Refactored to use centralized config loader)
+Date Changed: 02-19-2026 (v0.0.32 - Call CrewManager.on_turn_advanced() from end_current_turn())
 License: MIT
 
 Features:
@@ -38,18 +38,35 @@ Functions:
     - None
 """
 
+import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final
+from typing import Final, TypedDict, cast
 
+from ..engine.config_loader import get_combat_config
 from .components.mission_manager import MissionManager
 from .entities.base import GameObject, GridPosition
 from .entities.starship import Starship
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.32"
 
+
+
+class TurnStatus(TypedDict):
+    """Typed return value for GameModel.get_turn_status().
+
+    Keys returned by get_turn_info() plus action_points fields added
+    by get_turn_status(). Controller unpacks these into update_turn_info().
+    """
+
+    turn_number: int
+    current_phase: str
+    active_entity: str
+    entities_remaining: int
+    action_points: int
+    max_action_points: int
 
 @dataclass
 class CombatResult:
@@ -98,7 +115,7 @@ class TurnManager:
         _restore_action_points: Restore all entities' action points
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the turn manager."""
         self.turn_number: int = 0
         self.current_phase: str = "input"  # input, action, resolution
@@ -269,7 +286,7 @@ class GameModel:
         _create_player_ship: Create the player's starting ship
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the game model with default state."""
         # Map system
         self.galaxy = GalaxyMap()
@@ -354,8 +371,9 @@ class GameModel:
             return False
 
         # Get engine system and validate it exists
+        from .components.ship_systems import EngineSystems  # local runtime import for isinstance narrowing
         engines = ship.get_system("engines")
-        if not engines:
+        if not engines or not isinstance(engines, EngineSystems):
             return False
 
         # Calculate fuel cost
@@ -405,11 +423,10 @@ class GameModel:
         Returns:
             CombatResult containing the outcome
         """
-        import random
-
         # Get attacker's weapon system
+        from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
         weapons = attacker.get_system("weapons")
-        if not weapons or not weapons.active:
+        if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return CombatResult(False, "Weapons offline", 0)
 
         # Check action points
@@ -453,11 +470,9 @@ class GameModel:
         damage = weapons.calculate_damage(weapon_type, distance, target)
 
         # Load combat config for critical hits
-        from ..engine.config_loader import get_combat_config
-
         config = get_combat_config()
-        crit_chance = config.get("critical_hit_chance", 0.1)
-        crit_multiplier = config.get("critical_hit_multiplier", 1.5)
+        crit_chance = cast(float, config.get("critical_hit_chance") or 0.1)
+        crit_multiplier = cast(float, config.get("critical_hit_multiplier") or 1.5)
 
         # Check for critical hit (from config)
         is_critical = random.random() < crit_chance
@@ -479,12 +494,12 @@ class GameModel:
         crit_text = " (CRITICAL HIT)" if is_critical else ""
         shield_text = (
             f" (shields absorbed {damage_result['shields_absorbed']})"
-            if damage_result["shields_absorbed"] > 0
+            if int(damage_result["shields_absorbed"]) > 0
             else ""
         )
         hull_text = (
             f" hull damage: {damage_result['hull_damage']}"
-            if damage_result["hull_damage"] > 0
+            if int(damage_result["hull_damage"]) > 0
             else ""
         )
         facing_text = (
@@ -510,8 +525,9 @@ class GameModel:
         Returns:
             List of targetable enemy ships
         """
+        from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
         weapons = attacker.get_system("weapons")
-        if not weapons or not weapons.active:
+        if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return []
 
         targets: list[Starship] = []
@@ -578,6 +594,14 @@ class GameModel:
             return False
 
         return True
+
+    def is_valid_move(self, ship: Starship, destination: GridPosition) -> bool:
+        """Check if a move is valid for the given entity.
+
+        Public API for AI controllers. Delegates to internal validation logic.
+        Exposed here to avoid coupling AI code to private GameModel internals.
+        """
+        return self._is_valid_move(ship, destination)
 
     def _create_player_ship(self, position: GridPosition) -> Starship:
         """
@@ -653,36 +677,51 @@ class GameModel:
         """
         if ship.ai_controller:
             ship.ai_controller.update(self)
-            self.turn_manager.register_entity(ship)
 
     def end_current_turn(self) -> None:
         """
         Manually end the current entity's turn.
 
         Advances to the next entity in turn order or starts a new turn
-        if all entities have acted.
+        if all entities have acted. Also fires per-turn callbacks on the
+        player ship's crew system so morale/starbase tracking increments
+        exactly once per turn, not once per frame.
         """
         self.turn_manager.next_entity()
 
-    def get_turn_status(self) -> dict[str, int | str]:
+        # Fire per-turn crew tick on the player ship. Local runtime import
+        # required — TYPE_CHECKING-only imports are erased at runtime and
+        # isinstance() against them raises NameError (see project CLAUDE.md).
+        assert hasattr(self, "player_ship"), (
+            "end_current_turn() called before initialize_new_game()"
+        )
+        from .components.ship_systems import CrewManager  # local runtime import
+        crew = self.player_ship.get_system("crew")
+        if isinstance(crew, CrewManager):
+            crew.on_turn_advanced()
+
+    def get_turn_status(self) -> TurnStatus:
         """
         Get current turn status information.
 
         Returns:
-            Dictionary with turn number, phase, active entity, and action points
+            TurnStatus with turn number, phase, active entity, and action points
         """
-        info = self.turn_manager.get_turn_info()
-
-        # Add action point information for current entity
-        current_entity = self.turn_manager.get_current_entity()
-        if current_entity:
-            info["action_points"] = current_entity.action_points
-            info["max_action_points"] = current_entity.max_action_points
-        else:
-            info["action_points"] = 0
-            info["max_action_points"] = 0
-
-        return info
+        # Build explicit TurnStatus instead of mutating get_turn_info() dict so
+        # mypy can verify the return type matches the TypedDict exactly.
+        tm = self.turn_manager
+        current_entity = tm.get_current_entity()
+        action_points: int = current_entity.action_points if current_entity else 0
+        max_action_points: int = current_entity.max_action_points if current_entity else 0
+        active_entity_name: str = current_entity.name if current_entity else "None"
+        return TurnStatus(
+            turn_number=tm.turn_number,
+            current_phase=tm.current_phase,
+            active_entity=active_entity_name,
+            entities_remaining=len(tm.turn_order) - tm.current_entity_index,
+            action_points=action_points,
+            max_action_points=max_action_points,
+        )
 
     def update_missions(self) -> None:
         """Update all active missions and check for completion."""

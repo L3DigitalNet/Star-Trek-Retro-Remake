@@ -79,6 +79,21 @@ except ImportError:
         pytest.skip("PySide6 not available for Qt tests")
 
 
+from src.engine.config_manager import initialize_config_manager
+
+
+@pytest.fixture(scope="session", autouse=True)
+def initialized_config():
+    """Initialize ConfigManager once for the entire test session.
+
+    Without this, any test that imports from src.game.commands (or any module
+    that calls get_config_manager() at import time) will fail during collection.
+    The config dir path mirrors what application.py uses at runtime.
+    """
+    config_dir = Path(__file__).parent.parent / "config"
+    initialize_config_manager(config_dir)
+
+
 from src.game.entities.base import GridPosition
 from src.game.entities.starship import Starship
 from src.game.maps.galaxy import GalaxyMap

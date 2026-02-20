@@ -37,7 +37,7 @@ Functions:
 
 from typing import Final
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.31"
 
 # Import tomllib from stdlib (Python 3.14+ guaranteed for this project)
 import tomllib

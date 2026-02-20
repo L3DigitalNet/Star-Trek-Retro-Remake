@@ -25,17 +25,19 @@ Requirements:
     - pytest >= 8.0.0
     - Python 3.14+
 """
+import pytest
+pygame = pytest.importorskip("pygame")
+
 
 from typing import Final
 from unittest.mock import Mock, patch
 
-import pygame
-import pytest
+from src.game.controller import GameController
+from src.game.entities.base import GridPosition
+from src.game.model import GameModel
+from src.game.states.state_machine import GameMode
 
-from STRR.src.game.controller import GameController
-from STRR.src.game.entities.base import GridPosition
-from STRR.src.game.model import GameModel
-from STRR.src.game.states.state_machine import GameMode
+pytestmark = pytest.mark.gui
 
 __version__: Final[str] = "0.0.18"
 
@@ -57,7 +59,7 @@ def mock_model():
     # Mock turn_manager
     model.turn_manager = Mock()
     model.turn_manager.get_current_entity.return_value = None
-    model.turn_manager.entities = []
+    model.turn_manager.active_entities = []
     return model
 
 

@@ -70,12 +70,12 @@ from PySide6.QtWidgets import (
 )
 
 if TYPE_CHECKING:
-    from STRR.src.game.components.mission_manager import (
+    from ..components.mission_manager import (
         Mission,
         MissionManager,
     )
 
-__version__: Final[str] = "0.0.26"
+__version__: Final[str] = "0.0.31"
 
 
 def format_difficulty_color(difficulty: int) -> str:
@@ -379,7 +379,7 @@ class MissionSelectionDialog(QDialog):
 
     def _load_missions(self) -> None:
         """Load available missions for the current sector."""
-        from STRR.src.game.components.mission_manager import MissionType
+        from ..components.mission_manager import MissionType
 
         missions = self.mission_manager.get_available_missions_by_sector(self.sector)
 

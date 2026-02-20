@@ -15,6 +15,8 @@ License: MIT
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestCompatModule:
     """Test compatibility layer module."""

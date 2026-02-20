@@ -11,16 +11,20 @@ Date Created: 10-30-2025
 Date Changed: 10-30-2025
 License: MIT
 """
+import pytest
+pygame = pytest.importorskip("pygame")
+
 
 from typing import Final
 from unittest.mock import Mock
 
-import pygame
 from src.game.states.state_machine import (
     GameMode,
     GameState,
     GameStateManager,
 )
+
+pytestmark = pytest.mark.gui
 
 __version__: Final[str] = "0.0.11"
 

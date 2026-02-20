@@ -27,10 +27,11 @@ Requirements:
 """
 
 import pytest
+from src.game.components.ship_systems import CrewManager, ResourceManager
+from src.game.entities.base import GridPosition
+from src.game.entities.starship import Starship
 
-from STRR.src.game.components.ship_systems import CrewManager, ResourceManager
-from STRR.src.game.entities.base import GridPosition
-from STRR.src.game.entities.starship import Starship
+pytestmark = pytest.mark.unit
 
 __version__ = "0.0.22"
 
@@ -316,6 +317,36 @@ class TestCrewManager:
 
         # Morale should have decreased after >10 turns
         assert crew.morale < initial_morale
+
+    def test_on_turn_advanced_increments_counter(self):
+        """Test on_turn_advanced increments turns_since_starbase by 1 each call."""
+        crew = CrewManager()
+        assert crew.turns_since_starbase == 0
+
+        crew.on_turn_advanced()
+        assert crew.turns_since_starbase == 1
+
+        crew.on_turn_advanced()
+        assert crew.turns_since_starbase == 2
+
+    def test_on_turn_advanced_inactive_is_noop(self):
+        """Test on_turn_advanced does nothing when crew system is inactive."""
+        crew = CrewManager()
+        crew.active = False
+        initial_turns = crew.turns_since_starbase
+
+        crew.on_turn_advanced()
+
+        assert crew.turns_since_starbase == initial_turns
+
+    def test_update_is_noop_for_turns_since_starbase(self):
+        """Test update(dt) does not change turns_since_starbase (frame-rate call)."""
+        crew = CrewManager()
+        initial_turns = crew.turns_since_starbase
+
+        crew.update(0.016)  # Simulate one 16ms frame tick
+
+        assert crew.turns_since_starbase == initial_turns
 
 
 class TestStarshipResourceIntegration:

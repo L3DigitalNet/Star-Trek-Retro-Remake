@@ -26,6 +26,8 @@ from src.engine.config_manager import (
 )
 from src.game.exceptions import ConfigurationError
 
+pytestmark = pytest.mark.unit
+
 
 class TestConfigManager:
     """Test suite for ConfigManager class."""

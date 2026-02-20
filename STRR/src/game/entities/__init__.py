@@ -17,7 +17,7 @@ from typing import Final
 from .base import GameObject, GridPosition
 from .starship import SpaceStation, Starship
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.31"
 
 __all__ = [
     "GridPosition",

@@ -11,7 +11,7 @@ Author: Star Trek Retro Remake Development Team
 Email: team@startrekretroremake.dev
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 11-02-2025 (v0.0.28 - Config manager initialization fix, extension handling)
+Date Changed: 02-19-2026 (v0.0.31 - Fix tomli_w None assignment type error)
 License: MIT
 
 Features:
@@ -39,16 +39,16 @@ import tomllib
 from pathlib import Path
 from typing import Any, Final
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.31"
 
 # For TOML writing, we'll use tomli_w (lightweight, stdlib-compatible)
 try:
     import tomli_w
 except ImportError:
     # Fallback for development - will need tomli_w for production
-    tomli_w = None
+    tomli_w = None  # type: ignore[assignment]
 
-from src.game.exceptions import ConfigurationError
+from ..game.exceptions import ConfigurationError
 
 
 class ConfigManager:

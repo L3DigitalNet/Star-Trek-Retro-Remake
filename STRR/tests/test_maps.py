@@ -14,10 +14,13 @@ License: MIT
 
 from typing import Final
 
+import pytest
 from src.game.entities.base import GridPosition
 from src.game.entities.starship import SpaceStation, Starship
 from src.game.maps.galaxy import GalaxyMap
 from src.game.maps.sector import SectorMap
+
+pytestmark = pytest.mark.unit
 
 __version__: Final[str] = "0.0.11"
 

@@ -9,7 +9,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 02-19-2026
 License: MIT
 
 Features:
@@ -30,11 +30,11 @@ Functions:
 """
 
 import random
-from typing import Dict, Final, List, Optional, Tuple
+from typing import Final
 
-from ..entities.base import GridPosition
+from ..entities.base import GameObject, GridPosition
 
-__version__: Final[str] = "0.0.2"
+__version__: Final[str] = "0.0.31"
 
 
 class SectorMap:
@@ -66,7 +66,7 @@ class SectorMap:
 
     def __init__(
         self,
-        coordinates: Tuple[int, int],
+        coordinates: tuple[int, int],
         sector_type: str = "standard",
         random_seed: int | None = None,
     ):
@@ -85,9 +85,9 @@ class SectorMap:
         self.random_seed = random_seed
 
         # Initialize entity and obstacle tracking structures
-        self.entities: Dict[GridPosition, object] = {}
+        self.entities: dict[GridPosition, GameObject] = {}
         self.obstacles: set[GridPosition] = set()
-        self.environmental_effects: Dict[GridPosition, str] = {}
+        self.environmental_effects: dict[GridPosition, str] = {}
 
         # Generate sector content based on type
         self._initialize_sector()
@@ -121,7 +121,7 @@ class SectorMap:
         """
         return position in self.obstacles
 
-    def place_entity(self, entity: object, position: GridPosition) -> bool:
+    def place_entity(self, entity: GameObject, position: GridPosition) -> bool:
         """
         Place an entity at a position.
 
@@ -144,7 +144,7 @@ class SectorMap:
         self.entities[position] = entity
         return True
 
-    def remove_entity(self, position: GridPosition) -> Optional[object]:
+    def remove_entity(self, position: GridPosition) -> GameObject | None:
         """
         Remove an entity from a position.
 
@@ -156,7 +156,7 @@ class SectorMap:
         """
         return self.entities.pop(position, None)
 
-    def get_entity_at(self, position: GridPosition) -> Optional[object]:
+    def get_entity_at(self, position: GridPosition) -> GameObject | None:
         """
         Get entity at a specific position.
 
@@ -222,7 +222,7 @@ class SectorMap:
 
         return True
 
-    def get_all_entities(self) -> List[Tuple[GridPosition, object]]:
+    def get_all_entities(self) -> list[tuple[GridPosition, GameObject]]:
         """
         Get all entities in the sector.
 
