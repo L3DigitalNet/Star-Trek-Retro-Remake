@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-30-2025
-Date Changed: 02-19-2026 (v0.0.31 - Add isinstance narrowing and fix ConfigLoader.get() casts)
+Date Changed: 02-19-2026 (v0.0.31 - Use public is_valid_move, remove stale _assess_threat docstring)
 License: MIT
 
 Features:
@@ -88,7 +88,6 @@ class ShipAI:
         _update_flee: Execute flee behavior
         _transition_state: Handle state transitions
         _find_patrol_point: Find random point for patrol
-        _assess_threat: Evaluate threat level
     """
 
     def __init__(self, ship: Starship):
@@ -334,7 +333,7 @@ class ShipAI:
                 self.ship.position.z,
             )
 
-            if model._is_valid_move(self.ship, destination):
+            if model.is_valid_move(self.ship, destination):
                 return destination
 
         return None
@@ -370,7 +369,7 @@ class ShipAI:
             self.ship.position.x + dx, self.ship.position.y + dy, self.ship.position.z
         )
 
-        if model._is_valid_move(self.ship, destination):
+        if model.is_valid_move(self.ship, destination):
             return destination
 
         return None
@@ -406,7 +405,7 @@ class ShipAI:
             self.ship.position.x + dx, self.ship.position.y + dy, self.ship.position.z
         )
 
-        if model._is_valid_move(self.ship, destination):
+        if model.is_valid_move(self.ship, destination):
             return destination
 
         return None

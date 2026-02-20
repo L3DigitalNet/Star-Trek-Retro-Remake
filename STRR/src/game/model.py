@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 02-19-2026 (v0.0.31 - Remove redundant register_entity call in process_ai_turn)
+Date Changed: 02-19-2026 (v0.0.31 - Expose is_valid_move as public API)
 License: MIT
 
 Features:
@@ -596,6 +596,14 @@ class GameModel:
             return False
 
         return True
+
+    def is_valid_move(self, ship: Starship, destination: GridPosition) -> bool:
+        """Check if a move is valid for the given entity.
+
+        Public API for AI controllers. Delegates to internal validation logic.
+        Exposed here to avoid coupling AI code to private GameModel internals.
+        """
+        return self._is_valid_move(ship, destination)
 
     def _create_player_ship(self, position: GridPosition) -> Starship:
         """
