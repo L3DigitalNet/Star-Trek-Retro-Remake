@@ -360,10 +360,13 @@ experience = 100
         for obj in mission.objectives:
             obj.update_progress(obj.target_count)
 
-        # Create mock player ship
+        # Create mock player ship using the correct component API:
+        # get_system("resources") must return a ResourceManager instance for
+        # isinstance narrowing to pass in complete_mission().
+        from src.game.components.ship_systems import ResourceManager
         mock_ship = Mock()
-        mock_resource_manager = Mock()
-        mock_ship.resource_manager = mock_resource_manager
+        mock_resource_manager = Mock(spec=ResourceManager)
+        mock_ship.get_system.return_value = mock_resource_manager
 
         # Act
         manager.complete_mission(mission, mock_ship)
@@ -372,8 +375,8 @@ experience = 100
         assert mission.status == MissionStatus.COMPLETED
         assert mission in manager.completed_missions
         assert mission not in manager.active_missions
-        mock_resource_manager.add_supplies.assert_called_once()
-        mock_resource_manager.add_spare_parts.assert_called_once()
+        mock_ship.get_system.assert_called_once_with("resources")
+        mock_resource_manager.resupply.assert_called()
 
     def test_update_active_missions(self, mission_templates_file):
         """Test updating all active missions."""
