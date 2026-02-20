@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 02-19-2026 (v0.0.31 - Fix bare except in ResourceManager and CrewManager _load_config)
+Date Changed: 02-19-2026 (v0.0.32 - Move CrewManager morale tick from update(dt) to on_turn_advanced())
 License: MIT
 
 Features:
@@ -59,7 +59,7 @@ from ...engine.config_loader import get_combat_config
 
 logger = logging.getLogger(__name__)
 
-__version__: Final[str] = "0.0.31"
+__version__: Final[str] = "0.0.32"
 
 
 class ShipSystem(ABC):
@@ -1267,18 +1267,34 @@ class CrewManager(ShipSystem):
             ]
             self.update_morale(turns_penalty)
 
-    def update(self, dt: float) -> None:
+    def on_turn_advanced(self) -> None:
         """
-        Update crew systems state.
+        Apply per-turn morale tick and starbase distance tracking.
 
-        Args:
-            dt: Time delta in seconds
+        Called once per game turn by GameModel.end_current_turn() — NOT from
+        update(dt), which fires at ~60fps. Incrementing turns_since_starbase in
+        update() would count 60 turns per second instead of one per game turn.
         """
         if not self.active:
             return
 
-        # Increment turn counter
+        # Increment turn counter once per game turn
         self.turns_since_starbase += 1
 
-        # Calculate and apply morale modifiers
+        # Calculate and apply morale modifiers based on new count
         self._calculate_morale_modifiers()
+
+    def update(self, dt: float) -> None:
+        """
+        Update crew systems state per frame.
+
+        Args:
+            dt: Time delta in seconds
+
+        Note: Per-turn logic (turns_since_starbase, morale tick) lives in
+        on_turn_advanced() — this method is intentionally a no-op so callers
+        that iterate all ShipSystem.update() calls don't need to be changed.
+        """
+        # Per-turn morale logic is handled in on_turn_advanced(); nothing to do
+        # here at frame rate. Method retained because ShipSystem ABC requires it
+        # and callers invoke update() on all systems without type inspection.

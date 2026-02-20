@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 02-19-2026 (v0.0.31 - Expose is_valid_move as public API)
+Date Changed: 02-19-2026 (v0.0.32 - Call CrewManager.on_turn_advanced() from end_current_turn())
 License: MIT
 
 Features:
@@ -50,7 +50,7 @@ from .entities.starship import Starship
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.31"
+__version__: Final[str] = "0.0.32"
 
 
 
@@ -683,9 +683,20 @@ class GameModel:
         Manually end the current entity's turn.
 
         Advances to the next entity in turn order or starts a new turn
-        if all entities have acted.
+        if all entities have acted. Also fires per-turn callbacks on the
+        player ship's crew system so morale/starbase tracking increments
+        exactly once per turn, not once per frame.
         """
         self.turn_manager.next_entity()
+
+        # Fire per-turn crew tick on the player ship. Local runtime import
+        # required — TYPE_CHECKING-only imports are erased at runtime and
+        # isinstance() against them raises NameError (see project CLAUDE.md).
+        if hasattr(self, "player_ship"):
+            from .components.ship_systems import CrewManager  # local runtime import
+            crew = self.player_ship.get_system("crew")
+            if isinstance(crew, CrewManager):
+                crew.on_turn_advanced()
 
     def get_turn_status(self) -> TurnStatus:
         """
