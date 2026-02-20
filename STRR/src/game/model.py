@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 11-01-2025 (v0.0.29 - Refactored to use centralized config loader)
+Date Changed: 02-19-2026 (v0.0.31 - Remove redundant register_entity call in process_ai_turn)
 License: MIT
 
 Features:
@@ -48,7 +48,7 @@ from .entities.starship import Starship
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.30"
+__version__: Final[str] = "0.0.31"
 
 
 @dataclass
@@ -653,7 +653,6 @@ class GameModel:
         """
         if ship.ai_controller:
             ship.ai_controller.update(self)
-            self.turn_manager.register_entity(ship)
 
     def end_current_turn(self) -> None:
         """
