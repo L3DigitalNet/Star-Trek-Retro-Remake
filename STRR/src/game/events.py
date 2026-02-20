@@ -35,7 +35,7 @@ Functions:
 import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Final, Optional
+from typing import Any, Callable, Final
 
 __version__: Final[str] = "0.0.31"
 
@@ -104,7 +104,7 @@ class EventListener:
 
     callback: Callable[[GameEvent], None]
     priority: EventPriority = EventPriority.NORMAL
-    event_filter: Optional[Callable[[GameEvent], bool]] = None
+    event_filter: Callable[[GameEvent], bool] | None = None
 
 
 class EventBus:
@@ -142,7 +142,7 @@ class EventBus:
         event_type: str,
         callback: Callable[[GameEvent], None],
         priority: EventPriority = EventPriority.NORMAL,
-        event_filter: Optional[Callable[[GameEvent], bool]] = None,
+        event_filter: Callable[[GameEvent], bool] | None = None,
     ) -> None:
         """
         Register an event listener.
@@ -235,7 +235,7 @@ class EventBus:
                         exc_info=True,
                     )
 
-    def clear(self, event_type: Optional[str] = None) -> None:
+    def clear(self, event_type: str | None = None) -> None:
         """
         Remove all listeners.
 
@@ -295,7 +295,7 @@ class EventBus:
 
 
 # Global event bus instance
-_global_event_bus: Optional[EventBus] = None
+_global_event_bus: EventBus | None = None
 
 
 def get_event_bus() -> EventBus:
@@ -325,7 +325,7 @@ def subscribe_event(
     event_type: str,
     callback: Callable[[GameEvent], None],
     priority: EventPriority = EventPriority.NORMAL,
-    event_filter: Optional[Callable[[GameEvent], bool]] = None,
+    event_filter: Callable[[GameEvent], bool] | None = None,
 ) -> None:
     """
     Convenience function to subscribe to global event bus.

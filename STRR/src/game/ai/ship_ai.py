@@ -40,7 +40,7 @@ import random
 
 if TYPE_CHECKING:
     from ..entities.starship import Starship
-    from ..entities.base import GridPosition, GameObject
+    from ..entities.base import GridPosition
     from ..model import GameModel
 
 from ...engine.config_loader import get_combat_config
@@ -199,9 +199,6 @@ class ShipAI:
         weapons = self.ship.get_system("weapons")
         if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return
-
-        # Calculate distance to target
-        distance = self.ship.position.distance_to(self.target.position)
 
         # If in weapon range, fire
         if weapons.can_target(

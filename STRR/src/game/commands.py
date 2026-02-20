@@ -35,7 +35,7 @@ Functions:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Final, Optional
+from typing import Final
 
 from .entities.base import GridPosition
 from .entities.starship import Starship
@@ -192,7 +192,7 @@ class MoveShipCommand(Command):
         )
         self.ship = ship
         self.destination = destination
-        self.previous_position: Optional[GridPosition] = None
+        self.previous_position: GridPosition | None = None
         self.previous_fuel: float = 0.0
 
     def _do_execute(self) -> bool:

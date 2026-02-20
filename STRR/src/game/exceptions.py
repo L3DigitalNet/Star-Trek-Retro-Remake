@@ -35,7 +35,7 @@ Functions:
     - None
 """
 
-from typing import Final, Optional
+from typing import Final
 
 __version__: Final[str] = "0.0.31"
 
@@ -48,7 +48,7 @@ class GameError(Exception):
     to allow for consistent error handling throughout the application.
     """
 
-    def __init__(self, message: str, details: Optional[dict] = None):
+    def __init__(self, message: str, details: dict | None = None):
         """
         Initialize game error.
 
@@ -95,7 +95,7 @@ class InsufficientResourcesError(GameError):
         resource_type: str,
         required: float,
         available: float,
-        message: Optional[str] = None,
+        message: str | None = None,
     ):
         """
         Initialize insufficient resources error.
@@ -129,7 +129,7 @@ class SystemOfflineError(GameError):
     that is currently offline or destroyed.
     """
 
-    def __init__(self, system_name: str, message: Optional[str] = None):
+    def __init__(self, system_name: str, message: str | None = None):
         """
         Initialize system offline error.
 
@@ -174,7 +174,7 @@ class ConfigurationError(GameError):
     def __init__(
         self,
         config_name: str,
-        message: Optional[str] = None,
+        message: str | None = None,
         **kwargs: str | int | float,
     ) -> None:
         """
@@ -202,7 +202,7 @@ class SaveLoadError(GameError):
         self,
         operation: str,
         filepath: str,
-        message: Optional[str] = None,
+        message: str | None = None,
         **kwargs: str | int | float,
     ) -> None:
         """
@@ -229,7 +229,7 @@ class StateTransitionError(GameError):
     game states in an invalid manner.
     """
 
-    def __init__(self, from_state: str, to_state: str, message: Optional[str] = None):
+    def __init__(self, from_state: str, to_state: str, message: str | None = None):
         """
         Initialize state transition error.
 
@@ -251,7 +251,7 @@ class EntityNotFoundError(GameError):
     an entity that doesn't exist or cannot be located.
     """
 
-    def __init__(self, entity_id: str, message: Optional[str] = None):
+    def __init__(self, entity_id: str, message: str | None = None):
         """
         Initialize entity not found error.
 
