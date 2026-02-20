@@ -27,7 +27,7 @@ Requirements:
 from typing import Final
 from unittest.mock import MagicMock, patch
 
-from STRR.src.game.application import StarTrekRetroRemake
+from src.game.application import StarTrekRetroRemake
 
 __version__: Final[str] = "0.0.18"
 
@@ -35,11 +35,11 @@ __version__: Final[str] = "0.0.18"
 class TestStarTrekRetroRemakeInitialization:
     """Test StarTrekRetroRemake application initialization."""
 
-    @patch("STRR.src.game.application.pygame.init")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame.init")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_application_initialization_creates_mvc_components(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame_init
     ):
@@ -60,11 +60,11 @@ class TestStarTrekRetroRemakeInitialization:
         assert app.controller is not None
         assert app.view is not None
 
-    @patch("STRR.src.game.application.pygame.init")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame.init")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_application_initializes_pygame(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame_init
     ):
@@ -80,11 +80,11 @@ class TestStarTrekRetroRemakeInitialization:
         # Assert
         mock_pygame_init.assert_called_once()
 
-    @patch("STRR.src.game.application.pygame.init")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame.init")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_application_initializes_qapplication(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame_init
     ):
@@ -101,11 +101,11 @@ class TestStarTrekRetroRemakeInitialization:
         mock_qapp.assert_called_once()
         assert app.qt_app == mock_qapp_instance
 
-    @patch("STRR.src.game.application.pygame.init")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame.init")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_application_uses_existing_qapplication(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame_init
     ):
@@ -120,11 +120,11 @@ class TestStarTrekRetroRemakeInitialization:
         # Assert
         assert app.qt_app == existing_qapp
 
-    @patch("STRR.src.game.application.pygame.init")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame.init")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_application_connects_controller_and_view(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame_init
     ):
@@ -142,11 +142,11 @@ class TestStarTrekRetroRemakeInitialization:
         # Assert
         mock_controller_instance.set_view.assert_called_once_with(app.view)
 
-    @patch("STRR.src.game.application.pygame.init")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame.init")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_application_running_state_is_true_after_init(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame_init
     ):
@@ -166,11 +166,11 @@ class TestStarTrekRetroRemakeInitialization:
 class TestStarTrekRetroRemakeShutdown:
     """Test application shutdown and cleanup."""
 
-    @patch("STRR.src.game.application.pygame")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_shutdown_stops_controller(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame
     ):
@@ -190,11 +190,11 @@ class TestStarTrekRetroRemakeShutdown:
         # Assert
         mock_controller_instance.stop.assert_called_once()
 
-    @patch("STRR.src.game.application.pygame")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_shutdown_closes_view(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame
     ):
@@ -214,11 +214,11 @@ class TestStarTrekRetroRemakeShutdown:
         # Assert
         mock_view_instance.close.assert_called_once()
 
-    @patch("STRR.src.game.application.pygame")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_shutdown_sets_running_to_false(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame
     ):
@@ -236,11 +236,11 @@ class TestStarTrekRetroRemakeShutdown:
         # Assert
         assert app.running is False
 
-    @patch("STRR.src.game.application.pygame")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_shutdown_cleans_up_pygame(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame
     ):
@@ -258,11 +258,11 @@ class TestStarTrekRetroRemakeShutdown:
         # Assert
         mock_pygame.quit.assert_called_once()
 
-    @patch("STRR.src.game.application.pygame")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.pygame")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_shutdown_quits_qapplication(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame
     ):
@@ -284,12 +284,12 @@ class TestStarTrekRetroRemakeShutdown:
 class TestStarTrekRetroRemakeRun:
     """Test application run method."""
 
-    @patch("STRR.src.game.application.sys.exit")
-    @patch("STRR.src.game.application.pygame")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.sys.exit")
+    @patch("src.game.application.pygame")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_run_initializes_new_game(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame, mock_exit
     ):
@@ -310,12 +310,12 @@ class TestStarTrekRetroRemakeRun:
         # Assert
         mock_controller_instance.start_new_game.assert_called_once()
 
-    @patch("STRR.src.game.application.sys.exit")
-    @patch("STRR.src.game.application.pygame")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.sys.exit")
+    @patch("src.game.application.pygame")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_run_shows_view(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame, mock_exit
     ):
@@ -336,12 +336,12 @@ class TestStarTrekRetroRemakeRun:
         # Assert
         mock_view_instance.run.assert_called_once()
 
-    @patch("STRR.src.game.application.sys.exit")
-    @patch("STRR.src.game.application.pygame")
-    @patch("STRR.src.game.application.QApplication")
-    @patch("STRR.src.game.application.GameView")
-    @patch("STRR.src.game.application.GameController")
-    @patch("STRR.src.game.application.GameModel")
+    @patch("src.game.application.sys.exit")
+    @patch("src.game.application.pygame")
+    @patch("src.game.application.QApplication")
+    @patch("src.game.application.GameView")
+    @patch("src.game.application.GameController")
+    @patch("src.game.application.GameModel")
     def test_run_executes_qapplication_event_loop(
         self, mock_model, mock_controller, mock_view, mock_qapp, mock_pygame, mock_exit
     ):

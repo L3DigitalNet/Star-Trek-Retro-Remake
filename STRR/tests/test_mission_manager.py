@@ -41,7 +41,7 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 
-from STRR.src.game.components.mission_manager import (
+from src.game.components.mission_manager import (
     Mission,
     MissionManager,
     MissionObjective,

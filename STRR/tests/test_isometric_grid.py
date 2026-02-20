@@ -32,13 +32,13 @@ from math import isclose
 import pygame
 import pytest
 
-from STRR.src.engine.isometric_grid import (
+from src.engine.isometric_grid import (
     GridRenderer,
     create_combat_grid,
     create_default_grid,
     create_sector_grid,
 )
-from STRR.src.game.entities.base import GridPosition
+from src.game.entities.base import GridPosition
 
 
 class TestGridPosition:

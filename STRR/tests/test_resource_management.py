@@ -28,9 +28,9 @@ Requirements:
 
 import pytest
 
-from STRR.src.game.components.ship_systems import CrewManager, ResourceManager
-from STRR.src.game.entities.base import GridPosition
-from STRR.src.game.entities.starship import Starship
+from src.game.components.ship_systems import CrewManager, ResourceManager
+from src.game.entities.base import GridPosition
+from src.game.entities.starship import Starship
 
 __version__ = "0.0.22"
 

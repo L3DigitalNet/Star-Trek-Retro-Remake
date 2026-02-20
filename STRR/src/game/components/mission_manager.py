@@ -61,7 +61,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 if TYPE_CHECKING:
-    from STRR.src.game.entities.starship import Starship
+    from ..entities.starship import Starship
 
 try:
     import tomllib

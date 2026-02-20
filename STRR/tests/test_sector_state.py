@@ -29,8 +29,8 @@ from unittest.mock import MagicMock, Mock
 import pygame
 import pytest
 
-from STRR.src.game.states.sector_state import SectorState
-from STRR.src.game.states.state_machine import GameMode
+from src.game.states.sector_state import SectorState
+from src.game.states.state_machine import GameMode
 
 __version__: Final[str] = "0.0.18"
 

@@ -114,19 +114,20 @@ class StarTrekRetroRemake:
 
     def _initialize_systems(self) -> None:
         """
-        Initialize PyGame, PySide6, and configuration systems.
+        Initialize configuration, PyGame, and PySide6 systems.
 
         Initializes core game systems in the following order:
-        1. PyGame (game rendering engine)
-        2. PySide6 (UI framework)
-        3. Configuration manager (TOML config file loading)
+        1. Configuration manager (TOML config file loading)
+        2. PyGame (game rendering engine)
+        3. PySide6 (UI framework)
 
         The configuration manager must be initialized before creating
         the GameView, as the view requires access to display settings
         and other configuration values during initialization.
         """
         # Initialize configuration manager FIRST (required by other systems)
-        config_dir = Path(__file__).parents[2] / "config"
+        # Path: STRR/src/game/application.py -> STRR/config/
+        config_dir = Path(__file__).parent.parent.parent / "config"
         initialize_config_manager(config_dir)
 
         # Initialize PyGame for game rendering (without display)
@@ -137,11 +138,6 @@ class StarTrekRetroRemake:
             self.qt_app = QApplication(sys.argv)
         else:
             self.qt_app = QApplication.instance()
-
-        # Initialize configuration manager with config directory
-        # Path: STRR/src/game/application.py -> STRR/config/
-        config_dir = Path(__file__).parent.parent.parent / "config"
-        initialize_config_manager(config_dir)
 
     def _cleanup(self) -> None:
         """Clean up resources on shutdown."""

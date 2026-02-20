@@ -14,7 +14,7 @@ import pytest
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from STRR.src.game.components.mission_manager import (
+from src.game.components.mission_manager import (
     Mission,
     MissionManager,
     MissionObjective,
@@ -87,7 +87,7 @@ class TestMissionDialogHelpers:
 
     def test_format_difficulty_color(self):
         """Test difficulty color formatting."""
-        from STRR.src.game.ui.mission_dialogs import format_difficulty_color
+        from src.game.ui.mission_dialogs import format_difficulty_color
 
         # Test all difficulty levels
         assert format_difficulty_color(1) == "#00FF00"  # Green
@@ -99,7 +99,7 @@ class TestMissionDialogHelpers:
 
     def test_format_reward_text(self, sample_mission):
         """Test reward text formatting."""
-        from STRR.src.game.ui.mission_dialogs import format_reward_text
+        from src.game.ui.mission_dialogs import format_reward_text
 
         text = format_reward_text(sample_mission)
 
@@ -119,7 +119,7 @@ class TestObjectiveProgressBar:
 
     def test_progress_bar_initialization(self, qtbot):
         """Test progress bar initialization."""
-        from STRR.src.game.ui.mission_dialogs import ObjectiveProgressBar
+        from src.game.ui.mission_dialogs import ObjectiveProgressBar
 
         progress_bar = ObjectiveProgressBar("Test Objective", 2, 5)
         qtbot.addWidget(progress_bar)
@@ -135,7 +135,7 @@ class TestObjectiveProgressBar:
 
     def test_progress_bar_update(self, qtbot):
         """Test progress bar value update."""
-        from STRR.src.game.ui.mission_dialogs import ObjectiveProgressBar
+        from src.game.ui.mission_dialogs import ObjectiveProgressBar
 
         progress_bar = ObjectiveProgressBar("Test Objective", 0, 10)
         qtbot.addWidget(progress_bar)
@@ -153,7 +153,7 @@ class TestMissionBriefingDialog:
 
     def test_briefing_dialog_initialization(self, qtbot, sample_mission):
         """Test briefing dialog displays mission correctly."""
-        from STRR.src.game.ui.mission_dialogs import MissionBriefingDialog
+        from src.game.ui.mission_dialogs import MissionBriefingDialog
 
         dialog = MissionBriefingDialog(sample_mission)
         qtbot.addWidget(dialog)
@@ -170,7 +170,7 @@ class TestMissionBriefingDialog:
 
     def test_briefing_dialog_accept_signal(self, qtbot, sample_mission):
         """Test mission acceptance signal."""
-        from STRR.src.game.ui.mission_dialogs import MissionBriefingDialog
+        from src.game.ui.mission_dialogs import MissionBriefingDialog
 
         dialog = MissionBriefingDialog(sample_mission)
         qtbot.addWidget(dialog)
@@ -187,7 +187,7 @@ class TestMissionBriefingDialog:
 
     def test_briefing_dialog_decline_signal(self, qtbot, sample_mission):
         """Test mission decline signal."""
-        from STRR.src.game.ui.mission_dialogs import MissionBriefingDialog
+        from src.game.ui.mission_dialogs import MissionBriefingDialog
 
         dialog = MissionBriefingDialog(sample_mission)
         qtbot.addWidget(dialog)
@@ -208,7 +208,7 @@ class TestMissionSelectionDialog:
 
     def test_selection_dialog_initialization(self, qtbot, mission_manager):
         """Test selection dialog initialization."""
-        from STRR.src.game.ui.mission_dialogs import MissionSelectionDialog
+        from src.game.ui.mission_dialogs import MissionSelectionDialog
 
         dialog = MissionSelectionDialog(mission_manager, "Alpha Quadrant")
         qtbot.addWidget(dialog)
@@ -224,7 +224,7 @@ class TestMissionSelectionDialog:
 
     def test_selection_dialog_loads_missions(self, qtbot, mission_manager):
         """Test mission loading in selection dialog."""
-        from STRR.src.game.ui.mission_dialogs import MissionSelectionDialog
+        from src.game.ui.mission_dialogs import MissionSelectionDialog
 
         # Generate some missions
         mission1 = mission_manager.generate_mission(
@@ -243,7 +243,7 @@ class TestMissionSelectionDialog:
 
     def test_selection_dialog_mission_selection(self, qtbot, mission_manager):
         """Test mission selection from list."""
-        from STRR.src.game.ui.mission_dialogs import MissionSelectionDialog
+        from src.game.ui.mission_dialogs import MissionSelectionDialog
 
         # Generate mission
         mission = mission_manager.generate_mission(
@@ -269,7 +269,7 @@ class TestMissionTrackerWidget:
 
     def test_tracker_initialization(self, qtbot, mission_manager):
         """Test tracker widget initialization."""
-        from STRR.src.game.ui.mission_dialogs import MissionTrackerWidget
+        from src.game.ui.mission_dialogs import MissionTrackerWidget
 
         tracker = MissionTrackerWidget(mission_manager)
         qtbot.addWidget(tracker)
@@ -279,7 +279,7 @@ class TestMissionTrackerWidget:
 
     def test_tracker_displays_no_missions(self, qtbot, mission_manager):
         """Test tracker displays message when no active missions."""
-        from STRR.src.game.ui.mission_dialogs import MissionTrackerWidget
+        from src.game.ui.mission_dialogs import MissionTrackerWidget
 
         tracker = MissionTrackerWidget(mission_manager)
         qtbot.addWidget(tracker)
@@ -292,7 +292,7 @@ class TestMissionTrackerWidget:
 
     def test_tracker_displays_active_missions(self, qtbot, mission_manager):
         """Test tracker displays active missions."""
-        from STRR.src.game.ui.mission_dialogs import MissionTrackerWidget
+        from src.game.ui.mission_dialogs import MissionTrackerWidget
 
         # Create and activate mission
         mission = mission_manager.generate_mission(
@@ -311,7 +311,7 @@ class TestMissionTrackerWidget:
 
     def test_tracker_updates_on_mission_changes(self, qtbot, mission_manager):
         """Test tracker updates when missions change."""
-        from STRR.src.game.ui.mission_dialogs import MissionTrackerWidget
+        from src.game.ui.mission_dialogs import MissionTrackerWidget
 
         tracker = MissionTrackerWidget(mission_manager)
         qtbot.addWidget(tracker)
@@ -340,7 +340,7 @@ class TestMissionDialogIntegration:
 
     def test_briefing_to_selection_flow(self, qtbot, mission_manager):
         """Test flow from selection to briefing dialog."""
-        from STRR.src.game.ui.mission_dialogs import MissionSelectionDialog
+        from src.game.ui.mission_dialogs import MissionSelectionDialog
 
         # Create mission
         mission = mission_manager.generate_mission(
@@ -362,7 +362,7 @@ class TestMissionDialogIntegration:
 
     def test_mission_accepted_updates_manager(self, qtbot, mission_manager):
         """Test accepting mission updates mission manager."""
-        from STRR.src.game.ui.mission_dialogs import MissionBriefingDialog
+        from src.game.ui.mission_dialogs import MissionBriefingDialog
 
         # Create available mission
         mission = mission_manager.generate_mission(
