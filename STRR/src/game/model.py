@@ -692,11 +692,13 @@ class GameModel:
         # Fire per-turn crew tick on the player ship. Local runtime import
         # required — TYPE_CHECKING-only imports are erased at runtime and
         # isinstance() against them raises NameError (see project CLAUDE.md).
-        if hasattr(self, "player_ship"):
-            from .components.ship_systems import CrewManager  # local runtime import
-            crew = self.player_ship.get_system("crew")
-            if isinstance(crew, CrewManager):
-                crew.on_turn_advanced()
+        assert hasattr(self, "player_ship"), (
+            "end_current_turn() called before initialize_new_game()"
+        )
+        from .components.ship_systems import CrewManager  # local runtime import
+        crew = self.player_ship.get_system("crew")
+        if isinstance(crew, CrewManager):
+            crew.on_turn_advanced()
 
     def get_turn_status(self) -> TurnStatus:
         """

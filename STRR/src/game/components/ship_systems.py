@@ -1106,6 +1106,7 @@ class CrewManager(ShipSystem):
         record_casualty: Record crew casualty
         visit_starbase: Reset morale and casualty counters
         assign_crew: Assign crew member to position
+        on_turn_advanced: Process one game turn (morale tick, starbase counter)
 
     Private methods:
         _load_config: Load crew settings from TOML
