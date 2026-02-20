@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 11-01-2025 (v0.0.29 - Fixed starship attribute access)
+Date Changed: 02-19-2026 (v0.0.31 - Fix shield get_system() access and add type annotations)
 License: MIT
 
 Features:
@@ -43,7 +43,7 @@ from typing import TYPE_CHECKING, Final
 
 import pygame
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QImage, QKeyEvent, QMouseEvent, QPixmap
+from PySide6.QtGui import QCloseEvent, QImage, QKeyEvent, QMouseEvent, QPixmap
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -64,8 +64,12 @@ from .ui.settings_dialog import SettingsDialog
 if TYPE_CHECKING:
     from .components.mission_manager import Mission
     from .controller import GameController
+    from .entities.base import GameObject
+    from .entities.starship import Starship
+    from .maps.sector import SectorMap
+    from ..game.model import CombatResult
 
-__version__: Final[str] = "0.0.30"
+__version__: Final[str] = "0.0.31"
 
 logger = logging.getLogger(__name__)
 
@@ -279,7 +283,7 @@ class GameView:
         self.main_window.close()
         pygame.quit()
 
-    def _handle_close_event(self, event) -> None:
+    def _handle_close_event(self, event: QCloseEvent) -> None:
         """
         Handle window close event.
 
@@ -293,7 +297,7 @@ class GameView:
         pygame.quit()
         event.accept()
 
-    def render_sector_map(self, sector_map, game_objects: list) -> None:
+    def render_sector_map(self, sector_map: "SectorMap", game_objects: list) -> None:
         """
         Render the sector map view.
 
@@ -348,7 +352,7 @@ class GameView:
         for obj in game_objects:
             self._render_game_object(obj)
 
-    def show_combat_dialog(self, result) -> None:
+    def show_combat_dialog(self, result: "CombatResult") -> None:
         """
         Display combat results dialog.
 
@@ -358,7 +362,7 @@ class GameView:
         # Placeholder for combat dialog
         logger.info("Combat Result: %s", result.message)
 
-    def show_ship_status(self, ship) -> None:
+    def show_ship_status(self, ship: "Starship") -> None:
         """
         Display ship status information.
 
@@ -374,10 +378,15 @@ class GameView:
         self.hull_progress.setValue(int(ship.hull_integrity))
 
         # Update shields and energy using component-based access
-        shields_pct = (
-            ship.systems["shields"].total_shield_strength
-            / ship.systems["shields"].max_shield_strength
-        ) * 100
+        from .components.ship_systems import ShieldSystems  # local runtime import for isinstance
+        shield_system = ship.get_system("shields")
+        if isinstance(shield_system, ShieldSystems):
+            shields_pct = (
+                shield_system.total_shield_strength
+                / shield_system.max_shield_strength
+            ) * 100
+        else:
+            shields_pct = 0.0
         energy_pct = (
             ship.resources.energy_current / ship.resources.energy_capacity
         ) * 100
@@ -679,7 +688,7 @@ class GameView:
         selected_weapon = ["phaser"]  # Default
 
         # Connect buttons
-        def fire_phaser():
+        def fire_phaser() -> None:
             selected_weapon[0] = "phaser"
             selected_index = target_list.currentRow()
             if selected_index >= 0:
@@ -687,7 +696,7 @@ class GameView:
                 dialog.accept()
                 self.controller.handle_combat_action(target, "phaser")
 
-        def fire_torpedo():
+        def fire_torpedo() -> None:
             selected_weapon[0] = "torpedo"
             selected_index = target_list.currentRow()
             if selected_index >= 0:
@@ -845,7 +854,7 @@ class GameView:
         """Clear the current cell selection."""
         self.selected_cell = None
 
-    def _render_grid(self, sector_map) -> None:
+    def _render_grid(self, sector_map: "SectorMap") -> None:
         """
         Render the sector grid.
 
@@ -856,7 +865,7 @@ class GameView:
         # This method kept for compatibility
         pass
 
-    def _render_game_object(self, obj) -> None:
+    def _render_game_object(self, obj: "GameObject") -> None:
         """
         Render a single game object.
 
