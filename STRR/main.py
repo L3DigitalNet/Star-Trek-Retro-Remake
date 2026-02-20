@@ -58,7 +58,7 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.30"
 
 
 def main() -> None:

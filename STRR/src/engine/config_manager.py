@@ -39,7 +39,7 @@ import tomllib
 from pathlib import Path
 from typing import Any, Final
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.30"
 
 # For TOML writing, we'll use tomli_w (lightweight, stdlib-compatible)
 try:

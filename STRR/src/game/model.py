@@ -48,7 +48,7 @@ from .entities.starship import Starship
 from .maps.galaxy import GalaxyMap
 from .maps.sector import SectorMap
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.30"
 
 
 @dataclass

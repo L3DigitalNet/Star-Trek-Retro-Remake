@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from .components.mission_manager import Mission
     from .controller import GameController
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.30"
 
 logger = logging.getLogger(__name__)
 

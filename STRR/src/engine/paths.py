@@ -42,7 +42,7 @@ Functions:
 from pathlib import Path
 from typing import Final
 
-__version__: Final[str] = "0.0.29"
+__version__: Final[str] = "0.0.30"
 
 # Root directories (calculated once at import)
 # From STRR/src/engine/ -> STRR/ is 2 parents up
