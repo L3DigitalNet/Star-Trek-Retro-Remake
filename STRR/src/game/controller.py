@@ -263,12 +263,14 @@ class GameController:
 
         Runs AI logic for all NPC ships in turn order.
         """
+        from .entities.starship import Starship
+
         # Get current entity from turn manager
         current_entity = self.model.turn_manager.get_current_entity()
 
         # Keep processing AI turns until player's turn
         # Safety limit scales with total entity count
-        total_entities = len(self.model.turn_manager.entities)
+        total_entities = len(self.model.turn_manager.active_entities)
         max_ai_turns = max(20, total_entities * 2)  # At least 20, or 2x entity count
         turns_processed = 0
 

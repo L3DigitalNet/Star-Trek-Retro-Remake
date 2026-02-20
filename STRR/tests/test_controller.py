@@ -57,7 +57,7 @@ def mock_model():
     # Mock turn_manager
     model.turn_manager = Mock()
     model.turn_manager.get_current_entity.return_value = None
-    model.turn_manager.entities = []
+    model.turn_manager.active_entities = []
     return model
 
 
