@@ -13,8 +13,11 @@ Date Changed: 11-01-2025
 License: MIT
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+
+pytestmark = pytest.mark.unit
 
 
 class TestConfigLoader:
@@ -145,7 +148,7 @@ class TestHelperFunctions:
     def test_get_combat_config_returns_config_loader(self):
         """Test that get_combat_config returns ConfigLoader instance."""
         # Arrange & Act
-        from src.engine.config_loader import get_combat_config, ConfigLoader
+        from src.engine.config_loader import ConfigLoader, get_combat_config
 
         config = get_combat_config()
 
@@ -157,7 +160,7 @@ class TestHelperFunctions:
     def test_get_display_config_returns_config_loader(self):
         """Test that get_display_config returns ConfigLoader instance."""
         # Arrange & Act
-        from src.engine.config_loader import get_display_config, ConfigLoader
+        from src.engine.config_loader import ConfigLoader, get_display_config
 
         config = get_display_config()
 
@@ -169,7 +172,7 @@ class TestHelperFunctions:
     def test_get_audio_config_returns_config_loader(self):
         """Test that get_audio_config returns ConfigLoader instance."""
         # Arrange & Act
-        from src.engine.config_loader import get_audio_config, ConfigLoader
+        from src.engine.config_loader import ConfigLoader, get_audio_config
 
         config = get_audio_config()
 
@@ -182,9 +185,9 @@ class TestHelperFunctions:
         """Test that helper functions return same instance (lru_cache)."""
         # Arrange & Act
         from src.engine.config_loader import (
+            get_audio_config,
             get_combat_config,
             get_display_config,
-            get_audio_config,
         )
 
         # Get instances multiple times

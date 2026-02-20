@@ -13,8 +13,11 @@ License: MIT
 
 from typing import Final
 
+import pytest
 from src.game.entities.base import GameObject, GridPosition
 from src.game.entities.starship import SpaceStation, Starship
+
+pytestmark = pytest.mark.unit
 
 __version__: Final[str] = "0.0.1"
 

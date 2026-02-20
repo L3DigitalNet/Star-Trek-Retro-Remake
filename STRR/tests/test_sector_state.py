@@ -22,15 +22,17 @@ Requirements:
     - pytest >= 8.0.0
     - Python 3.14+
 """
+import pytest
+pygame = pytest.importorskip("pygame")
+
 
 from typing import Final
 from unittest.mock import MagicMock, Mock
 
-import pygame
-import pytest
-
 from src.game.states.sector_state import SectorState
 from src.game.states.state_machine import GameMode
+
+pytestmark = pytest.mark.gui
 
 __version__: Final[str] = "0.0.18"
 

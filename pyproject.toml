@@ -79,6 +79,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "gui: tests requiring a display server (Xvfb or real display)",
 ]
 
 [tool.coverage.run]

@@ -23,6 +23,8 @@ from src.game.components.mission_manager import (
     MissionType,
 )
 
+pytestmark = pytest.mark.gui
+
 
 @pytest.fixture
 def sample_mission():

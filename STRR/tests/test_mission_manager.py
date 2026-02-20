@@ -40,7 +40,6 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import pytest
-
 from src.game.components.mission_manager import (
     Mission,
     MissionManager,
@@ -49,6 +48,8 @@ from src.game.components.mission_manager import (
     MissionStatus,
     MissionType,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestMissionObjective:

@@ -27,10 +27,11 @@ Requirements:
 """
 
 import pytest
-
 from src.game.components.ship_systems import CrewManager, ResourceManager
 from src.game.entities.base import GridPosition
 from src.game.entities.starship import Starship
+
+pytestmark = pytest.mark.unit
 
 __version__ = "0.0.22"
 
