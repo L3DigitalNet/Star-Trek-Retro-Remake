@@ -32,7 +32,7 @@ Functions:
 import random
 from typing import Final
 
-from ..entities.base import GridPosition
+from ..entities.base import GameObject, GridPosition
 
 __version__: Final[str] = "0.0.31"
 
@@ -85,7 +85,7 @@ class SectorMap:
         self.random_seed = random_seed
 
         # Initialize entity and obstacle tracking structures
-        self.entities: dict[GridPosition, object] = {}
+        self.entities: dict[GridPosition, GameObject] = {}
         self.obstacles: set[GridPosition] = set()
         self.environmental_effects: dict[GridPosition, str] = {}
 
@@ -121,7 +121,7 @@ class SectorMap:
         """
         return position in self.obstacles
 
-    def place_entity(self, entity: object, position: GridPosition) -> bool:
+    def place_entity(self, entity: GameObject, position: GridPosition) -> bool:
         """
         Place an entity at a position.
 
@@ -144,7 +144,7 @@ class SectorMap:
         self.entities[position] = entity
         return True
 
-    def remove_entity(self, position: GridPosition) -> object | None:
+    def remove_entity(self, position: GridPosition) -> GameObject | None:
         """
         Remove an entity from a position.
 
@@ -156,7 +156,7 @@ class SectorMap:
         """
         return self.entities.pop(position, None)
 
-    def get_entity_at(self, position: GridPosition) -> object | None:
+    def get_entity_at(self, position: GridPosition) -> GameObject | None:
         """
         Get entity at a specific position.
 
@@ -222,7 +222,7 @@ class SectorMap:
 
         return True
 
-    def get_all_entities(self) -> list[tuple[GridPosition, object]]:
+    def get_all_entities(self) -> list[tuple[GridPosition, GameObject]]:
         """
         Get all entities in the sector.
 
