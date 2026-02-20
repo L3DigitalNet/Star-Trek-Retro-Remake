@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 11-01-2025 (v0.0.29 - Refactored to use centralized config loader)
+Date Changed: 02-19-2026 (v0.0.31 - Fix bare except in ResourceManager and CrewManager _load_config)
 License: MIT
 
 Features:
@@ -44,7 +44,10 @@ Functions:
 
 from __future__ import annotations
 
+import logging
+import tomllib
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -53,7 +56,9 @@ if TYPE_CHECKING:
 
 from ...engine.config_loader import get_combat_config
 
-__version__ = "0.0.30"
+logger = logging.getLogger(__name__)
+
+__version__ = "0.0.31"
 
 
 class ShipSystem(ABC):
@@ -924,8 +929,8 @@ class ResourceManager(ShipSystem):
                     config_data = tomllib.load(f)
                     resources = config_data.get("game", {}).get("resources", {})
                     defaults.update(resources)
-        except Exception:
-            pass  # Use defaults if config loading fails
+        except (OSError, tomllib.TOMLDecodeError) as e:
+            logger.warning("Failed to load config %s: %s", config_path, e)
 
         cls._resource_config = defaults
         return defaults
@@ -1181,8 +1186,8 @@ class CrewManager(ShipSystem):
                     config_data = tomllib.load(f)
                     crew = config_data.get("game", {}).get("crew", {})
                     defaults.update(crew)
-        except Exception:
-            pass  # Use defaults if config loading fails
+        except (OSError, tomllib.TOMLDecodeError) as e:
+            logger.warning("Failed to load config %s: %s", config_path, e)
 
         cls._crew_config = defaults
         return defaults
