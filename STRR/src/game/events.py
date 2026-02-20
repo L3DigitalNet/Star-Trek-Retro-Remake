@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 02-19-2026
 License: MIT
 
 Features:
@@ -37,7 +37,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Callable, Final, Optional
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.31"
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +131,7 @@ class EventBus:
         _should_handle_event: Check if listener should handle event
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the event bus."""
         self.listeners: dict[str, list[EventListener]] = {}
         self.enabled = True

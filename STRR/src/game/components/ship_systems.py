@@ -48,7 +48,7 @@ import logging
 import tomllib
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from ..entities.base import GameObject, GridPosition
@@ -85,7 +85,7 @@ class ShipSystem(ABC):
         None
     """
 
-    def __init__(self, name: str, max_efficiency: float = 1.0):
+    def __init__(self, name: str, max_efficiency: float = 1.0) -> None:
         """
         Initialize a ship system.
 
@@ -165,7 +165,7 @@ class WeaponSystems(ShipSystem):
         _is_in_firing_arc: Check if angle is within weapon arc
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize weapon systems with default configuration."""
         super().__init__("Weapons", 1.0)
 
@@ -177,8 +177,8 @@ class WeaponSystems(ShipSystem):
         self.torpedo_count = 10
         self.phaser_range = 5  # grid cells
         self.torpedo_range = 8  # grid cells
-        self.firing_arc = config.get("weapon_firing_arc", 270)
-        self.accuracy_base = config.get("weapon_accuracy_base", 0.85)
+        self.firing_arc = cast(float, config.get("weapon_firing_arc") or 270)
+        self.accuracy_base = cast(float, config.get("weapon_accuracy_base") or 0.85)
         self.cooldown_time = 1.0  # seconds between shots
         self.current_cooldown = 0.0
 
@@ -338,7 +338,7 @@ class WeaponSystems(ShipSystem):
 
         # Get range penalty from config
         config = get_combat_config()
-        range_penalty = config.get("weapon_range_penalty", 0.4)
+        range_penalty = cast(float, config.get("weapon_range_penalty") or 0.4)
 
         # Base accuracy modified by range
         range_factor = 1.0 - (distance / max_range) * range_penalty
@@ -439,7 +439,7 @@ class ShieldSystems(ShipSystem):
         _calculate_angle_to_attacker: Get angle from target to attacker
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize shield systems with default configuration."""
         super().__init__("Shields", 1.0)
 
@@ -499,16 +499,16 @@ class ShieldSystems(ShipSystem):
 
         # Shield effectiveness based on damage type (from config)
         if damage_type == "energy":
-            effectiveness = config.get("shield_energy_effectiveness", 0.85)
+            effectiveness = cast(float, config.get("shield_energy_effectiveness") or 0.85)
         else:
-            effectiveness = config.get("shield_kinetic_effectiveness", 0.65)
+            effectiveness = cast(float, config.get("shield_kinetic_effectiveness") or 0.65)
 
         # Calculate maximum possible absorption for this facing
         facing_strength = self.shield_facings[facing]
         max_absorption = damage * effectiveness
 
         # Shields absorb at least some damage when active (from config)
-        min_absorption_rate = config.get("shield_min_absorption", 0.1)
+        min_absorption_rate = cast(float, config.get("shield_min_absorption") or 0.1)
         min_absorption = min(damage * min_absorption_rate, facing_strength)
         absorbed = max(min_absorption, min(max_absorption, facing_strength))
 
@@ -658,7 +658,7 @@ class EngineSystems(ShipSystem):
         None
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize engine systems with default configuration."""
         super().__init__("Engines", 1.0)
         self.impulse_power = 1.0
@@ -715,7 +715,7 @@ class SensorSystems(ShipSystem):
         None
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize sensor systems with default configuration."""
         super().__init__("Sensors", 1.0)
         self.short_range = 3  # grid cells
@@ -790,7 +790,7 @@ class LifeSupportSystems(ShipSystem):
         None
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize life support systems with default configuration."""
         super().__init__("Life Support", 1.0)
         self.atmosphere_quality = 100.0
@@ -853,7 +853,7 @@ class ResourceManager(ShipSystem):
     # Class-level configuration cache
     _resource_config: dict[str, float | int] | None = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize resource manager with default configuration."""
         super().__init__("Resources", 1.0)
 
@@ -1118,7 +1118,7 @@ class CrewManager(ShipSystem):
     # Class-level configuration cache
     _crew_config: dict[str, float | int] | None = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize crew manager with default configuration."""
         super().__init__("Crew", 1.0)
 

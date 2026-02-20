@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-30-2025
+Date Changed: 02-19-2026
 License: MIT
 
 Features:
@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING, Dict, Final, Optional
 if TYPE_CHECKING:
     import pygame
 
-__version__: Final[str] = "0.0.1"
+__version__: Final[str] = "0.0.31"
 
 
 class GameMode(Enum):
@@ -154,7 +154,7 @@ class GameStateManager:
         _validate_transition: Validate state transition is legal
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the game state manager."""
         self.current_state: Optional[GameState] = None
         self.previous_state: Optional[GameState] = None

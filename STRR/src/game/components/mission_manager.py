@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-31-2025
-Date Changed: 10-31-2025
+Date Changed: 02-19-2026
 License: MIT License
 
 Features:
@@ -66,9 +66,9 @@ if TYPE_CHECKING:
 try:
     import tomllib
 except ImportError:
-    import tomli as tomllib  # type: ignore[import-not-found]
+    import tomli as tomllib  # type: ignore[import-not-found,no-redef]
 
-__version__: Final[str] = "0.0.24"
+__version__: Final[str] = "0.0.31"
 
 
 # Mission system configuration

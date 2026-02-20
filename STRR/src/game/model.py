@@ -40,7 +40,7 @@ Functions:
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, TypedDict
+from typing import Final, TypedDict, cast
 
 from .components.mission_manager import MissionManager
 from .entities.base import GameObject, GridPosition
@@ -113,7 +113,7 @@ class TurnManager:
         _restore_action_points: Restore all entities' action points
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the turn manager."""
         self.turn_number: int = 0
         self.current_phase: str = "input"  # input, action, resolution
@@ -284,7 +284,7 @@ class GameModel:
         _create_player_ship: Create the player's starting ship
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the game model with default state."""
         # Map system
         self.galaxy = GalaxyMap()
@@ -369,8 +369,9 @@ class GameModel:
             return False
 
         # Get engine system and validate it exists
+        from .components.ship_systems import EngineSystems  # local runtime import for isinstance narrowing
         engines = ship.get_system("engines")
-        if not engines:
+        if not engines or not isinstance(engines, EngineSystems):
             return False
 
         # Calculate fuel cost
@@ -423,8 +424,9 @@ class GameModel:
         import random
 
         # Get attacker's weapon system
+        from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
         weapons = attacker.get_system("weapons")
-        if not weapons or not weapons.active:
+        if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return CombatResult(False, "Weapons offline", 0)
 
         # Check action points
@@ -471,8 +473,8 @@ class GameModel:
         from ..engine.config_loader import get_combat_config
 
         config = get_combat_config()
-        crit_chance = config.get("critical_hit_chance", 0.1)
-        crit_multiplier = config.get("critical_hit_multiplier", 1.5)
+        crit_chance = cast(float, config.get("critical_hit_chance") or 0.1)
+        crit_multiplier = cast(float, config.get("critical_hit_multiplier") or 1.5)
 
         # Check for critical hit (from config)
         is_critical = random.random() < crit_chance
@@ -494,12 +496,12 @@ class GameModel:
         crit_text = " (CRITICAL HIT)" if is_critical else ""
         shield_text = (
             f" (shields absorbed {damage_result['shields_absorbed']})"
-            if damage_result["shields_absorbed"] > 0
+            if int(damage_result["shields_absorbed"]) > 0
             else ""
         )
         hull_text = (
             f" hull damage: {damage_result['hull_damage']}"
-            if damage_result["hull_damage"] > 0
+            if int(damage_result["hull_damage"]) > 0
             else ""
         )
         facing_text = (
@@ -525,8 +527,9 @@ class GameModel:
         Returns:
             List of targetable enemy ships
         """
+        from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
         weapons = attacker.get_system("weapons")
-        if not weapons or not weapons.active:
+        if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return []
 
         targets: list[Starship] = []

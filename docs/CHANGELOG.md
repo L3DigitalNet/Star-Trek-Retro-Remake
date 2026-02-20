@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.31] - 2026-02-19
+
+### Fixed
+
+- **mypy errors reduced from 78 to 4** across 10 source files
+  - Added missing `-> None` return type annotations to `__init__` methods in `application.py`, `model.py` (TurnManager, GameModel), `state_machine.py`, `events.py`, and all subclasses in `ship_systems.py`
+  - Fixed `distance_to()` return type in `base.py` by replacing `** 0.5` with `math.sqrt()` (avoids `float | complex` ambiguity)
+  - Added `isinstance` narrowing for `ShipSystem` subtype attribute access in `starship.py`, `model.py`, `commands.py`, and `ai/ship_ai.py`
+  - Fixed `ConfigLoader[dict].get()` scalar default issues using `cast()` in `ship_systems.py`, `model.py`, and `ship_ai.py`
+  - Fixed `tomllib` redefinition errors in `settings_dialog.py` and `mission_manager.py` with `# type: ignore[no-redef]`
+  - Fixed `tomli_w = None` type assignment in `config_manager.py` with `# type: ignore[assignment]`
+  - Corrected wrong relative import path in `starship.py` local runtime import
+
 ## [0.0.29] - 2025-11-02
 
 ### Added
