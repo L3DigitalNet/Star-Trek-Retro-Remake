@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.32] - 2026-02-19
+
+### Fixed
+
+- **CrewManager morale tick cadence**: Moved `turns_since_starbase` increment and morale tick from `update(dt)` (frame-rate) to new `on_turn_advanced()` method (per-turn), eliminating 60x-per-second overcounting
+- **MissionManager reward delivery**: Replaced broken `getattr(player_ship, "resource_manager")` with `get_system("resources")` + isinstance narrowing; corrected method calls from non-existent `add_supplies()`/`add_spare_parts()` to `resupply()`
+- **SectorMap entity container typing**: Replaced `object` with `GameObject` in `sector.py` entity dict and method signatures
+- **Deferred imports moved to module level**: `import random`, `import math`, `get_combat_config` promoted from function bodies in `model.py`, `starship.py`, `ship_systems.py`, `ship_ai.py`, `isometric_grid.py`
+- **Flaky combat test**: `test_resolve_combat_successful` now mocks `src.game.model.random.random` for deterministic hit results
+- **Optional syntax modernized**: Replaced `Optional[X]` with `X | None` in `commands.py`, `events.py`, `exceptions.py`
+- **Dead code removed**: Unused `distance` variable and `GameObject` import in `ship_ai.py`
+
 ## [0.0.31] - 2026-02-19
 
 ### Fixed
