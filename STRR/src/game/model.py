@@ -40,7 +40,7 @@ Functions:
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final
+from typing import Final, TypedDict
 
 from .components.mission_manager import MissionManager
 from .entities.base import GameObject, GridPosition
@@ -50,6 +50,21 @@ from .maps.sector import SectorMap
 
 __version__: Final[str] = "0.0.31"
 
+
+
+class TurnStatus(TypedDict):
+    """Typed return value for GameModel.get_turn_status().
+
+    Keys returned by get_turn_info() plus action_points fields added
+    by get_turn_status(). Controller unpacks these into update_turn_info().
+    """
+
+    turn_number: int
+    current_phase: str
+    active_entity: str
+    entities_remaining: int
+    action_points: int
+    max_action_points: int
 
 @dataclass
 class CombatResult:
@@ -663,25 +678,28 @@ class GameModel:
         """
         self.turn_manager.next_entity()
 
-    def get_turn_status(self) -> dict[str, int | str]:
+    def get_turn_status(self) -> TurnStatus:
         """
         Get current turn status information.
 
         Returns:
-            Dictionary with turn number, phase, active entity, and action points
+            TurnStatus with turn number, phase, active entity, and action points
         """
-        info = self.turn_manager.get_turn_info()
-
-        # Add action point information for current entity
-        current_entity = self.turn_manager.get_current_entity()
-        if current_entity:
-            info["action_points"] = current_entity.action_points
-            info["max_action_points"] = current_entity.max_action_points
-        else:
-            info["action_points"] = 0
-            info["max_action_points"] = 0
-
-        return info
+        # Build explicit TurnStatus instead of mutating get_turn_info() dict so
+        # mypy can verify the return type matches the TypedDict exactly.
+        tm = self.turn_manager
+        current_entity = tm.get_current_entity()
+        action_points: int = current_entity.action_points if current_entity else 0
+        max_action_points: int = current_entity.max_action_points if current_entity else 0
+        active_entity_name: str = current_entity.name if current_entity else "None"
+        return TurnStatus(
+            turn_number=tm.turn_number,
+            current_phase=tm.current_phase,
+            active_entity=active_entity_name,
+            entities_remaining=len(tm.turn_order) - tm.current_entity_index,
+            action_points=action_points,
+            max_action_points=max_action_points,
+        )
 
     def update_missions(self) -> None:
         """Update all active missions and check for completion."""

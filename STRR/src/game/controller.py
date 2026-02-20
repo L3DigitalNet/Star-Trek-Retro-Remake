@@ -10,7 +10,7 @@ Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 GitHub: https://github.com/L3DigitalNet/Star-Trek-Retro-Remake
 Date Created: 10-29-2025
-Date Changed: 10-31-2025 (v0.0.26 - Added mission system coordination methods)
+Date Changed: 02-19-2026 (v0.0.31 - Use TurnStatus TypedDict for get_turn_status return type)
 License: MIT
 
 Features:
@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from .model import GameModel
     from .view import GameView
 
-__version__: Final[str] = "0.0.26"
+__version__: Final[str] = "0.0.31"
 
 logger = logging.getLogger(__name__)
 
