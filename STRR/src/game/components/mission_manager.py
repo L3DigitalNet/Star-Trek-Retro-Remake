@@ -320,7 +320,7 @@ class MissionManager:
             # in a dict accessed via get_system(), not as direct attributes.
             # Local runtime import required: TYPE_CHECKING imports are erased at runtime
             # and PySide6 swallows the resulting NameError silently.
-            from ..components.ship_systems import ResourceManager  # noqa: PLC0415
+            from ..components.ship_systems import ResourceManager
             resource_manager = player_ship.get_system("resources")
             if resource_manager and isinstance(resource_manager, ResourceManager):
                 resource_manager.resupply("medical", mission.reward.supplies)

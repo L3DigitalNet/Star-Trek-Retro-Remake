@@ -376,7 +376,8 @@ experience = 100
         assert mission in manager.completed_missions
         assert mission not in manager.active_missions
         mock_ship.get_system.assert_called_once_with("resources")
-        mock_resource_manager.resupply.assert_called()
+        mock_resource_manager.resupply.assert_any_call("medical", mission.reward.supplies)
+        mock_resource_manager.resupply.assert_any_call("spare_parts", mission.reward.spare_parts)
 
     def test_update_active_missions(self, mission_templates_file):
         """Test updating all active missions."""
