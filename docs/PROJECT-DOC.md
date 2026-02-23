@@ -10,7 +10,7 @@ Description:
 
 Author: Star Trek Retro Remake Development Team
 Email: <development@star-trek-retro-remake.org>
-GitHub: <https://github.com/L3DigitalNet/Star-Trek-Retro-Remake>
+GitHub: <https://github.com/L3Digital-Net/Star-Trek-Retro-Remake>
 Date Created: 12-15-2024
 Date Changed: 10-30-2025
 License: MIT License
