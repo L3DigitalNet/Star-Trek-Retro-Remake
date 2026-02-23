@@ -354,7 +354,7 @@ def main() -> int:
     for i, issue in enumerate(unique_issues, 1):
         print(f"  {i}. {issue}")
 
-    if not os.environ.get("GITHUB_TOKEN"):
+    if not (os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")):
         print("\nNo GITHUB_TOKEN — skipping issue management (dry run).")
         return 0
 
