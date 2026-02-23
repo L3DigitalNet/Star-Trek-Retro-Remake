@@ -1,0 +1,33 @@
+name: Doc Drift Detection
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'   # Every Monday 07:00 UTC
+  workflow_dispatch:        # Manual trigger for on-demand runs
+
+jobs:
+  doc-drift:
+    name: Detect documentation drift
+    runs-on: [self-hosted, linux, l3digital]
+    # Needs write access to create/edit GitHub issues
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Ollama is reachable
+        run: |
+          curl -sf http://127.0.0.1:11434/api/tags > /dev/null || {
+            echo "Ollama not available — skipping analysis"
+            exit 1
+          }
+          echo "Ollama is up"
+
+      - name: Run doc drift analysis
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python3 .github/scripts/doc_drift.py
