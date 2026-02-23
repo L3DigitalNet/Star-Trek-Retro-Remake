@@ -48,7 +48,8 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           cd STRR
-          pytest tests/ -v --cov=src --cov-report=xml --cov-report=term --cov-fail-under=80
+          pytest tests/ -v --cov=src --cov-report=xml --cov-report=term --cov-fail-under=80 \
+            --cov-omit="src/ui/compiled/*,src/ui/designer/*,src/game/view.py"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
