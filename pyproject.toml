@@ -88,6 +88,9 @@ omit = [
     "*/tests/*",
     "*/conftest.py",
     "*/__pycache__/*",
+    "*/ui/compiled/*",   # Auto-generated Qt Designer output — not hand-edited
+    "*/ui/designer/*",   # Auto-generated Qt Designer templates
+    "*/game/view.py",    # Game rendering and input dispatch — not unit-testable headlessly
 ]
 
 [tool.coverage.report]
