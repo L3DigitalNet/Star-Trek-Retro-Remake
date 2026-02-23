@@ -150,3 +150,15 @@ module = [
     "PySide6.*",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Auto-generated Qt Designer files — not hand-edited, always regenerated from .ui files.
+# game.view uses Qt 6.x deprecated flat enum aliases (Qt.AlignCenter, Qt.Key_Left, etc.)
+# that are valid at runtime but absent from the current PySide6 mypy stubs.
+module = [
+    "src.ui.compiled.*",
+    "src.ui.designer.*",
+    "src.game.view",
+]
+ignore_errors = true
+

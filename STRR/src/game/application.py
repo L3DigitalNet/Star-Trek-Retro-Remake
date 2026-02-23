@@ -39,7 +39,7 @@ Functions:
 
 import sys
 from pathlib import Path
-from typing import Final
+from typing import Final, cast
 
 import pygame
 from PySide6.QtWidgets import QApplication
@@ -137,7 +137,7 @@ class StarTrekRetroRemake:
         if not QApplication.instance():
             self.qt_app = QApplication(sys.argv)
         else:
-            self.qt_app = QApplication.instance()
+            self.qt_app = cast(QApplication, QApplication.instance())
 
     def _cleanup(self) -> None:
         """Clean up resources on shutdown."""

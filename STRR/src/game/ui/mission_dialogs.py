@@ -469,7 +469,7 @@ class MissionTrackerWidget(QWidget):
         # Clear existing mission widgets
         while self.mission_container.count():
             child = self.mission_container.takeAt(0)
-            widget = child.widget()
+            widget = child.widget() if child is not None else None
             if widget:
                 widget.deleteLater()
 
