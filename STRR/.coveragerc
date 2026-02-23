@@ -1,0 +1,11 @@
+[run]
+source = src
+# Auto-generated Qt Designer output and game view (rendering/input) are
+# not unit-testable headlessly — exclude from the 80% gate.
+omit =
+    src/ui/compiled/*
+    src/ui/designer/*
+    src/game/view.py
+
+[report]
+fail_under = 80
