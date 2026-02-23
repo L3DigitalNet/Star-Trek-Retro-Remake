@@ -4,14 +4,15 @@ Star Trek Retro Remake - Settings Dialog Tests
 
 Tests for settings dialog and all configuration tabs.
 """
+
 import pytest
+
 pytest.importorskip("PySide6")
 
 
 import sys
 from pathlib import Path
 from unittest.mock import Mock
-
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -123,8 +124,8 @@ class TestGraphicsTab:
         assert tab.resolution_combo.currentText() == "1280x720"
 
         # Verify checkboxes
-        assert tab.fullscreen_check.isChecked() == False
-        assert tab.vsync_check.isChecked() == True
+        assert not tab.fullscreen_check.isChecked()
+        assert tab.vsync_check.isChecked()
 
         # Verify FPS combo
         assert tab.fps_combo.currentText() == "60"
@@ -146,8 +147,8 @@ class TestGraphicsTab:
         # Verify changes
         assert settings["display"]["width"] == 1920
         assert settings["display"]["height"] == 1080
-        assert settings["display"]["fullscreen"] == True
-        assert settings["display"]["vsync"] == False
+        assert settings["display"]["fullscreen"]
+        assert not settings["display"]["vsync"]
         assert settings["display"]["target_fps"] == 144
 
     def test_graphics_tab_unlimited_fps(self, qtbot, sample_settings):

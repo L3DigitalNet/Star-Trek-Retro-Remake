@@ -33,9 +33,10 @@ Functions:
 """
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Final
+from typing import Any, Final
 
 __version__: Final[str] = "0.0.31"
 
@@ -271,7 +272,7 @@ class EventBus:
             List of listeners sorted by priority (high to low)
         """
         listeners = self.listeners.get(event_type, [])
-        return sorted(listeners, key=lambda l: l.priority.value, reverse=True)
+        return sorted(listeners, key=lambda ls: ls.priority.value, reverse=True)
 
     def _should_handle_event(self, listener: EventListener, event: GameEvent) -> bool:
         """

@@ -42,17 +42,15 @@ Functions:
     - get_audio_config: Get audio configuration
 """
 
-from functools import lru_cache
-from typing import Any, TypeVar, Generic, Final
+from functools import cache
+from typing import Any, Final
 
 from .config_manager import get_config_manager
 
 __version__: Final[str] = "0.0.31"
 
-T = TypeVar("T")
 
-
-class ConfigLoader(Generic[T]):
+class ConfigLoader[T]:
     """
     Generic configuration loader with caching.
 
@@ -123,7 +121,7 @@ class ConfigLoader(Generic[T]):
 
 
 # Module-level helpers for common configurations
-@lru_cache(maxsize=None)
+@cache
 def get_combat_config() -> ConfigLoader[dict]:
     """
     Get combat configuration loader.
@@ -138,7 +136,7 @@ def get_combat_config() -> ConfigLoader[dict]:
     return ConfigLoader("game_settings", "game.combat")
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_display_config() -> ConfigLoader[dict]:
     """
     Get display configuration loader.
@@ -153,7 +151,7 @@ def get_display_config() -> ConfigLoader[dict]:
     return ConfigLoader("game_settings", "display")
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_audio_config() -> ConfigLoader[dict]:
     """
     Get audio configuration loader.

@@ -11,7 +11,9 @@ Date Created: 10-30-2025
 Date Changed: 10-30-2025
 License: MIT
 """
+
 import pytest
+
 pygame = pytest.importorskip("pygame")
 
 
@@ -264,7 +266,7 @@ class TestGameStateManager:
         # Act & Assert
         try:
             manager.transition_to(GameMode.MAIN_MENU)
-            assert False, "Should have raised ValueError"
+            raise AssertionError("Should have raised ValueError")
         except ValueError as e:
             assert "Unknown game mode" in str(e)
 

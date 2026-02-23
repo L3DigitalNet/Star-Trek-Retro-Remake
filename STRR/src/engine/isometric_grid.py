@@ -48,7 +48,7 @@ Functions:
 
 import logging
 import math
-from typing import Final, TypeAlias
+from typing import Final
 
 import pygame
 
@@ -60,8 +60,8 @@ __version__: Final[str] = "0.0.31"
 logger = logging.getLogger(__name__)
 
 # Type aliases
-ColorTuple: TypeAlias = tuple[int, int, int] | tuple[int, int, int, int]
-ScreenCoord: TypeAlias = tuple[int, int]
+type ColorTuple = tuple[int, int, int] | tuple[int, int, int, int]
+type ScreenCoord = tuple[int, int]
 
 
 class GridRenderer:
