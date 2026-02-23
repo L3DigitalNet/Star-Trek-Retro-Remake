@@ -23,7 +23,9 @@ Requirements:
     - pytest >= 8.0.0
     - Python 3.14+
 """
+
 import pytest
+
 pytest.importorskip("PySide6")
 
 

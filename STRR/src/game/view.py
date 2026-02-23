@@ -62,12 +62,12 @@ from .ui.mission_dialogs import MissionBriefingDialog, MissionSelectionDialog
 from .ui.settings_dialog import SettingsDialog
 
 if TYPE_CHECKING:
+    from ..game.model import CombatResult
     from .components.mission_manager import Mission
     from .controller import GameController
     from .entities.base import GameObject
     from .entities.starship import Starship
     from .maps.sector import SectorMap
-    from ..game.model import CombatResult
 
 __version__: Final[str] = "0.0.31"
 
@@ -297,7 +297,7 @@ class GameView:
         pygame.quit()
         event.accept()
 
-    def render_sector_map(self, sector_map: "SectorMap", game_objects: list) -> None:
+    def render_sector_map(self, sector_map: SectorMap, game_objects: list) -> None:
         """
         Render the sector map view.
 
@@ -352,7 +352,7 @@ class GameView:
         for obj in game_objects:
             self._render_game_object(obj)
 
-    def show_combat_dialog(self, result: "CombatResult") -> None:
+    def show_combat_dialog(self, result: CombatResult) -> None:
         """
         Display combat results dialog.
 
@@ -362,7 +362,7 @@ class GameView:
         # Placeholder for combat dialog
         logger.info("Combat Result: %s", result.message)
 
-    def show_ship_status(self, ship: "Starship") -> None:
+    def show_ship_status(self, ship: Starship) -> None:
         """
         Display ship status information.
 
@@ -378,12 +378,14 @@ class GameView:
         self.hull_progress.setValue(int(ship.hull_integrity))
 
         # Update shields and energy using component-based access
-        from .components.ship_systems import ShieldSystems  # local runtime import for isinstance
+        from .components.ship_systems import (
+            ShieldSystems,
+        )  # local runtime import for isinstance
+
         shield_system = ship.get_system("shields")
         if isinstance(shield_system, ShieldSystems):
             shields_pct = (
-                shield_system.total_shield_strength
-                / shield_system.max_shield_strength
+                shield_system.total_shield_strength / shield_system.max_shield_strength
             ) * 100
         else:
             shields_pct = 0.0
@@ -854,7 +856,7 @@ class GameView:
         """Clear the current cell selection."""
         self.selected_cell = None
 
-    def _render_grid(self, sector_map: "SectorMap") -> None:
+    def _render_grid(self, sector_map: SectorMap) -> None:
         """
         Render the sector grid.
 
@@ -865,7 +867,7 @@ class GameView:
         # This method kept for compatibility
         pass
 
-    def _render_game_object(self, obj: "GameObject") -> None:
+    def _render_game_object(self, obj: GameObject) -> None:
         """
         Render a single game object.
 

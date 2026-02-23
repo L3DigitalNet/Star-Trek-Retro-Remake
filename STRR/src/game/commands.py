@@ -207,7 +207,10 @@ class MoveShipCommand(Command):
             self.ship.position.x, self.ship.position.y, self.ship.position.z
         )
 
-        from .components.ship_systems import EngineSystems  # local runtime import for isinstance narrowing
+        from .components.ship_systems import (
+            EngineSystems,
+        )  # local runtime import for isinstance narrowing
+
         engines = self.ship.get_system("engines")
         if isinstance(engines, EngineSystems):
             self.previous_fuel = engines.fuel
@@ -247,7 +250,10 @@ class MoveShipCommand(Command):
         self.ship.position = self.previous_position
 
         # Restore fuel
-        from .components.ship_systems import EngineSystems  # local runtime import for isinstance narrowing
+        from .components.ship_systems import (
+            EngineSystems,
+        )  # local runtime import for isinstance narrowing
+
         engines = self.ship.get_system("engines")
         if isinstance(engines, EngineSystems):
             engines.fuel = self.previous_fuel
@@ -303,7 +309,10 @@ class FireWeaponCommand(Command):
         self.previous_target_hull = self.target.hull_integrity
 
         # Get weapon system
-        from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
+        from .components.ship_systems import (
+            WeaponSystems,
+        )  # local runtime import for isinstance narrowing
+
         weapons = self.attacker.get_system("weapons")
         if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return False
@@ -344,7 +353,10 @@ class FireWeaponCommand(Command):
 
         # Restore ammo if torpedo was fired
         if self.weapon_type == "torpedo":
-            from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
+            from .components.ship_systems import (
+                WeaponSystems,
+            )  # local runtime import for isinstance narrowing
+
             weapons = self.attacker.get_system("weapons")
             if isinstance(weapons, WeaponSystems):
                 weapons.torpedo_count += 1

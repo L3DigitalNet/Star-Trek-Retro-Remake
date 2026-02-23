@@ -34,13 +34,13 @@ Functions:
 
 from __future__ import annotations
 
-from enum import Enum, auto
-from typing import Final, TYPE_CHECKING, cast
 import random
+from enum import Enum, auto
+from typing import TYPE_CHECKING, Final, cast
 
 if TYPE_CHECKING:
-    from ..entities.starship import Starship
     from ..entities.base import GridPosition
+    from ..entities.starship import Starship
     from ..model import GameModel
 
 from ...engine.config_loader import get_combat_config
@@ -116,7 +116,7 @@ class ShipAI:
         self._cache_age = 0
         self._cache_max_age = cast(int, config.get("ai_enemy_cache_turns") or 3)
 
-    def update(self, model: "GameModel") -> None:
+    def update(self, model: GameModel) -> None:
         """
         Update AI state and execute behavior.
 
@@ -134,7 +134,7 @@ class ShipAI:
         elif self.state == AIState.FLEE:
             self._update_flee(model)
 
-    def _transition_state(self, model: "GameModel") -> None:
+    def _transition_state(self, model: GameModel) -> None:
         """
         Handle AI state transitions.
 
@@ -170,7 +170,7 @@ class ShipAI:
                     self.state = AIState.PATROL
                     self.target = None
 
-    def _update_patrol(self, model: "GameModel") -> None:
+    def _update_patrol(self, model: GameModel) -> None:
         """
         Execute patrol behavior - random movement within patrol area.
 
@@ -183,7 +183,7 @@ class ShipAI:
             if destination:
                 model.execute_move(self.ship, destination)
 
-    def _update_attack(self, model: "GameModel") -> None:
+    def _update_attack(self, model: GameModel) -> None:
         """
         Execute attack behavior - move toward and fire at target.
 
@@ -195,7 +195,10 @@ class ShipAI:
             return
 
         # Get weapon system
-        from ..components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
+        from ..components.ship_systems import (
+            WeaponSystems,
+        )  # local runtime import for isinstance narrowing
+
         weapons = self.ship.get_system("weapons")
         if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return
@@ -214,7 +217,7 @@ class ShipAI:
                 if destination:
                     model.execute_move(self.ship, destination)
 
-    def _update_flee(self, model: "GameModel") -> None:
+    def _update_flee(self, model: GameModel) -> None:
         """
         Execute flee behavior - move away from enemies.
 
@@ -236,7 +239,7 @@ class ShipAI:
             if destination:
                 model.execute_move(self.ship, destination)
 
-    def _get_enemies_cached(self, model: "GameModel") -> list["Starship"]:
+    def _get_enemies_cached(self, model: GameModel) -> list[Starship]:
         """
         Get enemy ships with caching to reduce scanning overhead.
 
@@ -255,7 +258,7 @@ class ShipAI:
 
         return self._cached_enemies
 
-    def _find_enemies(self, model: "GameModel") -> list["Starship"]:
+    def _find_enemies(self, model: GameModel) -> list[Starship]:
         """
         Find all enemy ships within sensor range.
 
@@ -267,12 +270,19 @@ class ShipAI:
         """
         from ..entities.starship import Starship
 
-        enemies: list["Starship"] = []
+        enemies: list[Starship] = []
 
         # Get sensor system for range
-        from ..components.ship_systems import SensorSystems  # local runtime import for isinstance narrowing
+        from ..components.ship_systems import (
+            SensorSystems,
+        )  # local runtime import for isinstance narrowing
+
         sensors = self.ship.get_system("sensors")
-        sensor_range = sensors.scan_range() if sensors and sensors.active and isinstance(sensors, SensorSystems) else 10
+        sensor_range = (
+            sensors.scan_range()
+            if sensors and sensors.active and isinstance(sensors, SensorSystems)
+            else 10
+        )
 
         # Find all enemy ships in range
         for obj in model.game_objects:
@@ -284,7 +294,7 @@ class ShipAI:
 
         return enemies
 
-    def select_target(self, enemies: list["Starship"]) -> "Starship | None":
+    def select_target(self, enemies: list[Starship]) -> Starship | None:
         """
         Select best target from available enemies.
 
@@ -300,14 +310,14 @@ class ShipAI:
             return None
 
         # Score targets (lower is better)
-        def score_target(enemy: "Starship") -> float:
+        def score_target(enemy: Starship) -> float:
             distance = self.ship.position.distance_to(enemy.position)
             hull_factor = enemy.hull_integrity / 100.0
             return distance * hull_factor
 
         return min(enemies, key=score_target)
 
-    def _find_patrol_point(self, model: "GameModel") -> "GridPosition | None":
+    def _find_patrol_point(self, model: GameModel) -> GridPosition | None:
         """
         Find random point within patrol radius.
 
@@ -336,8 +346,8 @@ class ShipAI:
         return None
 
     def _move_toward_target(
-        self, model: "GameModel", target_pos: "GridPosition"
-    ) -> "GridPosition | None":
+        self, model: GameModel, target_pos: GridPosition
+    ) -> GridPosition | None:
         """
         Find best move toward target position.
 
@@ -372,8 +382,8 @@ class ShipAI:
         return None
 
     def _move_away_from(
-        self, model: "GameModel", threat_pos: "GridPosition"
-    ) -> "GridPosition | None":
+        self, model: GameModel, threat_pos: GridPosition
+    ) -> GridPosition | None:
         """
         Find best move away from threat position.
 

@@ -49,7 +49,7 @@ import math
 import tomllib
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Final, TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Final, cast
 
 if TYPE_CHECKING:
     from ..entities.base import GameObject, GridPosition
@@ -498,9 +498,13 @@ class ShieldSystems(ShipSystem):
 
         # Shield effectiveness based on damage type (from config)
         if damage_type == "energy":
-            effectiveness = cast(float, config.get("shield_energy_effectiveness") or 0.85)
+            effectiveness = cast(
+                float, config.get("shield_energy_effectiveness") or 0.85
+            )
         else:
-            effectiveness = cast(float, config.get("shield_kinetic_effectiveness") or 0.65)
+            effectiveness = cast(
+                float, config.get("shield_kinetic_effectiveness") or 0.65
+            )
 
         # Calculate maximum possible absorption for this facing
         facing_strength = self.shield_facings[facing]

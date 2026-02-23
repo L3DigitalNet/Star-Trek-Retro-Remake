@@ -281,7 +281,9 @@ class GameController:
 
             # Stop if safety limit reached (prevents infinite loops)
             if turns_processed >= max_ai_turns:
-                logger.warning("AI turn limit reached (%s), breaking loop", max_ai_turns)
+                logger.warning(
+                    "AI turn limit reached (%s), breaking loop", max_ai_turns
+                )
                 break
 
             # Process AI turn if ship has AI controller

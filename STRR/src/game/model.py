@@ -53,7 +53,6 @@ from .maps.sector import SectorMap
 __version__: Final[str] = "0.0.32"
 
 
-
 class TurnStatus(TypedDict):
     """Typed return value for GameModel.get_turn_status().
 
@@ -67,6 +66,7 @@ class TurnStatus(TypedDict):
     entities_remaining: int
     action_points: int
     max_action_points: int
+
 
 @dataclass
 class CombatResult:
@@ -371,7 +371,10 @@ class GameModel:
             return False
 
         # Get engine system and validate it exists
-        from .components.ship_systems import EngineSystems  # local runtime import for isinstance narrowing
+        from .components.ship_systems import (
+            EngineSystems,
+        )  # local runtime import for isinstance narrowing
+
         engines = ship.get_system("engines")
         if not engines or not isinstance(engines, EngineSystems):
             return False
@@ -424,7 +427,10 @@ class GameModel:
             CombatResult containing the outcome
         """
         # Get attacker's weapon system
-        from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
+        from .components.ship_systems import (
+            WeaponSystems,
+        )  # local runtime import for isinstance narrowing
+
         weapons = attacker.get_system("weapons")
         if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return CombatResult(False, "Weapons offline", 0)
@@ -525,7 +531,10 @@ class GameModel:
         Returns:
             List of targetable enemy ships
         """
-        from .components.ship_systems import WeaponSystems  # local runtime import for isinstance narrowing
+        from .components.ship_systems import (
+            WeaponSystems,
+        )  # local runtime import for isinstance narrowing
+
         weapons = attacker.get_system("weapons")
         if not weapons or not weapons.active or not isinstance(weapons, WeaponSystems):
             return []
@@ -696,6 +705,7 @@ class GameModel:
             "end_current_turn() called before initialize_new_game()"
         )
         from .components.ship_systems import CrewManager  # local runtime import
+
         crew = self.player_ship.get_system("crew")
         if isinstance(crew, CrewManager):
             crew.on_turn_advanced()
@@ -712,7 +722,9 @@ class GameModel:
         tm = self.turn_manager
         current_entity = tm.get_current_entity()
         action_points: int = current_entity.action_points if current_entity else 0
-        max_action_points: int = current_entity.max_action_points if current_entity else 0
+        max_action_points: int = (
+            current_entity.max_action_points if current_entity else 0
+        )
         active_entity_name: str = current_entity.name if current_entity else "None"
         return TurnStatus(
             turn_number=tm.turn_number,

@@ -59,7 +59,7 @@ class GridPosition:
     y: int
     z: int = 0
 
-    def distance_to(self, other: "GridPosition") -> float:
+    def distance_to(self, other: GridPosition) -> float:
         """
         Calculate 3D distance to another position.
 
@@ -74,11 +74,11 @@ class GridPosition:
         dz = self.z - other.z
         return math.sqrt(dx * dx + dy * dy + dz * dz)
 
-    def __add__(self, other: "GridPosition") -> "GridPosition":
+    def __add__(self, other: GridPosition) -> GridPosition:
         """Add two grid positions component-wise."""
         return GridPosition(self.x + other.x, self.y + other.y, self.z + other.z)
 
-    def __sub__(self, other: "GridPosition") -> "GridPosition":
+    def __sub__(self, other: GridPosition) -> GridPosition:
         """Subtract two grid positions component-wise."""
         return GridPosition(self.x - other.x, self.y - other.y, self.z - other.z)
 

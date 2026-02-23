@@ -194,7 +194,10 @@ class Starship(GameObject):
         }
 
         # Shield absorption first
-        from ..components.ship_systems import ShieldSystems  # local runtime import for isinstance narrowing
+        from ..components.ship_systems import (
+            ShieldSystems,
+        )  # local runtime import for isinstance narrowing
+
         shields = self.get_system("shields")
         if shields and shields.active and isinstance(shields, ShieldSystems):
             remaining = shields.absorb_damage(

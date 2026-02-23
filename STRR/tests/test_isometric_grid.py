@@ -26,7 +26,9 @@ Requirements:
     - pytest for test framework
     - pygame-ce for rendering surface
 """
+
 import pytest
+
 pygame = pytest.importorskip("pygame")
 
 

@@ -6,7 +6,7 @@ Description:
     Tests for the compat.py module that provides compatibility shims
     for Python 3.11+ features and external dependencies.
 
-Author: Star Trek Retro Remake Development Team  
+Author: Star Trek Retro Remake Development Team
 Email: development@star-trek-retro-remake.org
 Date Created: 11-01-2025
 Date Changed: 11-01-2025

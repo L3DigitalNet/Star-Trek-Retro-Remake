@@ -46,7 +46,9 @@ class TestConfigLoader:
         loader = ConfigLoader("game_settings", "game.combat")
 
         # Act - First access
-        with patch("src.engine.config_loader.get_config_manager", return_value=mock_manager):
+        with patch(
+            "src.engine.config_loader.get_config_manager", return_value=mock_manager
+        ):
             data1 = loader.data
 
         # Assert - Data loaded and cached
@@ -74,7 +76,9 @@ class TestConfigLoader:
         loader = ConfigLoader("game_settings", "")
 
         # Act
-        with patch("src.engine.config_loader.get_config_manager", return_value=mock_manager):
+        with patch(
+            "src.engine.config_loader.get_config_manager", return_value=mock_manager
+        ):
             data = loader.data
 
         # Assert
@@ -94,7 +98,9 @@ class TestConfigLoader:
 
         loader = ConfigLoader("game_settings", "game.combat")
 
-        with patch("src.engine.config_loader.get_config_manager", return_value=mock_manager):
+        with patch(
+            "src.engine.config_loader.get_config_manager", return_value=mock_manager
+        ):
             # Act & Assert - Existing key
             assert loader.get("weapon_range", 10) == 5
             assert loader.get("accuracy", 0.5) == 0.85
@@ -113,7 +119,9 @@ class TestConfigLoader:
 
         loader = ConfigLoader("game_settings", "game.combat")
 
-        with patch("src.engine.config_loader.get_config_manager", return_value=mock_manager):
+        with patch(
+            "src.engine.config_loader.get_config_manager", return_value=mock_manager
+        ):
             # Act
             result = loader.get("missing_key")
 
@@ -130,7 +138,9 @@ class TestConfigLoader:
 
         loader = ConfigLoader("game_settings", "game.combat")
 
-        with patch("src.engine.config_loader.get_config_manager", return_value=mock_manager):
+        with patch(
+            "src.engine.config_loader.get_config_manager", return_value=mock_manager
+        ):
             # Act - Load data
             _ = loader.data
             assert loader._cache is not None
@@ -245,7 +255,9 @@ class TestTypeSafety:
 
         loader = ConfigLoader[dict]("game_settings", "test")
 
-        with patch("src.engine.config_loader.get_config_manager", return_value=mock_manager):
+        with patch(
+            "src.engine.config_loader.get_config_manager", return_value=mock_manager
+        ):
             # Act - Type hints should work for mypy
             value: int | None = loader.get("key", 0)
 
