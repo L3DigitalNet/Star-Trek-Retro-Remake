@@ -63,7 +63,7 @@ pip install pygame>=2.5 PySide6>=6.7
 
 ```bash
 # Clone the repository
-git clone https://github.com/L3Digital-Net/Star-Trek-Retro-Remake.git
+git clone https://github.com/L3DigitalNet/Star-Trek-Retro-Remake.git
 cd Star-Trek-Retro-Remake
 
 # Install package with dependencies (recommended)

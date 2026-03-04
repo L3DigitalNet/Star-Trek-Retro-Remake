@@ -41,10 +41,10 @@ qt = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/L3Digital-Net/Star-Trek-Retro-Remake"
-Repository = "https://github.com/L3Digital-Net/Star-Trek-Retro-Remake"
-Issues = "https://github.com/L3Digital-Net/Star-Trek-Retro-Remake/issues"
-Documentation = "https://github.com/L3Digital-Net/Star-Trek-Retro-Remake/blob/main/README.md"
+Homepage = "https://github.com/L3DigitalNet/Star-Trek-Retro-Remake"
+Repository = "https://github.com/L3DigitalNet/Star-Trek-Retro-Remake"
+Issues = "https://github.com/L3DigitalNet/Star-Trek-Retro-Remake/issues"
+Documentation = "https://github.com/L3DigitalNet/Star-Trek-Retro-Remake/blob/main/README.md"
 
 [project.scripts]
 star-trek-retro-remake = "STRR.main:main"
