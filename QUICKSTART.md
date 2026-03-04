@@ -21,7 +21,7 @@ git --version         # Should be 2.x+
 
 ```bash
 # Clone repository
-git clone https://github.com/L3Digital-Net/Star-Trek-Retro-Remake.git
+git clone https://github.com/L3DigitalNet/Star-Trek-Retro-Remake.git
 cd Star-Trek-Retro-Remake
 
 # Ensure on testing branch
