@@ -1,15 +1,15 @@
 name: Doc Drift Detection
 
+# DISABLED: This workflow requires a local Ollama instance (127.0.0.1:11434)
+# which was available on the self-hosted runner. Needs reworking to use
+# LiteLLM API or another approach before re-enabling.
 on:
-  schedule:
-    - cron: '0 7 * * 1'   # Every Monday 07:00 UTC
-  workflow_dispatch:        # Manual trigger for on-demand runs
+  workflow_dispatch:  # manual trigger only
 
 jobs:
   doc-drift:
     name: Detect documentation drift
-    runs-on: [self-hosted, linux, l3digital]
-    # Needs write access to create/edit GitHub issues
+    runs-on: ubuntu-latest
     permissions:
       issues: write
       contents: read
