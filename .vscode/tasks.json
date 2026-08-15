@@ -17,7 +17,7 @@
 		{
 			"label": "fix",
 			"type": "shell",
-			"command": "uv run ruff format . && uv run ruff check . --fix",
+			"command": "uv run ruff format src tests scripts && uv run ruff check src tests scripts --fix",
 			"problemMatcher": []
 		},
 		{

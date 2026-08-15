@@ -42,6 +42,7 @@ Prettier owns physical formatting and markdownlint owns Markdown structure. Do n
 Enabled checks: format, lint.
 Markdown scope: `**/*.md`.
 Structured-config scope: `**/*.json`, `**/*.jsonc`, `**/*.yml`, `**/*.yaml`.
+Lint additionally skips generated directories: `.ruff_cache/**`, `node_modules/**`.
 
 Declared exclusions:
 - `.pytest_cache/**` (both): Generated pytest cache content is not repository documentation.
@@ -61,6 +62,28 @@ Declared exclusions:
 - `docs/adr/template.md` (both): The authoring template intentionally contains placeholders.
 - `docs/handoff/**` (both): Agent Handoff governs this knowledge corpus.
 
+Check formatting over exactly that scope, with Git as the corpus authority:
+
+```bash
+git ls-files -z -- ':(glob)**/*.md' ':(glob)**/*.json' ':(glob)**/*.jsonc' ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob,exclude).agents/**' ':(glob,exclude).claude/**' ':(glob,exclude).codex/**' ':(glob,exclude).github/PULL_REQUEST_TEMPLATE.md' ':(glob,exclude).github/workflows/format.yml' ':(glob,exclude).github/workflows/lint-markdown.yml' ':(glob,exclude).import_linter_cache/**' ':(glob,exclude).pytest_cache/**' ':(glob,exclude).standards/**' ':(glob,exclude).venv/**' ':(glob,exclude)AGENTS.md' ':(glob,exclude)CLAUDE.md' ':(glob,exclude)docs/STATUS.md' ':(glob,exclude)docs/TODO.md' ':(glob,exclude)docs/adr/template.md' ':(glob,exclude)docs/handoff/**' | xargs -0 -r npx prettier --check --
+```
+
+Without Git, bound the same scope by glob instead. Prettier's CLI has no negative pattern, so this form does not apply the declared format exclusions above; pass them through an `--ignore-path` file inside the repository:
+
+```bash
+npx prettier --check --no-error-on-unmatched-pattern -- '**/*.md' '**/*.json' '**/*.jsonc' '**/*.yml' '**/*.yaml'
+```
+
+Never check or write with a bare `.`: it reaches undeclared languages and Git-excluded scratch.
+
+Lint Markdown structure over the same Git-tracked scope:
+
+```bash
+git ls-files -z -- ':(glob)**/*.md' ':(glob,exclude).ruff_cache/**' ':(glob,exclude)node_modules/**' ':(glob,exclude).agents/**' ':(glob,exclude).claude/**' ':(glob,exclude).codex/**' ':(glob,exclude).github/PULL_REQUEST_TEMPLATE.md' ':(glob,exclude).pytest_cache/**' ':(glob,exclude).standards/**' ':(glob,exclude).venv/**' ':(glob,exclude)AGENTS.md' ':(glob,exclude)CLAUDE.md' ':(glob,exclude)docs/STATUS.md' ':(glob,exclude)docs/TODO.md' ':(glob,exclude)docs/adr/template.md' ':(glob,exclude)docs/handoff/**' | sed -z 's|^|:|' | xargs -0 -r npx markdownlint-cli2 --no-globs
+```
+
+Never lint a bare recursive glob: it descends into any independent Git repository checked out below this one.
+
 Run the enabled checks before claiming completion.
 <!-- markdownlint-enable MD025 -->
 <!-- END project-standards:markdown-tooling -->
@@ -79,8 +102,8 @@ Use basedpyright in strict mode for type checking. Do not add a competing Python
 Run before claiming completion:
 
 ```bash
-uv run ruff format --check .
-uv run ruff check .
+uv run ruff format --check src tests scripts
+uv run ruff check src tests scripts
 uv run basedpyright
 uv run coverage run -m pytest
 uv run coverage report
@@ -90,8 +113,8 @@ uv run pip-audit
 When the gate reports formatting or lint findings, run:
 
 ```bash
-uv run ruff format .
-uv run ruff check . --fix
+uv run ruff format src tests scripts
+uv run ruff check src tests scripts --fix
 ```
 <!-- markdownlint-enable MD025 -->
 <!-- END project-standards:python-tooling -->
