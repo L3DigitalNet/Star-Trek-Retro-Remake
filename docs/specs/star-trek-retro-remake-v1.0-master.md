@@ -6,7 +6,7 @@ profile: standard
 owner: 'project-maintainer'
 implementer: 'coding-agent'
 created: '2026-07-26'
-last_reviewed: '2026-07-26'
+last_reviewed: '2026-08-15'
 supersedes: null
 superseded_by: null
 related:
@@ -49,8 +49,9 @@ related:
 | 0.2 | 2026-07-26 | Codex | Resolved Codex review CR-001 through CR-008: completed canonical feature ownership, split oversized milestones, assigned evolving configuration/persistence, completed traceability, corrected orchestration and adjacent architecture, exposed future persistence decisions, and normalized ADR metadata. |
 | 0.3 | 2026-07-26 | Codex | Resolved Opus round-one SA-001 through SA-014: bound tracked promotion, added campaign entry and terminal-state ownership, made balance normative, and completed performance, licensing, geometry, workflow, and data-policy contracts. |
 | 0.4 | 2026-07-26 | Codex | Promoted the Codex-ready and Opus-converged normative content to the tracked Project Spec corpus; adjusted only lifecycle, status, and location-relative links. |
+| 0.5 | 2026-08-15 | Codex | Restored Project Specification 1.9 canonical surfaces and mandatory requirement phrasing without changing requirement intent or acceptance. |
 
-**Spec lifecycle:** This tracked document is `approved` and change-controlled. Changes to scope, requirements, architecture, release gates, or milestone boundaries require a revision row and renewed owner approval. Implementation deviations belong in the [Deviations Log](#deviations-log), not in silent requirement edits.
+**Spec lifecycle:** This document is **living until `approved`**, then **change-controlled**: post-approval edits require a new revision row and, for scope-affecting changes, re-approval by the owner. Implementation deviations are recorded in the [Deviations Log](#deviations-log), not silently patched into requirements. When replaced, set `status: superseded` and `superseded_by:` in the frontmatter.
 
 ---
 
@@ -174,14 +175,14 @@ At v1.0.0, a player can start or load a local game, navigate a procedurally gene
 
 ## 7. Requirements
 
-Every requirement in §7, §10.2, §10.3, and §12.1 is normative and release-blocking unless its row explicitly states otherwise. Interface, data, workflow, edge-case, and expected-failure requirements therefore have Must priority even where the canonical table shape has no Priority column.
+> **Quality rule:** Each requirement is one testable statement with a stable ID, a rationale, an acceptance criterion, and a priority. Priorities: **Must** (release-blocking), **Should** (important, briefly deferrable), **Could** (nice-to-have, must not delay release). Anything "Won't" belongs in §2.3, not here.
 
 ### 7.1 Functional Requirements
 
 | ID | Requirement | Rationale | Acceptance Criteria | Priority |
 | --- | --- | --- | --- | --- |
 | FR-001 | The system shall satisfy all ten v0.1 Definition of Done outcomes in the canonical design. | The vertical slice must prove every architectural seam before combat work begins. | Launch, UI, grid, input, movement, Dock, turn, settings, verification, and import-boundary checks all pass. | Must |
-| FR-002 | The v0.1 sector shall render one selectable and movable player ship plus an adjacent-reachable starbase whose Dock action costs 1 AP and produces model, UI, and log feedback. | ADR-0011 establishes the complete action-pipeline target. | An end-to-end test and manual interaction prove selection, movement, AP debit, Dock enablement, `Docked`, and comm-log output. | Must |
+| FR-002 | The system shall render one selectable and movable player ship plus an adjacent-reachable starbase in the v0.1 sector; the Dock action shall cost 1 AP and produce model, UI, and log feedback. | ADR-0011 establishes the complete action-pipeline target. | An end-to-end test and manual interaction prove selection, movement, AP debit, Dock enablement, `Docked`, and comm-log output. | Must |
 | FR-003 | The system shall implement phaser and torpedo attacks, four shield facings, damage resolution, firing arcs, accuracy, and combat AP costs on the current sector grid. | These are the tactical core promised by v0.2. | Deterministic combat tests cover legal and illegal attacks, shield/hull damage, AP debit, and combat completion. | Must |
 | FR-004 | The system shall implement PATROL/ATTACK/FLEE AI, TOML mission templates, and pydantic/TOML save-load round trips by the v0.2 gate. | v0.2 must establish both opponents and durable session continuity. | Seeded AI transitions, mission-template validation, malformed-save handling, and deep-equality save round trips pass. | Must |
 | FR-005 | The system shall implement energy allocation, supplies, crew morale, and all six approved mission types by the v0.3 gate. | Resource trade-offs and mission variety create the intended captain fantasy. | Resource invariants and success/failure workflows for patrol, escort, reconnaissance, combat, rescue, and diplomacy pass. | Must |
@@ -192,10 +193,10 @@ Every requirement in §7, §10.2, §10.3, and §12.1 is normative and release-bl
 | FR-010 | The system shall implement uncapped captain XP/skills, crew specialization and levels, and ship upgrade paths by the v0.5 gate. | The game needs long-term progression before final polish. | Boundary, progression, unlock, save-round-trip, and post-level-100 tests pass. | Must |
 | FR-011 | The system shall implement the approved music, combat/engine/UI sound effects, and accessible visual equivalents during v1.0 polish. | ADR-0009 defers audio without making feedback depend on hearing. | Audio can be independently disabled; each critical sound has an existing visual cue; playback smoke tests pass; every audio source/license/attribution satisfies DR-004. | Must |
 | FR-012 | The system shall produce a versioned AppImage and complete user/developer/release documentation for v1.0.0. | The finished game must be distributable and maintainable. | All supported Linux baselines launch the AppImage; packaged resources and license/NOTICE inventory resolve; documentation and release metadata match v1.0.0. | Must |
-| FR-013 | Each future milestone shall have one approved Standard-profile sub-spec before a detailed plan or implementation begins. | Bounded contracts prevent later-release scope from leaking into the current milestone. | The specs index points to an approved sub-spec whose scope, requirements, acceptance, and deliverables cover the milestone. | Must |
-| FR-014 | Each sub-spec shall define one chronological milestone, list prerequisites, exclude later milestones, and provide observable deliverables and exit criteria. | A sub-spec must be independently actionable and reviewable. | Project Spec validate/lint pass and semantic review finds no unresolved blocking ambiguity. | Must |
-| FR-015 | Every milestone that adds configuration-backed content or persisted state shall extend the applicable configuration schema, save snapshot, unsupported-input behavior, and round-trip evidence in the same milestone. | A one-time persistence foundation cannot remain complete as game state evolves. | The sub-spec maps every new durable field or content reference to validation and save/load tests before its milestone exits. | Must |
-| FR-016 | Development shall not begin on a later release until all Must requirements in the prior release gate are passing or an owner-approved master-spec revision changes the sequence. | The roadmap explicitly forbids advancing past an incomplete v0.1 gate. | Status and traceability evidence show the prior gate complete before the first later-release implementation commit. | Must |
+| FR-013 | The system shall require each future milestone to have one approved Standard-profile sub-spec before a detailed plan or implementation begins. | Bounded contracts prevent later-release scope from leaking into the current milestone. | The specs index points to an approved sub-spec whose scope, requirements, acceptance, and deliverables cover the milestone. | Must |
+| FR-014 | The system shall require each sub-spec to define one chronological milestone, list prerequisites, exclude later milestones, and provide observable deliverables and exit criteria. | A sub-spec must be independently actionable and reviewable. | Project Spec validate/lint pass and semantic review finds no unresolved blocking ambiguity. | Must |
+| FR-015 | The system shall require every milestone that adds configuration-backed content or persisted state to extend the applicable configuration schema, save snapshot, unsupported-input behavior, and round-trip evidence in the same milestone. | A one-time persistence foundation cannot remain complete as game state evolves. | The sub-spec maps every new durable field or content reference to validation and save/load tests before its milestone exits. | Must |
+| FR-016 | The system shall prohibit development on a later release until all Must requirements in the prior release gate are passing or an owner-approved master-spec revision changes the sequence. | The roadmap explicitly forbids advancing past an incomplete v0.1 gate. | Status and traceability evidence show the prior gate complete before the first later-release implementation commit. | Must |
 | FR-017 | The system shall provide a campaign entry surface with Main Menu, New Game seed and difficulty selection, Load Game, save/load slot management, and settings/controls editing by the v0.2 gate. | A campaign cannot exercise persistence, difficulty, or later generated-world contracts without an owned entry workflow. | pytest-qt and end-to-end tests prove new/load, validated selection, slot metadata and overwrite confirmation, settings apply/cancel/defaults, and return to the prior state. | Must |
 | FR-018 | The system shall implement the canonical campaign-ending conditions through one terminal campaign state with cause-specific feedback and an approved save-slot consequence. | Ship loss in an approved no-respawn scenario, court-martial after qualifying critical mission failure, and Disgraced reputation must not degrade into ordinary combat recovery. | Tests prove each terminal cause, `CampaignEnded` transition, explanation, disabled gameplay actions, and the owner-approved OQ-003/OQ-004 persistence behavior; Admiral crew permadeath remains distinct from campaign termination unless OQ-003 decides otherwise. | Must |
 | FR-019 | The system shall qualify v1.0 combat, resource, and progression balance against owner-approved pacing targets across all four difficulty modes. | `SPEC-S061` requires a normative release contract rather than inventing scope below the master. | A fixed scenario matrix covers normal and elite combat plus resource/progression pacing in Cadet, Officer, Captain, and Admiral; measured outcomes fall within the targets approved in `SPEC-S061`. | Must |
@@ -205,11 +206,11 @@ Every requirement in §7, §10.2, §10.3, and §12.1 is normative and release-bl
 | ID | Category | Requirement | Measurement / Acceptance Criteria | Priority |
 | --- | --- | --- | --- | --- |
 | NFR-001 | Architecture | The system shall preserve the Qt-free model boundary and the single model-event/Qt seam. | All import-linter contracts pass, and a repository-wide negative source probe proves no module except `controller/model_bridge.py` imports both `stmrr.model.events` and PySide6. | Must |
-| NFR-002 | Quality | The repository shall pass Ruff format/check, BasedPyright strict, import-linter, branch-aware pytest coverage at or above 85%, and pip-audit at every release gate. | `uv run python scripts/check.py` exits 0. | Must |
-| NFR-003 | Performance | The supported baseline shall meet the canonical interaction, load, turn, aggregate-AI, animation, and leak-free-session budgets. | Repeatable checks document hardware and prove input under 16 ms outside deliberate resolution, player-turn work under 50 ms, turn advancement under 100 ms, AI under 200 ms per ship and under 1 s for ten simultaneous ships, animation at least 30 FPS, startup under 3 s, sector load under 2 s, combat initialization under 1 s, galaxy render under 1 s, save/load under 2 s, and no unbounded memory growth in a defined long-running v1.0 session. | Must |
-| NFR-004 | Portability | The packaged v1.0.0 game shall launch without a development checkout on clean Debian 13, Ubuntu 24.04-compatible LTS, and one owner-named rolling Linux distribution. | Installation, launch, gameplay/resource, and library-loading smoke tests pass on all three baselines or owner-approved equivalents. | Must |
-| NFR-005 | Reliability | Corrupted, malformed, or explicitly unsupported saves shall fail with a user-visible error without mutating the current in-memory session. | Invalid/unsupported-save tests prove load-before-apply behavior; write-commit and compatibility semantics remain OQ-001 and OQ-002 for `SPEC-S021`. | Must |
-| NFR-006 | Accessibility | Critical state changes shall be conveyed visually even when audio is disabled, and core gameplay shall remain keyboard-operable through documented shortcuts. | Audio-disabled end-to-end checks and keyboard interaction tests cover core actions. | Must |
+| NFR-002 | Quality | The system shall pass Ruff format/check, BasedPyright strict, import-linter, branch-aware pytest coverage at or above 85%, and pip-audit at every release gate. | `uv run python scripts/check.py` exits 0. | Must |
+| NFR-003 | Performance | The system shall meet the canonical interaction, load, turn, aggregate-AI, animation, and leak-free-session budgets on the supported baseline. | Repeatable checks document hardware and prove input under 16 ms outside deliberate resolution, player-turn work under 50 ms, turn advancement under 100 ms, AI under 200 ms per ship and under 1 s for ten simultaneous ships, animation at least 30 FPS, startup under 3 s, sector load under 2 s, combat initialization under 1 s, galaxy render under 1 s, save/load under 2 s, and no unbounded memory growth in a defined long-running v1.0 session. | Must |
+| NFR-004 | Portability | The system shall launch the packaged v1.0.0 game without a development checkout on clean Debian 13, Ubuntu 24.04-compatible LTS, and one owner-named rolling Linux distribution. | Installation, launch, gameplay/resource, and library-loading smoke tests pass on all three baselines or owner-approved equivalents. | Must |
+| NFR-005 | Reliability | The system shall reject corrupted, malformed, or explicitly unsupported saves with a user-visible error without mutating the current in-memory session. | Invalid/unsupported-save tests prove load-before-apply behavior; write-commit and compatibility semantics remain OQ-001 and OQ-002 for `SPEC-S021`. | Must |
+| NFR-006 | Accessibility | The system shall convey critical state changes visually even when audio is disabled and shall keep core gameplay keyboard-operable through documented shortcuts. | Audio-disabled end-to-end checks and keyboard interaction tests cover core actions. | Must |
 
 ### 7.3 Interface Requirements
 
@@ -228,9 +229,9 @@ Every requirement in §7, §10.2, §10.3, and §12.1 is normative and release-bl
 | DR-001 | Game state | The system shall preserve all state required to resume a session deterministically. | Pydantic schema; no executable objects; deep-equality round trip; unsupported inputs rejected before apply. | `stmrr.persistence` |
 | DR-002 | Galaxy seed and generated world | The system shall store the seed and sufficient version/provenance to reproduce the generated galaxy. | Seed type/range validated; generation rules version recorded. | `stmrr.model.world` and persistence |
 | DR-003 | Game configuration | The system shall separate ships, missions, factions, galaxy generation, sector-content templates, settings, and keybindings into validated TOML sources. | Unknown/invalid values fail before gameplay mutation; defaults are documented. | `stmrr.config` |
-| DR-004 | Asset provenance and licensing | Every committed generated visual asset or family shall retain its exact prompt record; every audio, font, icon, or other third-party bundled asset shall retain source, license, and required attribution. | Prompt records contain prompt/date/tool/version/references/selection notes; redistribution-compatible license and attribution text appears in `NOTICE.md` and the packaged artifact; no official-media asset is copied. | Repository assets, prompts, and `NOTICE.md` |
+| DR-004 | Asset provenance and licensing | The system shall retain the exact prompt record for every committed generated visual asset or family and shall retain the source, license, and required attribution for every bundled third-party asset. | Prompt records contain prompt/date/tool/version/references/selection notes; redistribution-compatible license and attribution text appears in `NOTICE.md` and the packaged artifact; no official-media asset is copied. | Repository assets, prompts, and `NOTICE.md` |
 | DR-005 | Local settings | The system shall persist window geometry and dock layout to the explicit project INI path and game settings to TOML. | Settings restore tolerates first run and stale window geometry; no secrets are stored. | Qt settings adapter and `stmrr.config` |
-| DR-006 | Player-entered names | Captain, ship, campaign, and save display names shall be bounded by their owning UI schema, reject control characters/newlines, and never determine a filesystem path. | Boundary/invalid-text tests pass; save filenames derive only from fixed slot identifiers. | Campaign-entry UI and persistence schemas |
+| DR-006 | Player-entered names | The system shall bound captain, ship, campaign, and save display names through their owning UI schema, reject control characters and newlines, and never derive a filesystem path from those names. | Boundary/invalid-text tests pass; save filenames derive only from fixed slot identifiers. | Campaign-entry UI and persistence schemas |
 
 ## 8. Architecture and Design
 
@@ -716,6 +717,8 @@ No implementation deviation has been recorded against this master specification.
 
 ## Appendix A: ID Conventions
 
+Stable IDs allow requirements to be referenced from commits, tests, issues, ADRs, and review comments — and let an implementer's completion claims be mechanically checked. Section numbers below match `spec-full-template.md`, so an ID keeps the same "Defined In" reference across every profile.
+
 | Prefix | Meaning                     | Defined In     |
 | ------ | --------------------------- | -------------- |
 | `G-`   | Goal                        | §4             |
@@ -735,50 +738,54 @@ No implementation deviation has been recorded against this master specification.
 | `OQ-`  | Open question               | §21            |
 | `DEV-` | Deviation                   | Deviations Log |
 
-Priority values (`Must`, `Should`, `Could`) are column values, not ID prefixes. IDs remain stable when status or priority changes.
+The `R-` (Risk) prefix is Full-tier (§15) and is not used at the Standard profile. Priority values (`Must/Should/Could`) are column values, not ID prefixes — IDs never change when priorities do.
+
+---
 
 ## Appendix B: Agent Implementation Contract
+
+Binding when this spec is implemented by a coding agent. (Applies equally well to human contractors.)
 
 ### B.1 Implementation Rules
 
 The implementer shall:
 
-- Read this master specification and the current milestone sub-spec before changing code.
-- Re-read at minimum both documents' §7, §21, and Deviations Logs in later sessions.
-- Preserve non-goals, deferrals, constraints, accepted ADRs, and chronological release gates.
-- Treat Must requirements and blocking questions as hard gates.
-- Record non-blocking ambiguity as an `OQ-` with a proposed assumption.
-- Record every divergence as a `DEV-`; never silently adapt the contract.
-- Add tests for implemented behavior and keep both levels of §17.3 traceability current.
-- Implement only the active sub-spec; do not pull later milestone work forward.
-- Keep handoff state and the specs index current under repository conventions.
+- Read this entire specification before making changes; per session thereafter, re-read at minimum §7 (Requirements), §21 (Open Questions), and the Deviations Log — Background and References may be read once.
+- Preserve all explicit non-goals, won't-haves, constraints, and design constraints.
+- Treat **Must** requirements as mandatory and **blocking** open questions as hard stops for the affected work.
+- On encountering underspecified behavior: file an `OQ-` row **with a proposed default assumption** and proceed on it only if non-blocking — never guess silently.
+- On any divergence from the spec: record a `DEV-` row (spec reference, what, why) rather than adapting silently.
+- Add or update tests for every implemented requirement; keep §17.3 (traceability) current.
+- Follow the milestone order in §19; do not build later milestones on unproven earlier ones.
+- Prefer small, reviewable changes; avoid broad refactors unless the spec requires them.
+- Document any discovered mismatch between the spec and existing code as a `DEV-` or `OQ-` row.
 
 ### B.2 Prohibited Behaviors
 
 The implementer shall not:
 
-- Implement a milestone without an approved self-contained sub-spec.
-- Begin a later release while the prior release gate is incomplete.
-- Invent product requirements or alter accepted architecture to simplify implementation.
-- Add a second rendering event loop, Qt imports to the model, direct view Blinker subscriptions, a separate combat scene, or executable save serialization.
-- Add dependencies without an approved requirement and repository workflow.
-- Mark work complete without mapped verification evidence.
+- Invent requirements not present in this spec.
+- Remove existing behavior unless explicitly required.
+- Introduce external services or dependencies not agreed with the owner without an approved `OQ-`.
+- Store secrets in source control or print them in CI logs.
+- Ignore failing tests unrelated to the change without documenting them.
+- Treat examples as exhaustive or normative unless explicitly stated.
+- Mark a requirement complete without a verification entry in §17.3.
 
 ### B.3 Required Completion Report (verification gate)
 
-At each milestone completion, provide:
+At completion, provide:
 
-- Summary and files changed.
-- Every implemented Must requirement mapped to a passing test or command.
+- Summary of changes and files changed.
+- **Requirements implemented, each mapped to the test or command that proves it** — i.e., the completed §17.3 matrix. Claims without verification entries are not accepted.
 - Tests added or changed.
-- Deviations and owner disposition.
+- Deviations (`DEV-` rows) and their approval status.
 - Known limitations and remaining open questions.
-- Documentation and handoff updates.
-- Commit, branch, push/parity, worktree, and release-gate state.
+- Documentation deliverables completed (§18.7).
 
 ### B.4 Session Handoff
 
-Record current milestone, active requirement IDs, and unresolved `OQ-`/`DEV-` items in the repository handoff documents. The master and sub-specs define what and why; handoff records where implementation stands.
+For multi-session implementations: record current milestone, in-progress requirement IDs, and unresolved `OQ-`/`DEV-` items in the repository's session-state/handoff documents at the end of each session, per the repo's documentation convention. The spec records _what and why_; handoff docs record _where work stands_.
 
 ---
 
@@ -786,4 +793,16 @@ Record current milestone, active requirement IDs, and unresolved `OQ-`/`DEV-` it
 
 ## Appendix D: Tailoring
 
-The Standard profile is selected because this is one local desktop application with durable data but no external services or multiple operational stakeholders. Sub-specs use the same profile unless a narrower explicit project decision selects another. Upgrade to Full only if the project gains multiple services/stakeholders, paid or rate-limited external integrations, or another Full-tier trigger from Project Specification Standard 1.4.
+Pick the smallest profile that fits; upgrade if the project grows. Because numbering is stable across profiles, upgrading is **additive**: insert the missing sections at their canonical numbers and set `profile:` in the frontmatter — no existing section or ID reference changes.
+
+| Profile | Template File | Use For |
+| --- | --- | --- |
+| **Light** | `spec-light-template.md` | Scripts, small tools, single-session agent tasks |
+| **Standard** | this file | Typical features and services |
+| **Full** | `spec-full-template.md` | Multi-service systems, durable data, external integrations, or multiple stakeholders |
+
+Rules of thumb:
+
+- Owns durable data → §18.6 Backup/DR is required.
+- Talks to external paid/rate-limited APIs, makes automated decisions users must trust, or spans multiple services/stakeholders → upgrade to **Full** (adds §5, §8.4, §8.6, §14–§16, §18.4, §20, §19 Waves, and Appendix C modules).
+- Implemented by a coding agent → Appendix B is required (it is the cheapest section and the highest-leverage one).
