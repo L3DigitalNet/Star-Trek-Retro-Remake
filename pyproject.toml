@@ -81,6 +81,7 @@ include = ["src", "tests", "scripts"]
 pythonPlatform = "All"
 pythonVersion = "3.14"
 typeCheckingMode = "strict"
+extraPaths = ["src", "scripts"]
 
 [tool.coverage.report]
 show_missing = true
@@ -96,9 +97,12 @@ target-version = "py314"
 line-length = 100
 src = ["src", "tests", "scripts"]
 extend-exclude = [".claude", ".agents", ".codex", ".continue", ".venv", "build", "dist"]
+extend-include = []
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "C4", "PIE", "PTH", "RET", "RUF"]
 ignore = ["E501"]
+extend-ignore = []
+extend-select = []
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101"]
 [tool.ruff.format]
